@@ -179,6 +179,7 @@ Boolean	  { FOUND_TYPE(); }
 \]        { FOUND_OPERATOR(); }
 \;	  { FOUND_OPERATOR(); }
 
+[1-9][0-9]*		 { printf("Integer: %d\n", atoi(yytext)); }
 [a-zA-Z_][a-zA-Z0-9_]*   { printf("Identificator: %s\n", yytext); }
 
 [ \t\n]+   ;    
