@@ -121,6 +121,10 @@ void FOUND_CHARACTER(const char* text) {
                         printf("Found multiline comment: %s\n", buff);
                         BEGIN(INITIAL);
                      }
+<ML_COMMENT><<EOF>>  {
+                         printf("Found multiline comment: %s\n", buff);
+                         BEGIN(INITIAL);
+                     }
 
 if	  { FOUND_OPERATOR(); }
 else      { FOUND_OPERATOR(); }
