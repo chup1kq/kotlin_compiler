@@ -159,6 +159,9 @@ String	  { FOUND_TYPE(); }
 Char	  { FOUND_TYPE(); }
 Boolean	  { FOUND_TYPE(); }
 
+true      { printf("Boolean: %s\n", yytext); }
+false     { printf("Boolean: %s\n", yytext); }
+
 \+        { FOUND_OPERATOR(); }
 -         { FOUND_OPERATOR(); }
 \*        { FOUND_OPERATOR(); }
@@ -166,8 +169,12 @@ Boolean	  { FOUND_TYPE(); }
 
 \=        { FOUND_OPERATOR(); }
 \=\=      { FOUND_OPERATOR(); }
+\!\=      { FOUND_OPERATOR(); }
 \<        { FOUND_OPERATOR(); }
 \>        { FOUND_OPERATOR(); }
+
+&&        { FOUND_OPERATOR(); }
+\|\|      { FOUND_OPERATOR(); }
 
 \.        { FOUND_OPERATOR(); }
 ->        { FOUND_OPERATOR(); }
