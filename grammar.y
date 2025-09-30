@@ -40,3 +40,32 @@ endl_list: ENDL
 endl_list_e: /* empty */
 	   | endl_list
 	   ;
+
+expr: INT_LITERAL
+    | FLOAT_LITERAL
+    | DOUBLE_LITERAL
+    | CHAR_LITERAL
+    | STRING_LITERAL
+    | TRUE_LITERAL
+    | FALSE_LITERAL
+    | NULL_LITERAL
+    | ID
+    | '(' endl_list_e expr endl_list_e ')'
+    ;
+
+stmt: ';' endl_list_e
+    | expr endl_list
+    | expr ';' endl_list_e
+    | var_stmt
+    | val_stmt
+    | multy_declaration_stmt
+    | if_stmt
+    | for_stmt
+    | while_stmt
+    | do_while_stmt
+    | return
+    ;
+
+stmt_list: '{' endl_list_e '}'
+	 | '{' endl_list_e stmt endl_list_e '}'
+	 ;
