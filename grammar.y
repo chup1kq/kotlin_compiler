@@ -73,3 +73,8 @@ stmt_list: stmt
 stmt_block: '{' endl_list_e '}'
 	  | '{' stmt_list '}'
 	  ;
+
+if_stmt: IF '(' expr ')' stmt
+       | IF '(' expr ')' expr
+       | IF '(' expr ')' stmt ELSE stmt
+       | IF '(' expr ')' expr ELSE expr
