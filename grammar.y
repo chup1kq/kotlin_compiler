@@ -12,4 +12,23 @@
 %token TRUE_LITERAL FALSE_LITERAL
 %token NULL_LITERAL
 
+%nonassoc INCREMENT DECREMENT
+%nonassoc ENDL
+%nonassoc '{' ':'
+%right '=' PLUS_ASSIGNMENT MINUS_ASSIGNMENT MUL_ASSIGNMENT DIV_ASSIGNMENT MOD_ASSIGNMENT
+%left OR
+%left AND
+%left EQUAL NOT_EQUAL
+%left '>' '<' GREATER_EQUAL LESS_EQUAL 
+%left IN
+%left RANGE DOWN_TO
+%left '+' '-'
+%left '*' '/' '%'
+%left UMINUS UPLUS
+%right PREF_INCREMENT PREF_DECREMENT '!'
+%left POST_INCREMENT POST_DECREMENT '.'
+%nonassoc '(' ')' '[' ']'
+
+%start kotlin_file
+
 %%
