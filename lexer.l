@@ -121,6 +121,10 @@ void FOUND_CHARACTER(const char* text) {
                         printf("Found multiline comment: %s\n", buff);
                         BEGIN(INITIAL);
                      }
+<ML_COMMENT><<EOF>>  {
+                         printf("Found multiline comment: %s\n", buff);
+                         BEGIN(INITIAL);
+                     }
 
 if	  { FOUND_OPERATOR(); }
 else      { FOUND_OPERATOR(); }
@@ -155,6 +159,9 @@ String	  { FOUND_TYPE(); }
 Char	  { FOUND_TYPE(); }
 Boolean	  { FOUND_TYPE(); }
 
+true      { printf("Boolean: %s\n", yytext); }
+false     { printf("Boolean: %s\n", yytext); }
+
 \+        { FOUND_OPERATOR(); }
 -         { FOUND_OPERATOR(); }
 \*        { FOUND_OPERATOR(); }
@@ -162,8 +169,12 @@ Boolean	  { FOUND_TYPE(); }
 
 \=        { FOUND_OPERATOR(); }
 \=\=      { FOUND_OPERATOR(); }
+\!\=      { FOUND_OPERATOR(); }
 \<        { FOUND_OPERATOR(); }
 \>        { FOUND_OPERATOR(); }
+
+&&        { FOUND_OPERATOR(); }
+\|\|      { FOUND_OPERATOR(); }
 
 \.        { FOUND_OPERATOR(); }
 ->        { FOUND_OPERATOR(); }
@@ -179,6 +190,9 @@ Boolean	  { FOUND_TYPE(); }
 \]        { FOUND_OPERATOR(); }
 \;	  { FOUND_OPERATOR(); }
 
+[1-9][0-9]*		 { printf("Integer: %d\n", atoi(yytext)); }
+[0-9]+\.[0-9]+		 { printf("Double: %d\n", strtod(yytext, NULL)); }
+[0-9]+(\.([0-9])+)*f	 { printf("Float: %d\n", strtof(yytext, NULL)); }
 [a-zA-Z_][a-zA-Z0-9_]*   { printf("Identificator: %s\n", yytext); }
 
 [ \t\n]+   ;    
