@@ -1,0 +1,10 @@
+%token IF ELSE
+%token FOR WHILE DO
+%token VAL VAR
+%token FUN
+%token CLASS THIS OPEN OVERRIDE SUPER CONSTRUCTOR
+%token PUBLIC PROTECTED PRIVATE
+%token ENDL
+%token ID
+
+%%
