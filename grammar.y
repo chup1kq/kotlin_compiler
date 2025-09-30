@@ -66,6 +66,10 @@ stmt: ';' endl_list_e
     | return_stmt
     ;
 
-stmt_list: '{' endl_list_e '}'
-	 | '{' endl_list_e stmt endl_list_e '}'
+stmt_list: stmt
+	 | stmt_list stmt
 	 ;
+
+stmt_block: '{' endl_list_e '}'
+	  | '{' stmt_list '}'
+	  ;
