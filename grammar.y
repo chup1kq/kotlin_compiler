@@ -63,7 +63,7 @@ stmt: ';' endl_list_e
     | for_stmt
     | while_stmt
     | do_while_stmt
-    | return
+    | return_stmt
     ;
 
 stmt_list: '{' endl_list_e '}'
