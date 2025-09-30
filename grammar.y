@@ -32,3 +32,11 @@
 %start kotlin_file
 
 %%
+
+endl_list: ENDL
+	 | endl_list ENDL
+	 ;
+
+endl_list_e: /* empty */
+	   | endl_list
+	   ;
