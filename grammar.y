@@ -78,3 +78,4 @@ if_stmt: IF '(' expr ')' stmt
        | IF '(' expr ')' expr
        | IF '(' expr ')' stmt ELSE stmt
        | IF '(' expr ')' expr ELSE expr
+       ;
