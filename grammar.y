@@ -21,7 +21,7 @@
 %left EQUAL NOT_EQUAL
 %left '>' '<' GREATER_EQUAL LESS_EQUAL 
 %left IN
-%left RANGE DOWN_TO
+%left RANGE DOWN_TO STEP UNTIL
 %left '+' '-'
 %left '*' '/' '%'
 %left UMINUS UPLUS
