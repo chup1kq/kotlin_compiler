@@ -190,9 +190,9 @@ false { printf("Boolean: %s\n", yytext); }
 \] { FOUND_OPERATOR(); }
 \; { FOUND_OPERATOR(); }
 
-[1-9][0-9]* { printf("Integer: %d\n", atoi(yytext)); }
-[0-9]+\.[0-9]+ { printf("Double: %d\n", strtod(yytext, NULL)); }
-[0-9]+(\.([0-9])+)*f { printf("Float: %d\n", strtof(yytext, NULL)); }
+-?0|([1-9][0-9]*) { printf("Integer: %d\n", atoi(yytext)); }
+-?[0-9]+\.[0-9]+ { printf("Double: %d\n", strtod(yytext, NULL)); }
+-?[0-9]+(\.([0-9])+)*f { printf("Float: %d\n", strtof(yytext, NULL)); }
 [a-zA-Z_][a-zA-Z0-9_]* { printf("Identificator: %s\n", yytext); }
 
 \n { printf("ENDL\n"); }
