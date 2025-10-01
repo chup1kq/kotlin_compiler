@@ -85,15 +85,19 @@ void FOUND_CHARACTER(const char* text) {
 				BEGIN(INITIAL);
 			}
 
-\"\"\"          { 
-			BEGIN(MULTILINE_STRING); 
-			buff[0] = '\0'; 
+\"\"\"  {
+			BEGIN(MULTILINE_STRING);
+			buff[0] = '\0';
 		}
 <MULTILINE_STRING>.|\n     { strcat(buff, yytext); }
-<MULTILINE_STRING>\"\"\"   { 
-				printf("Found multiline string: %s\n", buff); 
-				BEGIN(INITIAL); 
+<MULTILINE_STRING>\"\"\"   {
+				printf("Found multiline string: %s\n", buff);
+				BEGIN(INITIAL);
 			   }
+<MULTILINE_STRING><<EOF>>  {
+                    printf("Error in string. Unexpected end of file: %s\n", buff);
+                    BEGIN(INITIAL);
+               }
 
 \/\/[^\n]*	{ printf("Found singleline comment: %s\n", yytext + 2); }
 
