@@ -23,67 +23,76 @@ void FOUND_CHARACTER(const char* text) {
 
 %%
 
-\"              { 
-			BEGIN(STRING); 
-			buff[0] = '\0'; 
-		}
-<STRING>\"      { 
-			printf("Found singleline string: %s\n", buff);
-			BEGIN(INITIAL); 
-		}
-<STRING>[^\"\\\n]+   	{ strcat(buff, yytext); }
-<STRING>\\n		{ strcat(buff, "\n"); }
-<STRING>\\t		{ strcat(buff, "\t"); }
-<STRING>\\b		{ strcat(buff, "\b"); }
-<STRING>\\$		{ strcat(buff, "$"); }
-<STRING>\\\'		{ strcat(buff, "\'"); }
-<STRING>\\\"		{ strcat(buff, "\""); }
-<STRING>\\\\		{ strcat(buff, "\\"); }
-<STRING>\\u[0-9a-fA-F]{4} { strcat(buff, yytext); }
-<STRING>\n|($)		{ 
-				printf("Error in singleline string. Has no closed \" in string: %s\n", buff); 
-				BEGIN(INITIAL);
-			}
-<STRING><<EOF>> 	{
-    				printf("Error in string. Unexpected end of file: %s\n", buff);
-    				BEGIN(INITIAL);
-			}
+\" {
+    BEGIN(STRING);
+	buff[0] = '\0';
+}
 
-\'		{ 
-			BEGIN(SYMBOL); 
-			buff[0] = '\0'; 
-		}
-<SYMBOL>\'      { 
-			printf("Found character: %s\n", buff);
-			BEGIN(INITIAL); 
-		}
+<STRING>\" {
+    printf("Found singleline string: %s\n", buff);
+    BEGIN(INITIAL);
+}
+
+<STRING>[^\"\\\n]+ { strcat(buff, yytext); }
+<STRING>\\n { strcat(buff, "\n"); }
+<STRING>\\t	{ strcat(buff, "\t"); }
+<STRING>\\b	{ strcat(buff, "\b"); }
+<STRING>\\$	{ strcat(buff, "$"); }
+<STRING>\\\' { strcat(buff, "\'"); }
+<STRING>\\\" { strcat(buff, "\""); }
+<STRING>\\\\ { strcat(buff, "\\"); }
+<STRING>\\u[0-9a-fA-F]{4} { strcat(buff, yytext); }
+
+<STRING>\n|($) {
+	printf("Error in singleline string. Has no closed \" in string: %s\n", buff);
+	BEGIN(INITIAL);
+}
+
+<STRING><<EOF>> {
+    printf("Error in string. Unexpected end of file: %s\n", buff);
+    BEGIN(INITIAL);
+}
+
+\' {
+	BEGIN(SYMBOL);
+	buff[0] = '\0';
+}
+
+<SYMBOL>\' {
+	printf("Found character: %s\n", buff);
+	BEGIN(INITIAL);
+}
+
 <SYMBOL>[^\'\\\n]{1}\'	{ 
-				char c[2] = { yytext[0], '\0' };
-    				FOUND_CHARACTER(c);
-			}
-<SYMBOL>\\n\'		{ FOUND_CHARACTER("\n"); }
-<SYMBOL>\\t\'		{ FOUND_CHARACTER("\t"); }
-<SYMBOL>\\b\'		{ FOUND_CHARACTER("\b"); }
-<SYMBOL>\\$\'		{ FOUND_CHARACTER("$"); }
-<SYMBOL>\\\'\'		{ FOUND_CHARACTER("\'"); }
-<SYMBOL>\\\"\'		{ FOUND_CHARACTER("\""); }
-<SYMBOL>\\\\\'		{ FOUND_CHARACTER("\\"); }
+    char c[2] = { yytext[0], '\0' };
+    FOUND_CHARACTER(c);
+}
+
+<SYMBOL>\\n\' { FOUND_CHARACTER("\n"); }
+<SYMBOL>\\t\' { FOUND_CHARACTER("\t"); }
+<SYMBOL>\\b\' { FOUND_CHARACTER("\b"); }
+<SYMBOL>\\$\' { FOUND_CHARACTER("$"); }
+<SYMBOL>\\\'\' { FOUND_CHARACTER("\'"); }
+<SYMBOL>\\\"\' { FOUND_CHARACTER("\""); }
+<SYMBOL>\\\\\' { FOUND_CHARACTER("\\"); }
 <SYMBOL>\\u[0-9a-fA-F]{4}\' {
-                      char c[7] = { '\\', 'u', yytext[2], yytext[3], yytext[4],yytext[5], '\0' };
-                      FOUND_CHARACTER(c);
-                    }
-<SYMBOL>\n		{ 
-				printf("Error in character. Has no closed \' in character: %s\n", yytext); 
-				BEGIN(INITIAL);
-			}
-<SYMBOL><<EOF>> 	{
-    				printf("Error in string. Unexpected end of file: %s\n", buff);
-    				BEGIN(INITIAL);
-			}
-<SYMBOL>[^\'\n]{2,}\'	{ 
-				printf("Error in character. has more than 1 character: %s\n", yytext); 
-				BEGIN(INITIAL);
-			}
+    char c[7] = { '\\', 'u', yytext[2], yytext[3], yytext[4],yytext[5], '\0' };
+    FOUND_CHARACTER(c);
+}
+
+<SYMBOL>\n {
+    printf("Error in character. Has no closed \' in character: %s\n", yytext);
+	BEGIN(INITIAL);
+}
+
+<SYMBOL><<EOF>> {
+    printf("Error in string. Unexpected end of file: %s\n", buff);
+    BEGIN(INITIAL);
+}
+<SYMBOL>[^\'\n]{2,}\' {
+    printf("Error in character. has more than 1 character: %s\n", yytext);
+	BEGIN(INITIAL);
+}
 
 \"\"\"  {
 			BEGIN(MULTILINE_STRING);
