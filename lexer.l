@@ -43,7 +43,7 @@ void FOUND_CHARACTER(const char* text) {
 <STRING>\\\\ { strcat(buff, "\\"); }
 <STRING>\\u[0-9a-fA-F]{4} { strcat(buff, yytext); }
 
-<STRING>\n|($) {
+<STRING>\n {
 	printf("Error in singleline string. Has no closed \" in string: %s\n", buff);
 	BEGIN(INITIAL);
 }
@@ -95,110 +95,110 @@ void FOUND_CHARACTER(const char* text) {
 }
 
 \"\"\"  {
-			BEGIN(MULTILINE_STRING);
-			buff[0] = '\0';
-		}
-<MULTILINE_STRING>.|\n     { strcat(buff, yytext); }
-<MULTILINE_STRING>\"\"\"   {
-				printf("Found multiline string: %s\n", buff);
-				BEGIN(INITIAL);
-			   }
-<MULTILINE_STRING><<EOF>>  {
-                    printf("Error in string. Unexpected end of file: %s\n", buff);
-                    BEGIN(INITIAL);
-               }
+	BEGIN(MULTILINE_STRING);
+	buff[0] = '\0';
+}
+<MULTILINE_STRING>.|\n { strcat(buff, yytext); }
+<MULTILINE_STRING>\"\"\" {
+	printf("Found multiline string: %s\n", buff);
+	BEGIN(INITIAL);
+}
+<MULTILINE_STRING><<EOF>> {
+	printf("Error in string. Unexpected end of file: %s\n", buff);
+	BEGIN(INITIAL);
+}
 
-\/\/[^\n]*	{ printf("Found singleline comment: %s\n", yytext + 2); }
+\/\/[^\n]* { printf("Found singleline comment: %s\n", yytext + 2); }
 
-\/\*            { BEGIN(ML_COMMENT); buff[0] = '\0'; }
+\/\* { BEGIN(ML_COMMENT); buff[0] = '\0'; }
 <ML_COMMENT>[^*]+|\n { strcat(buff, yytext); }
 <ML_COMMENT>\*+[^*/] { strcat(buff, yytext); }
-<ML_COMMENT>\*+\/    {
-                        printf("Found multiline comment: %s\n", buff);
-                        BEGIN(INITIAL);
-                     }
-<ML_COMMENT><<EOF>>  {
-                         printf("Found multiline comment: %s\n", buff);
-                         BEGIN(INITIAL);
-                     }
+<ML_COMMENT>\*+\/ {
+	printf("Found multiline comment: %s\n", buff);
+	BEGIN(INITIAL);
+}
+<ML_COMMENT><<EOF>> {
+	printf("Found multiline comment: %s\n", buff);
+	BEGIN(INITIAL);
+}
 
-if	  { FOUND_OPERATOR(); }
-else      { FOUND_OPERATOR(); }
-when      { FOUND_OPERATOR(); }
-for       { FOUND_OPERATOR(); }
-in        { FOUND_OPERATOR(); }
-while     { FOUND_OPERATOR(); }
-do        { FOUND_OPERATOR(); }
-break     { FOUND_OPERATOR(); }
-continue  { FOUND_OPERATOR(); }
-downTo    { FOUND_OPERATOR(); }
-step      { FOUND_OPERATOR(); }
+if { FOUND_OPERATOR(); }
+else { FOUND_OPERATOR(); }
+when { FOUND_OPERATOR(); }
+for { FOUND_OPERATOR(); }
+in { FOUND_OPERATOR(); }
+while { FOUND_OPERATOR(); }
+do { FOUND_OPERATOR(); }
+break { FOUND_OPERATOR(); }
+continue { FOUND_OPERATOR(); }
+downTo { FOUND_OPERATOR(); }
+step { FOUND_OPERATOR(); }
 
-var	  	{ FOUND_KEYWORD(); }
-val	  	{ FOUND_KEYWORD(); }
-fun	  	{ FOUND_KEYWORD(); }
-class	  	{ FOUND_KEYWORD(); }
-this	  	{ FOUND_KEYWORD(); }
-super       { FOUND_KEYWORD(); }
-open	  	{ FOUND_KEYWORD(); }
-final	  	{ FOUND_KEYWORD(); }
+var { FOUND_KEYWORD(); }
+val	{ FOUND_KEYWORD(); }
+fun { FOUND_KEYWORD(); }
+class { FOUND_KEYWORD(); }
+this { FOUND_KEYWORD(); }
+super { FOUND_KEYWORD(); }
+open { FOUND_KEYWORD(); }
+final { FOUND_KEYWORD(); }
 constructor	{ FOUND_KEYWORD(); }
-private	  	{ FOUND_KEYWORD(); }
-public	  	{ FOUND_KEYWORD(); }
-protected	{ FOUND_KEYWORD(); }
-enum	  	{ FOUND_KEYWORD(); }
+private { FOUND_KEYWORD(); }
+public { FOUND_KEYWORD(); }
+protected { FOUND_KEYWORD(); }
+enum { FOUND_KEYWORD(); }
 
-Array       { FOUND_KEYWORD(); }
-arrayOf     { FOUND_KEYWORD(); }
+Array { FOUND_KEYWORD(); }
+arrayOf { FOUND_KEYWORD(); }
 
-null	  { FOUND_TYPE(); }
-Int	  { FOUND_TYPE(); }
-Double	  { FOUND_TYPE(); }
-Float	  { FOUND_TYPE(); }
-String	  { FOUND_TYPE(); }
-Char	  { FOUND_TYPE(); }
-Boolean	  { FOUND_TYPE(); }
+null { FOUND_TYPE(); }
+Int { FOUND_TYPE(); }
+Double { FOUND_TYPE(); }
+Float { FOUND_TYPE(); }
+String { FOUND_TYPE(); }
+Char { FOUND_TYPE(); }
+Boolean { FOUND_TYPE(); }
 
-true      { printf("Boolean: %s\n", yytext); }
-false     { printf("Boolean: %s\n", yytext); }
+true { printf("Boolean: %s\n", yytext); }
+false { printf("Boolean: %s\n", yytext); }
 
-\+        { FOUND_OPERATOR(); }
--         { FOUND_OPERATOR(); }
-\*        { FOUND_OPERATOR(); }
-\\        { FOUND_OPERATOR(); }
+\+ { FOUND_OPERATOR(); }
+- { FOUND_OPERATOR(); }
+\* { FOUND_OPERATOR(); }
+\\ { FOUND_OPERATOR(); }
 
-\=        { FOUND_OPERATOR(); }
-\=\=      { FOUND_OPERATOR(); }
-\!\=      { FOUND_OPERATOR(); }
-\<        { FOUND_OPERATOR(); }
-\>        { FOUND_OPERATOR(); }
+\= { FOUND_OPERATOR(); }
+\=\= { FOUND_OPERATOR(); }
+\!\= { FOUND_OPERATOR(); }
+\< { FOUND_OPERATOR(); }
+\> { FOUND_OPERATOR(); }
 
-&&        { FOUND_OPERATOR(); }
-\|\|      { FOUND_OPERATOR(); }
+&& { FOUND_OPERATOR(); }
+\|\| { FOUND_OPERATOR(); }
 
-\.        { FOUND_OPERATOR(); }
-->        { FOUND_OPERATOR(); }
+\. { FOUND_OPERATOR(); }
+-> { FOUND_OPERATOR(); }
 
-\.\.      { FOUND_OPERATOR(); }
-\.\.<     { FOUND_OPERATOR(); }
+\.\. { FOUND_OPERATOR(); }
+\.\.< { FOUND_OPERATOR(); }
 
-\(        { FOUND_OPERATOR(); }
-\)        { FOUND_OPERATOR(); }
-\{        { FOUND_OPERATOR(); }
-\}        { FOUND_OPERATOR(); }
-\[        { FOUND_OPERATOR(); }
-\]        { FOUND_OPERATOR(); }
-\;	  { FOUND_OPERATOR(); }
+\( { FOUND_OPERATOR(); }
+\) { FOUND_OPERATOR(); }
+\{ { FOUND_OPERATOR(); }
+\} { FOUND_OPERATOR(); }
+\[ { FOUND_OPERATOR(); }
+\] { FOUND_OPERATOR(); }
+\; { FOUND_OPERATOR(); }
 
-[1-9][0-9]*		 { printf("Integer: %d\n", atoi(yytext)); }
-[0-9]+\.[0-9]+		 { printf("Double: %d\n", strtod(yytext, NULL)); }
-[0-9]+(\.([0-9])+)*f	 { printf("Float: %d\n", strtof(yytext, NULL)); }
-[a-zA-Z_][a-zA-Z0-9_]*   { printf("Identificator: %s\n", yytext); }
+[1-9][0-9]* { printf("Integer: %d\n", atoi(yytext)); }
+[0-9]+\.[0-9]+ { printf("Double: %d\n", strtod(yytext, NULL)); }
+[0-9]+(\.([0-9])+)*f { printf("Float: %d\n", strtof(yytext, NULL)); }
+[a-zA-Z_][a-zA-Z0-9_]* { printf("Identificator: %s\n", yytext); }
 
-\n         { printf("ENDL\n"); }
+\n { printf("ENDL\n"); }
 
-[ \t]+     { ; }
-.          { ; }
+[ \t]+ { ; }
+. { ; }
 
 %%
 
