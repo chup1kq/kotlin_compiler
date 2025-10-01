@@ -59,7 +59,7 @@ void FOUND_CHARACTER(const char* text) {
 }
 
 <SYMBOL>\' {
-	printf("Found character: %s\n", buff);
+	printf("Error in character. Has no character.);
 	BEGIN(INITIAL);
 }
 
