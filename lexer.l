@@ -143,6 +143,7 @@ val	  	{ FOUND_KEYWORD(); }
 fun	  	{ FOUND_KEYWORD(); }
 class	  	{ FOUND_KEYWORD(); }
 this	  	{ FOUND_KEYWORD(); }
+super       { FOUND_KEYWORD(); }
 open	  	{ FOUND_KEYWORD(); }
 final	  	{ FOUND_KEYWORD(); }
 constructor	{ FOUND_KEYWORD(); }
@@ -150,6 +151,9 @@ private	  	{ FOUND_KEYWORD(); }
 public	  	{ FOUND_KEYWORD(); }
 protected	{ FOUND_KEYWORD(); }
 enum	  	{ FOUND_KEYWORD(); }
+
+Array       { FOUND_KEYWORD(); }
+arrayOf     { FOUND_KEYWORD(); }
 
 null	  { FOUND_TYPE(); }
 Int	  { FOUND_TYPE(); }
