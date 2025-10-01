@@ -10,26 +10,6 @@
 
 char buff[8192];
 
-const char* CONVERT_UTF_16_TO_UTF_8(const char *yytext) {
-    static char utf8[5];
-    memset(utf8, 0, sizeof(utf8));
-
-    long code = strtol(yytext + 2, NULL, 16);  // yytext == "\uXXXX"
-
-    if (code <= 0x7F) {
-        utf8[0] = (char)code;
-    } else if (code <= 0x7FF) {
-        utf8[0] = 0xC0 | ((code >> 6) & 0x1F);
-        utf8[1] = 0x80 | (code & 0x3F);
-    } else {
-        utf8[0] = 0xE0 | ((code >> 12) & 0x0F);
-        utf8[1] = 0x80 | ((code >> 6) & 0x3F);
-        utf8[2] = 0x80 | (code & 0x3F);
-    }
-
-    return utf8;
-}
-
 void FOUND_CHARACTER(const char* text) {
     printf("Found character: %s\n", text);
     BEGIN(INITIAL);
@@ -59,7 +39,7 @@ void FOUND_CHARACTER(const char* text) {
 <STRING>\\\'		{ strcat(buff, "\'"); }
 <STRING>\\\"		{ strcat(buff, "\""); }
 <STRING>\\\\		{ strcat(buff, "\\"); }
-<STRING>\\u[0-9a-fA-F]{4} { strcat(buff, CONVERT_UTF_16_TO_UTF_8(yytext)); }
+<STRING>\\u[0-9a-fA-F]{4} { strcat(buff, yytext); }
 <STRING>\n|($)		{ 
 				printf("Error in singleline string. Has no closed \" in string: %s\n", buff); 
 				BEGIN(INITIAL);
@@ -88,7 +68,7 @@ void FOUND_CHARACTER(const char* text) {
 <SYMBOL>\\\'\'		{ FOUND_CHARACTER("\'"); }
 <SYMBOL>\\\"\'		{ FOUND_CHARACTER("\""); }
 <SYMBOL>\\\\\'		{ FOUND_CHARACTER("\\"); }
-<SYMBOL>\\u[0-9a-fA-F]{4}\' { FOUND_CHARACTER(CONVERT_UTF_16_TO_UTF_8(yytext)); }
+<SYMBOL>\\u[0-9a-fA-F]{4}\' { FOUND_CHARACTER(yytext); }
 <SYMBOL>\n		{ 
 				printf("Error in character. Has no closed \' in character: %s\n", yytext); 
 				BEGIN(INITIAL);
