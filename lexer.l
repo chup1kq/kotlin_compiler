@@ -68,7 +68,10 @@ void FOUND_CHARACTER(const char* text) {
 <SYMBOL>\\\'\'		{ FOUND_CHARACTER("\'"); }
 <SYMBOL>\\\"\'		{ FOUND_CHARACTER("\""); }
 <SYMBOL>\\\\\'		{ FOUND_CHARACTER("\\"); }
-<SYMBOL>\\u[0-9a-fA-F]{4}\' { FOUND_CHARACTER(yytext); }
+<SYMBOL>\\u[0-9a-fA-F]{4}\' {
+                      char c[7] = { '\\', 'u', yytext[2], yytext[3], yytext[4],yytext[5], '\0' };
+                      FOUND_CHARACTER(c);
+                    }
 <SYMBOL>\n		{ 
 				printf("Error in character. Has no closed \' in character: %s\n", yytext); 
 				BEGIN(INITIAL);
