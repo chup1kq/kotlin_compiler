@@ -199,8 +199,10 @@ false     { printf("Boolean: %s\n", yytext); }
 [0-9]+(\.([0-9])+)*f	 { printf("Float: %d\n", strtof(yytext, NULL)); }
 [a-zA-Z_][a-zA-Z0-9_]*   { printf("Identificator: %s\n", yytext); }
 
-[ \t\n]+   ;    
-.          ;    
+\n         { printf("ENDL\n"); }
+
+[ \t]+     { ; }
+.          { ; }
 
 %%
 
