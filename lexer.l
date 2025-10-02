@@ -122,17 +122,17 @@ void FOUND_CHARACTER(const char* text) {
 	BEGIN(INITIAL);
 }
 
-if			{ FOUND_OPERATOR(); }
-else		{ FOUND_OPERATOR(); }
-when		{ FOUND_OPERATOR(); }
-for			{ FOUND_OPERATOR(); }
-in			{ FOUND_OPERATOR(); }
-while		{ FOUND_OPERATOR(); }
-do			{ FOUND_OPERATOR(); }
-break		{ FOUND_OPERATOR(); }
-continue	{ FOUND_OPERATOR(); }
-downTo		{ FOUND_OPERATOR(); }
-step		{ FOUND_OPERATOR(); }
+if			{ FOUND_KEYWORD(); }
+else		{ FOUND_KEYWORD(); }
+when		{ FOUND_KEYWORD(); }
+for			{ FOUND_KEYWORD(); }
+in			{ FOUND_KEYWORD(); }
+while		{ FOUND_KEYWORD(); }
+do			{ FOUND_KEYWORD(); }
+break		{ FOUND_KEYWORD(); }
+continue	{ FOUND_KEYWORD(); }
+downTo		{ FOUND_KEYWORD(); }
+step		{ FOUND_KEYWORD(); }
 
 var			{ FOUND_KEYWORD(); }
 val			{ FOUND_KEYWORD(); }
