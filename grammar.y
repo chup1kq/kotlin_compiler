@@ -34,12 +34,12 @@
 %%
 
 endl_list: ENDL
-	 | endl_list ENDL
-	 ;
+	     | endl_list ENDL
+	     ;
 
 endl_list_e: /* empty */
-	   | endl_list
-	   ;
+	       | endl_list
+	       ;
 
 expr: INT_LITERAL
     | FLOAT_LITERAL
@@ -67,15 +67,58 @@ stmt: ';' endl_list_e
     ;
 
 stmt_list: stmt
-	 | stmt_list stmt
-	 ;
+	     | stmt_list stmt
+	     ;
 
 stmt_block: '{' endl_list_e '}'
-	  | '{' stmt_list '}'
-	  ;
+	      | '{' stmt_list '}'
+	      ;
 
-if_stmt: IF '(' expr ')' stmt
-       | IF '(' expr ')' expr
-       | IF '(' expr ')' stmt ELSE stmt
-       | IF '(' expr ')' expr ELSE expr
+condition_expr: endl_list_e '(' expr ')' endl_list_e
+              ;
+
+if_stmt: IF condition_expr stmt
+       | IF condition_expr expr
+       | IF condition_expr stmt ELSE stmt
+       | IF condition_expr ELSE expr
        ;
+
+while_stmt: WHILE condition_expr stmt
+          ;
+
+for_stmt: FOR '(' expr IN range_expr ')' stmt
+        | FOR '(' expr IN expr ')' stmt
+        ;
+
+do_while_stmt: DO stmt WHILE condition_expr
+             ;
+
+range_expr: expr ".." expr step_expr
+          | expr DOWN_TO expr step_expr
+          | expr UNTIL expr step_expr
+          ;
+
+step_expr: /* empty */
+         | STEP expr
+         ;
+
+access_modifier: PUBLIC 
+               | PROTECTED
+               | PRIVATE
+               ;
+
+enum_class: ENUM CLASS ID endl_list_e '{' enum_entries '}'
+          ;
+
+enum_entry: endl_list_e ID endl_list_e
+          | endl_list_e ID '(' argument_list ')' endl_list_e
+          ;
+
+enum_entries: enum_entry
+            | enum_entries ',' enum_entry
+            ;
+
+
+argument_list: expr
+             | argument_list ',' expr
+             ;
