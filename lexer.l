@@ -177,6 +177,7 @@ false		{ printf("Boolean: %s\n", yytext); }
 \|\|		{ FOUND_OPERATOR(); }
 
 \.			{ FOUND_OPERATOR(); }
+\?\.        { FOUND_OPERATOR(); }
 ->			{ FOUND_OPERATOR(); }
 
 \.\.		{ FOUND_OPERATOR(); }
