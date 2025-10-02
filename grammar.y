@@ -86,14 +86,14 @@ if_stmt: IF condition_expr single_or_block_stmt
        | IF condition_expr ELSE expr
        ;
 
-while_stmt: WHILE condition_expr stmt
+while_stmt: WHILE condition_expr single_or_block_stmt
           ;
 
-for_stmt: FOR '(' expr IN range_expr ')' stmt
-        | FOR '(' expr IN expr ')' stmt
+for_stmt: FOR '(' expr IN range_expr ')' single_or_block_stmt
+        | FOR '(' expr IN expr ')' single_or_block_stmt
         ;
 
-do_while_stmt: DO stmt WHILE condition_expr
+do_while_stmt: DO single_or_block_stmt WHILE condition_expr
              ;
 
 range_expr: expr ".." expr step_expr
