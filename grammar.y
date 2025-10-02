@@ -74,12 +74,15 @@ stmt_block: '{' endl_list_e '}'
 	      | '{' stmt_list '}'
 	      ;
 
+single_or_block_stmt: stmt
+                    | stmt_block
+
 condition_expr: endl_list_e '(' expr ')' endl_list_e
               ;
 
-if_stmt: IF condition_expr stmt
+if_stmt: IF condition_expr single_or_block_stmt
        | IF condition_expr expr
-       | IF condition_expr stmt ELSE stmt
+       | IF condition_expr single_or_block_stmt ELSE single_or_block_stmt
        | IF condition_expr ELSE expr
        ;
 
