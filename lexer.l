@@ -200,6 +200,8 @@ false		{ printf("Boolean: %s\n", yytext); }
 [ \t]+ 					{ ; }
 . 						{ ; }
 
+;;                      { printf("Syntax error: %s\n", yytext); }
+
 %%
 
 int main(void) {
