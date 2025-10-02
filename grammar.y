@@ -53,6 +53,9 @@ expr: INT_LITERAL
     | '(' endl_list_e expr endl_list_e ')'
     ;
 
+expr_ws: endl_list_e expr endl_list_e
+       ;
+
 stmt: ';' endl_list_e
     | expr endl_list
     | expr ';' endl_list_e
@@ -89,20 +92,20 @@ if_stmt: IF condition_expr single_or_block_stmt
 while_stmt: WHILE condition_expr single_or_block_stmt
           ;
 
-for_stmt: FOR '(' expr IN range_expr ')' single_or_block_stmt
-        | FOR '(' expr IN expr ')' single_or_block_stmt
+for_stmt: FOR endl_list_e '(' expr_ws IN endl_list_e range_expr ')' single_or_block_stmt
+        | FOR endl_list_e '(' expr_ws IN expr_ws ')' single_or_block_stmt
         ;
 
-do_while_stmt: DO single_or_block_stmt WHILE condition_expr
+do_while_stmt: DO endl_list_e single_or_block_stmt endl_list_e WHILE condition_expr
              ;
 
-range_expr: expr ".." expr step_expr
-          | expr DOWN_TO expr step_expr
-          | expr UNTIL expr step_expr
+range_expr: expr_ws ".." expr_ws step_expr
+          | expr_ws DOWN_TO expr_ws step_expr
+          | expr_ws UNTIL expr_ws step_expr
           ;
 
 step_expr: /* empty */
-         | STEP expr
+         | STEP expr_ws
          ;
 
 access_modifier: PUBLIC 
