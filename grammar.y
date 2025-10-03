@@ -98,8 +98,7 @@ type: INT_LITERAL
 nullable_type: type nullable_e
              ;
 
-nullable_e: /* empty */
-          | endl_list_e '?'
+nullable_e: endl_list_e '?'
           ;
 
 var_stmt: VAR endl_list_e var_declaration end_of_stmt
