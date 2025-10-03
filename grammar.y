@@ -7,6 +7,8 @@
 %token ENDL
 %token ID
 
+%token INT_TYPE FLOAT_TYPE DOUBLE_TYPE SRTING_TYPE CHAR_TYPE BOOLEAN_TYPE
+
 %token INT_LITERAL FLOAT_LITERAL DOUBLE_LITERAL
 %token CHAR_LITERAL STRING_LITERAL
 %token TRUE_LITERAL FALSE_LITERAL
@@ -19,14 +21,14 @@
 %left OR
 %left AND
 %left EQUAL NOT_EQUAL
-%left '>' '<' GREATER_EQUAL LESS_EQUAL 
+%left '>' '<' GREATER_EQUAL LESS_EQUAL
 %left IN
 %left RANGE DOWN_TO STEP UNTIL
 %left '+' '-'
 %left '*' '/' '%'
 %left UMINUS UPLUS
 %right PREF_INCREMENT PREF_DECREMENT '!'
-%left POST_INCREMENT POST_DECREMENT '.'
+%left POST_INCREMENT POST_DECREMENT '.' SAFE_CALL
 %nonassoc '(' ')' '[' ']'
 
 %start kotlin_file
@@ -39,6 +41,10 @@ endl_list: ENDL
 
 endl_list_e: /* empty */
 	       | endl_list
+	       ;
+
+end_of_stmt: endl_list
+           | ';' endl_list_e
 	       ;
 
 expr: INT_LITERAL
@@ -79,6 +85,37 @@ stmt_block: '{' endl_list_e '}'
 
 single_or_block_stmt: stmt
                     | stmt_block
+                    ;
+
+type: INT_LITERAL
+    | FLOAT_LITERAL
+    | DOUBLE_TYPE
+    | SRTING_TYPE
+    | CHAR_TYPE
+    | BOOLEAN_TYPE
+    ;
+
+nullable_type: type nullable_e
+             ;
+
+nullable_e: /* empty */
+          | endl_list_e '?'
+          ;
+
+var_stmt: VAR endl_list_e var_declaration end_of_stmt
+        | VAR endl_list_e var_declaration endl_list_e '=' endl_list_e expr endl_list_e end_of_stmt
+        ;
+
+val_stmt: VAL endl_list_e var_declaration end_of_stmt
+        | VAL endl_list_e var_declaration endl_list_e '=' endl_list_e expr endl_list_e end_of_stmt
+        ;
+
+var_declaration: ID
+               | ID enld_list_e ':' endl_list_e nullable_type
+               ;
+
+var_declaration_list: var_declaration
+                    | var_declaration_list ',' var_declaration
 
 condition_expr: endl_list_e '(' expr ')' endl_list_e
               ;
@@ -86,7 +123,7 @@ condition_expr: endl_list_e '(' expr ')' endl_list_e
 if_stmt: IF condition_expr single_or_block_stmt
        | IF condition_expr expr
        | IF condition_expr single_or_block_stmt ELSE single_or_block_stmt
-       | IF condition_expr ELSE expr
+       | IF condition_expr expr ELSE expr
        ;
 
 while_stmt: WHILE condition_expr single_or_block_stmt
@@ -108,7 +145,7 @@ step_expr: /* empty */
          | STEP expr_ws
          ;
 
-access_modifier: PUBLIC 
+access_modifier: PUBLIC
                | PROTECTED
                | PRIVATE
                ;
@@ -123,7 +160,6 @@ enum_entry: endl_list_e ID endl_list_e
 enum_entries: enum_entry
             | enum_entries ',' enum_entry
             ;
-
 
 argument_list: expr
              | argument_list ',' expr
