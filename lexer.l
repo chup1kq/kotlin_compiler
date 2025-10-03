@@ -5,6 +5,7 @@
     #include <string>
     #include <cstring>
     #include <cstdlib>
+    #include <algorithm>
 
     #define FOUND_KEYWORD() std::cout << "Found keyword: " << yytext << std::endl;
 
@@ -20,6 +21,7 @@
     void printModifierKeyword(char* mkw);
     void printStatementKeyword(char* skw);
     void printKeyword(char* kw);
+    std::string remove_underscore(const char* text);
 %}
 
 %x STRING
@@ -205,10 +207,11 @@ false       { printConstantKeyword(yytext); }
 \]          { printOperator(yytext); }
 \;          { printOperator(yytext); }
 
--?0|([1-9][0-9]*)       { std::cout << "Integer: " << atoi(yytext) << std::endl; }
--?[0-9]+\.[0-9]+        { std::cout << "Double: " << strtod(yytext, NULL) << std::endl; }
--?[0-9]+(\.([0-9])+)*f  { std::cout << "Float: " << strtof(yytext, NULL) << std::endl; }
-[a-zA-Z_][a-zA-Z0-9_]*  { std::cout << "Identificator: " << yytext << std::endl; }
+-?(_[0-9_]+|[0-9][0-9_]*_|[0-9][0-9_]*_\.[0-9_]*|[0-9][0-9_]*\._[0-9_]*) { std::cout << "Error: invalid numeric literal with underscore: " << yytext << std::endl; }
+-?0|([1-9]([0-9_]*[0-9])?)                          { std::cout << "Integer: " << atoi(remove_underscore(yytext).c_str()) << std::endl; }
+-?[0-9]([0-9_]*[0-9])?\.[0-9]([0-9_]*[0-9])?        { std::cout << "Double: " << strtod(remove_underscore(yytext).c_str(), NULL) << std::endl; }
+-?[0-9]([0-9_]*[0-9])?(\.([0-9]([0-9_]*[0-9])?))*f  { std::cout << "Float: " << strtof(remove_underscore(yytext).c_str(), NULL) << std::endl; }
+[a-zA-Z_][a-zA-Z0-9_]*                              { std::cout << "Identificator: " << yytext << std::endl; }
 
 \n                      { printEndOfLine(); }
 
@@ -245,4 +248,10 @@ void printStatementKeyword(char* skw) {
 
 void printKeyword(char* kw) {
     std::cout << "Keyword: " << kw << std::endl;
+}
+
+std::string remove_underscore(const char* text) {
+    std::string s(text);
+    s.erase(std::remove(s.begin(), s.end(), '_'), s.end());
+    return s;
 }
