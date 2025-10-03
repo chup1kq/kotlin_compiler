@@ -41,3 +41,7 @@ a.exe < test\test010.txt >> results.txt
 echo. >> results.txt
 echo test011 Объявление переменной внутри комментария >> results.txt
 a.exe < test\test011.txt >> results.txt
+
+echo. >> results.txt
+echo test012 Числа с нижним подчеркиванием >> results.txt
+a.exe < test\test012.txt >> results.txt
