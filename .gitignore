@@ -3,3 +3,5 @@
 a.exe
 lex.yy.c
 results.txt
+
+lexer-build/
