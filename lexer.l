@@ -6,16 +6,21 @@
     #include <cstring>
     #include <cstdlib>
 
-    #define FOUND_TYPE() std::cout << "Found type: " << yytext << std::endl;
     #define FOUND_KEYWORD() std::cout << "Found keyword: " << yytext << std::endl;
 
     #define FOUND_CHARACTER(text) \
         do { std::cout << "Found character: " << text << std::endl; BEGIN(INITIAL); } while(0)
 
     std::string buff;
+
+    void printOperator(char* o);
+    void printEndOfLine();
+    void printType(char* t);
+    void printConstantKeyword(char* ckw);
+    void printModifierKeyword(char* mkw);
+    void printStatementKeyword(char* skw);
+    void printKeyword(char* kw);
 %}
-
-
 
 %x STRING
 %x SYMBOL
@@ -23,13 +28,6 @@
 %x ML_COMMENT
 
 %%
-
-%{
-    void printOperator(char* o);
-    void printEndOfLine();
-    void printType(char* t);
-    void printConstantKeyword(char* ckw);
-%}
 
 \" {
     BEGIN(STRING);
@@ -135,33 +133,36 @@
     BEGIN(INITIAL);
 }
 
-if          { FOUND_KEYWORD(); }
-else        { FOUND_KEYWORD(); }
-when        { FOUND_KEYWORD(); }
-for         { FOUND_KEYWORD(); }
-in          { FOUND_KEYWORD(); }
-while       { FOUND_KEYWORD(); }
-do          { FOUND_KEYWORD(); }
-break       { FOUND_KEYWORD(); }
-continue    { FOUND_KEYWORD(); }
-downTo      { FOUND_KEYWORD(); }
-step        { FOUND_KEYWORD(); }
+if          { printStatementKeyword(yytext); }
+else        { printStatementKeyword(yytext); }
+when        { printStatementKeyword(yytext); }
+for         { printStatementKeyword(yytext); }
+in          { printStatementKeyword(yytext); }
+while       { printStatementKeyword(yytext); }
+do          { printStatementKeyword(yytext); }
+break       { printStatementKeyword(yytext); }
+continue    { printStatementKeyword(yytext); }
+downTo      { printStatementKeyword(yytext); }
+step        { printStatementKeyword(yytext); }
 
-var         { FOUND_KEYWORD(); }
-val         { FOUND_KEYWORD(); }
-fun         { FOUND_KEYWORD(); }
-class       { FOUND_KEYWORD(); }
-this        { FOUND_KEYWORD(); }
-super       { FOUND_KEYWORD(); }
-open        { FOUND_KEYWORD(); }
-final       { FOUND_KEYWORD(); }
-constructor { FOUND_KEYWORD(); }
-private     { FOUND_KEYWORD(); }
-public      { FOUND_KEYWORD(); }
-protected   { FOUND_KEYWORD(); }
-enum        { FOUND_KEYWORD(); }
+var         { printStatementKeyword(yytext); }
+val         { printStatementKeyword(yytext); }
 
-arrayOf     { FOUND_KEYWORD(); }
+fun         { printStatementKeyword(yytext); }
+
+class       { printStatementKeyword(yytext); }
+this        { printStatementKeyword(yytext); }
+super       { printStatementKeyword(yytext); }
+constructor { printStatementKeyword(yytext); }
+enum        { printStatementKeyword(yytext); }
+
+final       { printModifierKeyword(yytext); }
+open        { printModifierKeyword(yytext); }
+private     { printModifierKeyword(yytext); }
+public      { printModifierKeyword(yytext); }
+protected   { printModifierKeyword(yytext); }
+
+arrayOf     { printKeyword(yytext); }
 
 Array       { printType(yytext); }
 Int         { printType(yytext); }
@@ -204,10 +205,10 @@ false       { printConstantKeyword(yytext); }
 \]          { printOperator(yytext); }
 \;          { printOperator(yytext); }
 
--?0|([1-9][0-9]*)        { std::cout << "Integer: " << atoi(yytext) << std::endl; }
--?[0-9]+\.[0-9]+         { std::cout << "Double: " << strtod(yytext, NULL) << std::endl; }
--?[0-9]+(\.([0-9])+)*f   { std::cout << "Float: " << strtof(yytext, NULL) << std::endl; }
-[a-zA-Z_][a-zA-Z0-9_]*   { std::cout << "Identificator: " << yytext << std::endl; }
+-?0|([1-9][0-9]*)       { std::cout << "Integer: " << atoi(yytext) << std::endl; }
+-?[0-9]+\.[0-9]+        { std::cout << "Double: " << strtod(yytext, NULL) << std::endl; }
+-?[0-9]+(\.([0-9])+)*f  { std::cout << "Float: " << strtof(yytext, NULL) << std::endl; }
+[a-zA-Z_][a-zA-Z0-9_]*  { std::cout << "Identificator: " << yytext << std::endl; }
 
 \n                      { printEndOfLine(); }
 
@@ -232,4 +233,16 @@ void printType(char* t) {
 
 void printConstantKeyword(char* ckw) {
     std::cout << "Constant keyword: " << ckw << std::endl;
+}
+
+void printModifierKeyword(char* mkw) {
+    std::cout << "Modifier keyword: " << mkw << std::endl;
+}
+
+void printStatementKeyword(char* skw) {
+    std::cout << "Statement keyword: " << skw << std::endl;
+}
+
+void printKeyword(char* kw) {
+    std::cout << "Keyword: " << kw << std::endl;
 }
