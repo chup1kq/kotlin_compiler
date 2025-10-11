@@ -45,7 +45,7 @@ endl_list_e: /* empty */
 
 end_of_stmt: endl_list
            | ';' endl_list_e
-	       ;
+           ;
 
 expr: INT_LITERAL
     | FLOAT_LITERAL
@@ -76,12 +76,12 @@ stmt: ';' endl_list_e
     ;
 
 stmt_list: stmt
-	     | stmt_list stmt
-	     ;
+	 | stmt_list stmt
+	 ;
 
 stmt_block: '{' endl_list_e '}'
-	      | '{' stmt_list '}'
-	      ;
+	  | '{' endl_list_e stmt_list endl_list_e '}'
+	  ;
 
 single_or_block_stmt: stmt
                     | stmt_block
@@ -120,8 +120,8 @@ condition_expr: endl_list_e '(' expr ')' endl_list_e
               ;
 
 if_stmt: IF condition_expr single_or_block_stmt
-       | IF condition_expr expr
        | IF condition_expr single_or_block_stmt ELSE single_or_block_stmt
+       | IF condition_expr expr
        | IF condition_expr expr ELSE expr
        ;
 
