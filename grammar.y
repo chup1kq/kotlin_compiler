@@ -56,7 +56,7 @@ expr: INT_LITERAL
     | FALSE_LITERAL
     | NULL_LITERAL
     | ID
-    | '(' endl_list_e expr endl_list_e ')'
+    | '(' expr_ws ')'
     | if_expr
     ;
 
@@ -103,11 +103,11 @@ nullable_e: endl_list_e '?'
           ;
 
 var_stmt: VAR endl_list_e var_declaration end_of_stmt
-        | VAR endl_list_e var_declaration endl_list_e '=' endl_list_e expr endl_list_e end_of_stmt
+        | VAR endl_list_e var_declaration endl_list_e '=' expr_ws end_of_stmt
         ;
 
 val_stmt: VAL endl_list_e var_declaration end_of_stmt
-        | VAL endl_list_e var_declaration endl_list_e '=' endl_list_e expr endl_list_e end_of_stmt
+        | VAL endl_list_e var_declaration endl_list_e '=' expr_ws end_of_stmt
         ;
 
 var_declaration: ID
@@ -117,7 +117,7 @@ var_declaration: ID
 var_declaration_list: var_declaration
                     | var_declaration_list ',' var_declaration
 
-condition_expr: endl_list_e '(' expr ')' endl_list_e
+condition_expr: endl_list_e '(' expr_ws ')' endl_list_e
               ;
 
 if_expr: IF condition_expr expr_ws ELSE expr_ws
@@ -163,6 +163,6 @@ enum_entries: enum_entry
             | enum_entries ',' enum_entry
             ;
 
-argument_list: expr
-             | argument_list ',' expr
+argument_list: expr_ws
+             | argument_list ',' expr_ws
              ;
