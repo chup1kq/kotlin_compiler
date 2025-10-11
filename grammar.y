@@ -87,8 +87,8 @@ single_or_block_stmt: stmt
                     | stmt_block
                     ;
 
-type: INT_LITERAL
-    | FLOAT_LITERAL
+type: INT_TYPE
+    | FLOAT_TYPE
     | DOUBLE_TYPE
     | SRTING_TYPE
     | CHAR_TYPE
