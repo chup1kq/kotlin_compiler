@@ -120,19 +120,19 @@ var_declaration_list: var_declaration
 condition_expr: endl_list_e '(' expr_ws ')' endl_list_e
               ;
 
-if_expr: IF condition_expr expr_ws ELSE expr_ws
+if_expr: IF condition_expr expr_ws ELSE expr_ws end_of_stmt
        ;
 
-if_stmt: IF condition_expr single_or_block_stmt
-       | IF condition_expr single_or_block_stmt ELSE single_or_block_stmt
-       | IF condition_expr expr_ws
+if_stmt: IF condition_expr single_or_block_stmt end_of_stmt
+       | IF condition_expr single_or_block_stmt ELSE single_or_block_stmt end_of_stmt
+       | IF condition_expr expr_ws end_of_stmt
        ;
 
-while_stmt: WHILE condition_expr single_or_block_stmt
+while_stmt: WHILE condition_expr single_or_block_stmt end_of_stmt
           ;
 
-for_stmt: FOR endl_list_e '(' expr_ws IN endl_list_e range_expr ')' single_or_block_stmt
-        | FOR endl_list_e '(' expr_ws IN expr_ws ')' single_or_block_stmt
+for_stmt: FOR endl_list_e '(' expr_ws IN range_expr ')' endl_list_e single_or_block_stmt end_of_stmt
+        | FOR endl_list_e '(' expr_ws IN expr_ws ')' endl_list_e single_or_block_stmt end_of_stmt
         ;
 
 do_while_stmt: DO endl_list_e single_or_block_stmt endl_list_e WHILE condition_expr
