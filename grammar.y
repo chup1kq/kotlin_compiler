@@ -57,6 +57,7 @@ expr: INT_LITERAL
     | NULL_LITERAL
     | ID
     | '(' endl_list_e expr endl_list_e ')'
+    | if_expr
     ;
 
 expr_ws: endl_list_e expr endl_list_e
@@ -119,10 +120,12 @@ var_declaration_list: var_declaration
 condition_expr: endl_list_e '(' expr ')' endl_list_e
               ;
 
+if_expr: IF condition_expr expr_ws ELSE expr_ws
+       ;
+
 if_stmt: IF condition_expr single_or_block_stmt
        | IF condition_expr single_or_block_stmt ELSE single_or_block_stmt
-       | IF condition_expr expr
-       | IF condition_expr expr ELSE expr
+       | IF condition_expr expr_ws
        ;
 
 while_stmt: WHILE condition_expr single_or_block_stmt
