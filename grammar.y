@@ -103,13 +103,13 @@ nullable_e: endl_list_e '?'
           ;
 
 var_stmt: VAR endl_list_e var_declaration end_of_stmt
-        | VAR endl_list_e var_declaration endl_list_e '=' expr_ws end_of_stmt
-        | VAR endl_list_e ID endl_list_e '=' expr_ws end_of_stmt
+        | VAR endl_list_e var_declaration endl_list_e '=' endl_list_e expr end_of_stmt
+        | VAR endl_list_e ID endl_list_e '=' endl_list_e expr end_of_stmt
         ;
 
 val_stmt: VAL endl_list_e var_declaration end_of_stmt
-        | VAL endl_list_e var_declaration endl_list_e '=' expr_ws end_of_stmt
-        | VAL endl_list_e ID endl_list_e '=' expr_ws end_of_stmt
+        | VAL endl_list_e var_declaration endl_list_e '=' endl_list_e expr end_of_stmt
+        | VAL endl_list_e ID endl_list_e '=' endl_list_e expr end_of_stmt
         ;
 
 var_declaration: ID enld_list_e ':' endl_list_e nullable_type
@@ -118,12 +118,12 @@ var_declaration: ID enld_list_e ':' endl_list_e nullable_type
 condition_expr: endl_list_e '(' expr_ws ')' endl_list_e
               ;
 
-if_expr: IF condition_expr expr_ws ELSE expr_ws end_of_stmt
+if_expr: IF condition_expr expr_ws ELSE endl_list_e expr end_of_stmt
        ;
 
 if_stmt: IF condition_expr single_or_block_stmt end_of_stmt
        | IF condition_expr single_or_block_stmt ELSE single_or_block_stmt end_of_stmt
-       | IF condition_expr expr_ws end_of_stmt
+       | IF condition_expr endl_list_e expr end_of_stmt
        ;
 
 while_stmt: WHILE condition_expr single_or_block_stmt end_of_stmt
