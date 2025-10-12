@@ -36,6 +36,7 @@ binNumber      -?0[bB]({binDigit}(_*{binDigit})*)
 hexNumber      -?0[xX]({hexDigit}(_*{hexDigit})*)
 doubleNumber   -?{digit}(_*{digit})*(\.{digit}(_*{digit})*)?([eE][+-]{digit})?
 floatNumber    -?{digit}(_*{digit})*(\.{digit}(_*{digit})*)?([eE][+-]{digit})?[fF]
+id             [a-zA-Z_][a-zA-Z0-9_]*
 
 %%
 
@@ -221,7 +222,7 @@ false       { printConstantKeyword(yytext); }
     }
     std::cout << "Hex number: " << std::stoul(hexStr, nullptr, 16) << std::endl; 
 }
-[a-zA-Z_][a-zA-Z0-9_]*  { std::cout << "Identificator: " << yytext << std::endl; }
+{id}  { std::cout << "Identificator: " << yytext << std::endl; }
 
 \n                      { printEndOfLine(); }
 
