@@ -26,6 +26,17 @@
 %x MULTILINE_STRING
 %x ML_COMMENT
 
+digit          [0-9]
+notZeroDigit   [1-9]
+binDigit       [01]
+hexDigit       [0-9a-fA-F]
+
+number         -?(0|{notZeroDigit}(_*{digit})*)
+binNumber      -?0[bB]({binDigit}_*{binDigit})*
+hexNumber      -?0[xX]({hexDigit}_*{hexDigit})*
+doubleNumber   -?[0-9](?:[0-9_]*[0-9])?(?:\.[0-9](?:[0-9_]*[0-9])?)?(?:[eE][+-]?[0-9](?:[0-9_]*[0-9])?)?
+floatNumber    -?[0-9](?:[0-9_]*[0-9])?(?:\.[0-9](?:[0-9_]*[0-9])?)?(?:[eE][+-]?[0-9](?:[0-9_]*[0-9])?)?[fF]
+
 %%
 
 %{
@@ -191,11 +202,26 @@ false       { printConstantKeyword(yytext); }
 \]          { printOperator(yytext); }
 \;          { printOperator(yytext); }
 
--?(_[0-9_]+|[0-9][0-9_]*_|[0-9][0-9_]*_\.[0-9_]*|[0-9][0-9_]*\._[0-9_]*) { std::cout << "Error: invalid numeric literal with underscore: " << yytext << std::endl; }
--?0|([1-9]([0-9_]*[0-9])?)                          { std::cout << "Integer: " << atoi(remove_underscore(yytext).c_str()) << std::endl; }
--?[0-9]([0-9_]*[0-9])?\.[0-9]([0-9_]*[0-9])?        { std::cout << "Double: " << strtod(remove_underscore(yytext).c_str(), NULL) << std::endl; }
--?[0-9]([0-9_]*[0-9])?(\.([0-9]([0-9_]*[0-9])?))*f  { std::cout << "Float: " << strtof(remove_underscore(yytext).c_str(), NULL) << std::endl; }
-[a-zA-Z_][a-zA-Z0-9_]*                              { std::cout << "Identificator: " << yytext << std::endl; }
+-?(_[0-9_]+|[0-9][0-9_]*_|[0-9][0-9_]*_\.[0-9_]*|[0-9][0-9_]*\._[0-9_]*)    { std::cout << "Error: invalid numeric literal with underscore: " << yytext << std::endl; }
+{number}                                                                    { std::cout << "Integer: " << atoi(remove_underscore(yytext).c_str()) << std::endl; }
+{doubleNumber}                                                              { std::cout << "Double: " << strtod(remove_underscore(yytext).c_str(), NULL) << std::endl; }
+{floatNumber}                                                               { std::cout << "Float: " << strtof(remove_underscore(yytext).c_str(), NULL) << std::endl; }
+{binNumber} { 
+    std::string binStr = remove_underscore(yytext);
+    if (binStr.substr(0, 2) == "0b" || binStr.substr(0, 2) == "0B") {
+        binStr = binStr.substr(2);
+    }
+    std::cout << "Bin number: " << std::stoul(binStr, nullptr, 2) << std::endl; 
+}
+
+{hexNumber} { 
+    std::string hexStr = remove_underscore(yytext);
+    if (hexStr.substr(0, 2) == "0x" || hexStr.substr(0, 2) == "0X") {
+        hexStr = hexStr.substr(2);
+    }
+    std::cout << "Hex number: " << std::stoul(hexStr, nullptr, 16) << std::endl; 
+}
+[a-zA-Z_][a-zA-Z0-9_]*                                                      { std::cout << "Identificator: " << yytext << std::endl; }
 
 \n                      { printEndOfLine(); }
 
