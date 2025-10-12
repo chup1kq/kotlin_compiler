@@ -35,6 +35,18 @@
 
 %%
 
+kotlin_file: top_level_declaration_list
+
+top_level_declaration_list: top_level_declaration
+			  | top_level_declaration_list endl_list_e top_level_declaration
+			  ;
+
+top_level_declaration: end_of_stmt
+		     | class_declaration
+		     | fun_declaration
+		     | enum_class
+		     ;
+
 endl_list: ENDL
 	     | endl_list ENDL
 	     ;
