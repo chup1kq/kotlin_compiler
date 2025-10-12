@@ -33,8 +33,25 @@
 %}
 
 \" {
+    buff = "";
     BEGIN(STRING);
-    buff.clear();
+}
+
+<STRING>[^\"\\\n]+                   { buff += yytext; }
+<STRING,SYMBOL>\\n                   { buff += "\n"; }
+<STRING,SYMBOL>\\t                   { buff += "\t"; }
+<STRING,SYMBOL>\\b                   { buff += "\b"; }
+<STRING,SYMBOL>\\$                   { buff += "$"; }
+<STRING,SYMBOL>\\\'                  { buff += "\'"; }
+<STRING,SYMBOL>\\\"                  { buff += "\""; }
+<STRING,SYMBOL>\\\\                  { buff += "\\"; }
+<STRING,SYMBOL>\\u[0-9a-fA-F]{4}     {
+    char ch = (char)strtol(yytext + strlen(yytext) - 4, NULL, 16);
+    buff += ch;
+}
+<STRING,SYMBOL>\\. {
+    std::cerr << "Error in literal. Unsupported escape sequence: " << yytext << std::endl;
+    BEGIN(INITIAL);
 }
 
 <STRING>\" {
@@ -42,69 +59,35 @@
     BEGIN(INITIAL);
 }
 
-<STRING>[^\"\\\n]+            { buff += yytext; }
-<STRING>\\n                   { buff += "\n"; }
-<STRING>\\t                   { buff += "\t"; }
-<STRING>\\b                   { buff += "\b"; }
-<STRING>\\$                   { buff += "$"; }
-<STRING>\\\'                  { buff += "\'"; }
-<STRING>\\\"                  { buff += "\""; }
-<STRING>\\\\                  { buff += "\\"; }
-<STRING>\\u[0-9a-fA-F]{4}     {
-    char ch = (char)strtol(yytext + strlen(yytext) - 4, NULL, 16);
-    buff += ch;
-}
-
-<STRING>\n {
-    std::cout << "Error in singleline string. Has no closed \" in string: " << buff << std::endl;
+<STRING,SYMBOL>\n {
+    std::cerr << "Error in literal. Found newline: " << buff << std::endl;
     BEGIN(INITIAL);
 }
 
-<STRING><<EOF>> {
-    std::cout << "Error in string. Unexpected end of file: " << buff << std::endl;
+<STRING,SYMBOL><<EOF>> {
+    std::cerr << "Error in literal. Unexpected end of file: " << buff << std::endl;
     BEGIN(INITIAL);
 }
 
 \' {
+    buff = "";
     BEGIN(SYMBOL);
-    buff.clear();
 }
 
+<SYMBOL>[^\'\\\n]+           { buff += yytext; }
 <SYMBOL>\' {
-    std::cout << "Error in character. Has no character." << std::endl;
+    if(buff.length() == 0) {
+        std::cerr << "Error in character. Empty character." << std::endl;
+    }
+    else if (buff.length() == 1) {
+        std::cout << "Found character: " << buff << std::endl;
+    }
+    else {
+        std::cerr << "Error in character. More than 1 character: " << buff << std::endl;
+    }
     BEGIN(INITIAL);
 }
 
-<SYMBOL>[^\'\\\n]{1}\' {
-    char c[2] = { yytext[0], '\0' };
-    FOUND_CHARACTER(c);
-}
-
-<SYMBOL>\\n\'   { FOUND_CHARACTER("\n"); }
-<SYMBOL>\\t\'   { FOUND_CHARACTER("\t"); }
-<SYMBOL>\\b\'   { FOUND_CHARACTER("\b"); }
-<SYMBOL>\\$\'   { FOUND_CHARACTER("$"); }
-<SYMBOL>\\\'\'  { FOUND_CHARACTER("\'"); }
-<SYMBOL>\\\"\'  { FOUND_CHARACTER("\""); }
-<SYMBOL>\\\\\'  { FOUND_CHARACTER("\\"); }
-<SYMBOL>\\u[0-9a-fA-F]{4}\' {
-    char c[7] = { '\\', 'u', yytext[2], yytext[3], yytext[4], yytext[5], '\0' };
-    FOUND_CHARACTER(c);
-}
-
-<SYMBOL>\n {
-    std::cout << "Error in character. Has no closed ' in character: " << yytext << std::endl;
-    BEGIN(INITIAL);
-}
-
-<SYMBOL><<EOF>> {
-    std::cout << "Error in string. Unexpected end of file: " << buff << std::endl;
-    BEGIN(INITIAL);
-}
-<SYMBOL>[^\'\n]{2,}\' {
-    std::cout << "Error in character. has more than 1 character: " << yytext << std::endl;
-    BEGIN(INITIAL);
-}
 
 \"\"\" {
     BEGIN(MULTILINE_STRING);
