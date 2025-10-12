@@ -7,12 +7,9 @@
     #include <cstdlib>
     #include <algorithm>
 
-    #define FOUND_KEYWORD() std::cout << "Found keyword: " << yytext << std::endl;
-
     #define FOUND_CHARACTER(text) \
         do { std::cout << "Found character: " << text << std::endl; BEGIN(INITIAL); } while(0)
 
-    std::string buff;
 
     void printOperator(char* o);
     void printEndOfLine();
@@ -30,6 +27,10 @@
 %x ML_COMMENT
 
 %%
+
+%{
+    std::string buff = "";
+%}
 
 \" {
     BEGIN(STRING);
