@@ -104,18 +104,16 @@ nullable_e: endl_list_e '?'
 
 var_stmt: VAR endl_list_e var_declaration end_of_stmt
         | VAR endl_list_e var_declaration endl_list_e '=' expr_ws end_of_stmt
+        | VAR endl_list_e ID endl_list_e '=' expr_ws end_of_stmt
         ;
 
 val_stmt: VAL endl_list_e var_declaration end_of_stmt
         | VAL endl_list_e var_declaration endl_list_e '=' expr_ws end_of_stmt
+        | VAL endl_list_e ID endl_list_e '=' expr_ws end_of_stmt
         ;
 
-var_declaration: ID
-               | ID enld_list_e ':' endl_list_e nullable_type
+var_declaration: ID enld_list_e ':' endl_list_e nullable_type
                ;
-
-var_declaration_list: var_declaration
-                    | var_declaration_list ',' var_declaration
 
 condition_expr: endl_list_e '(' expr_ws ')' endl_list_e
               ;
