@@ -48,12 +48,12 @@ top_level_declaration: end_of_stmt
 		     ;
 
 endl_list: ENDL
-	     | endl_list ENDL
-	     ;
+	 | endl_list ENDL
+  	 ;
 
 endl_list_e: /* empty */
-	       | endl_list
-	       ;
+           | endl_list
+      	   ;
 
 end_of_stmt: endl_list
            | ';' endl_list_e
@@ -145,7 +145,7 @@ for_stmt: FOR endl_list_e '(' expr_ws IN range_expr ')' endl_list_e single_or_bl
         | FOR endl_list_e '(' expr_ws IN expr_ws ')' endl_list_e single_or_block_stmt end_of_stmt
         ;
 
-do_while_stmt: DO endl_list_e single_or_block_stmt endl_list_e WHILE condition_expr
+do_while_stmt: DO endl_list_e single_or_block_stmt endl_list_e WHILE condition_expr end_of_stmt
              ;
 
 range_expr: expr_ws ".." expr_ws step_expr
