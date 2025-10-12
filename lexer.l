@@ -34,8 +34,8 @@ hexDigit       [0-9a-fA-F]
 number         -?(0|{notZeroDigit}(_*{digit})*)
 binNumber      -?0[bB]({binDigit}(_*{binDigit})*)
 hexNumber      -?0[xX]({hexDigit}(_*{hexDigit})*)
-doubleNumber   -?[0-9](?:[0-9_]*[0-9])?(?:\.[0-9](?:[0-9_]*[0-9])?)?(?:[eE][+-]?[0-9](?:[0-9_]*[0-9])?)?
-floatNumber    -?[0-9](?:[0-9_]*[0-9])?(?:\.[0-9](?:[0-9_]*[0-9])?)?(?:[eE][+-]?[0-9](?:[0-9_]*[0-9])?)?[fF]
+doubleNumber   -?{digit}(_*{digit})*(\.{digit}(_*{digit})*)?([eE][+-]{digit})?
+floatNumber    -?{digit}(_*{digit})*(\.{digit}(_*{digit})*)?([eE][+-]{digit})?[fF]
 
 %%
 
