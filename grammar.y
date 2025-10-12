@@ -38,25 +38,26 @@
 kotlin_file: top_level_declaration_list
 
 top_level_declaration_list: top_level_declaration
-			  | top_level_declaration_list endl_list_e top_level_declaration
+			  | top_level_declaration_list ele top_level_declaration
 			  ;
 
 top_level_declaration: end_of_stmt
 		     | class_declaration
 		     | fun_declaration
-		     | enum_class
+		     | enum_declaration
 		     ;
 
 endl_list: ENDL
 	 | endl_list ENDL
   	 ;
 
-endl_list_e: /* empty */
+// endl_list_e
+ele: /* empty */
            | endl_list
       	   ;
 
 end_of_stmt: endl_list
-           | ';' endl_list_e
+           | ';' ele
            ;
 
 expr: INT_LITERAL
@@ -72,12 +73,12 @@ expr: INT_LITERAL
     | if_expr
     ;
 
-expr_ws: endl_list_e expr endl_list_e
+expr_ws: ele expr ele
        ;
 
-stmt: ';' endl_list_e
+stmt: ';' ele
     | expr endl_list
-    | expr ';' endl_list_e
+    | expr ';' ele
     | var_stmt
     | val_stmt
     | multy_declaration_stmt
@@ -92,8 +93,8 @@ stmt_list: stmt
 	 | stmt_list stmt
 	 ;
 
-stmt_block: '{' endl_list_e '}'
-	  | '{' endl_list_e stmt_list endl_list_e '}'
+stmt_block: '{' ele '}'
+	  | '{' ele stmt_list ele '}'
 	  ;
 
 single_or_block_stmt: stmt
@@ -111,41 +112,45 @@ type: INT_TYPE
 nullable_type: type nullable_e
              ;
 
-nullable_e: endl_list_e '?'
+nullable_e: /* empty */
+	  | ele '?'
           ;
 
-var_stmt: VAR endl_list_e var_declaration end_of_stmt
-        | VAR endl_list_e var_declaration endl_list_e '=' endl_list_e expr end_of_stmt
-        | VAR endl_list_e ID endl_list_e '=' endl_list_e expr end_of_stmt
+var_stmt: VAR ele var_declaration end_of_stmt
+        | VAR ele var_declaration ele '=' ele expr end_of_stmt
+        | VAR ele ID ele '=' ele expr end_of_stmt
         ;
 
-val_stmt: VAL endl_list_e var_declaration end_of_stmt
-        | VAL endl_list_e var_declaration endl_list_e '=' endl_list_e expr end_of_stmt
-        | VAL endl_list_e ID endl_list_e '=' endl_list_e expr end_of_stmt
+val_stmt: VAL ele var_declaration end_of_stmt
+        | VAL ele var_declaration ele '=' ele expr end_of_stmt
+        | VAL ele ID ele '=' ele expr end_of_stmt
         ;
 
-var_declaration: ID enld_list_e ':' endl_list_e nullable_type
+var_declaration: ID enld_list_e ':' ele nullable_type
                ;
 
-condition_expr: endl_list_e '(' expr_ws ')' endl_list_e
+var_declaration_default_value: var_declaration ele '=' ele expr
+			     ;
+
+condition_expr: ele '(' expr_ws ')' ele
               ;
 
-if_expr: IF condition_expr expr_ws ELSE endl_list_e expr end_of_stmt
+if_expr: IF condition_expr expr_ws ELSE ele expr end_of_stmt
        ;
 
 if_stmt: IF condition_expr single_or_block_stmt end_of_stmt
        | IF condition_expr single_or_block_stmt ELSE single_or_block_stmt end_of_stmt
-       | IF condition_expr endl_list_e expr end_of_stmt
+       | IF condition_expr ele expr end_of_stmt
        ;
 
 while_stmt: WHILE condition_expr single_or_block_stmt end_of_stmt
           ;
 
-for_stmt: FOR endl_list_e '(' expr_ws IN range_expr ')' endl_list_e single_or_block_stmt end_of_stmt
-        | FOR endl_list_e '(' expr_ws IN expr_ws ')' endl_list_e single_or_block_stmt end_of_stmt
+for_stmt: FOR ele '(' expr_ws IN range_expr ')' ele single_or_block_stmt end_of_stmt
+        | FOR ele '(' expr_ws IN expr_ws ')' ele single_or_block_stmt end_of_stmt
         ;
 
-do_while_stmt: DO endl_list_e single_or_block_stmt endl_list_e WHILE condition_expr end_of_stmt
+do_while_stmt: DO ele single_or_block_stmt ele WHILE condition_expr end_of_stmt
              ;
 
 range_expr: expr_ws ".." expr_ws step_expr
@@ -157,16 +162,41 @@ step_expr: /* empty */
          | STEP expr_ws
          ;
 
-access_modifier: PUBLIC
-               | PROTECTED
-               | PRIVATE
-               ;
 
-enum_class: ENUM CLASS ID endl_list_e '{' enum_entries '}'
-          ;
 
-enum_entry: endl_list_e ID endl_list_e
-          | endl_list_e ID '(' argument_list ')' endl_list_e
+class_access_modifier: /* empty */
+		     | PUBLIC
+                     | PROTECTED
+                     | PRIVATE
+                     ;
+
+enum_access_modifier: /* empty */
+		    | PUBLIC
+		    | PRIVATE
+		    ;
+
+enum_primary_constructor: /* empty */
+			| CONSTRUCTOR
+			| PRIVATE ele CONSTRUCTOR
+			;
+
+enum_declaration: enum_access_modifier ele ENUM ele CLASS ele ID ele enum_body
+	       | enum_access_modifier ele ENUM ele CLASS ele ID ele enum_primary_constructor ele '(' ele ')' enum_body
+	       | enum_access_modifier ele ENUM ele CLASS ele ID ele enum_primary_constructor ele '(' class_agrument_list ')' enum_body
+	       | enum_access_modifier ele ENUM ele CLASS ele ID ele enum_primary_constructor ele '(' class_agrument_list ele ',' ele ')' enum_body
+	       ;
+
+enum_body: /* empty */
+         | '{' ele '}'
+         | '{' enum_entries '}'
+         | '{' enum_entries ',' ele '}'
+         | '{' enum_entries ';' ele '}'
+         | '{' enum_entries ';' ele fun_declaration_list ele '}'
+         ;
+
+enum_entry: ele ID ele
+          | ele ID ele '(' argument_list ')' ele
+          | ele ID ele '(' argument_list ',' ele ')' ele
           ;
 
 enum_entries: enum_entry
@@ -176,3 +206,17 @@ enum_entries: enum_entry
 argument_list: expr_ws
              | argument_list ',' expr_ws
              ;
+
+class_argument: var_declaration
+	      | var_declaration_default_value
+	      ;
+
+class_agrument_list: class_argument
+		   | argument_declaration_list ele ',' ele class_argument
+		   ;
+
+fun_declaration:
+
+fun_declaration_list: fun_declaration
+		    | fun_declaration_list ele fun_declaration
+		    ;
