@@ -135,12 +135,12 @@ var_declaration_default_value: var_declaration ele '=' ele expr
 condition_expr: ele '(' expr_ws ')' ele
               ;
 
-if_expr: IF condition_expr expr_ws ELSE ele expr end_of_stmt
+if_expr: IF condition_expr expr ele ELSE ele expr end_of_stmt
        ;
 
 if_stmt: IF condition_expr single_or_block_stmt end_of_stmt
        | IF condition_expr single_or_block_stmt ELSE single_or_block_stmt end_of_stmt
-       | IF condition_expr ele expr end_of_stmt
+       | IF condition_expr expr end_of_stmt
        ;
 
 while_stmt: WHILE condition_expr single_or_block_stmt end_of_stmt
@@ -218,7 +218,11 @@ allowed_declaration_params: ele
 		          | declaration_argument_list ',' ele
 		          ;
 
-fun_declaration:
+fun_declaration: FUN ele ID ele '(' allowed_declaration_params ')' ele stmt_block ele
+	       | FUN ele ID ele '(' allowed_declaration_params ')' ele ':' nullable_type ele stmt_block ele
+	       | FUN ele ID ele '(' allowed_declaration_params ')' ele '=' ele expr ele
+	       | FUN ele ID ele '(' allowed_declaration_params ')' ele ':' nullable_type ele '=' ele expr ele
+	       ;
 
 fun_declaration_list: fun_declaration
 		    | fun_declaration_list ele fun_declaration
