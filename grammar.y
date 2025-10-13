@@ -181,9 +181,7 @@ enum_primary_constructor: /* empty */
 			;
 
 enum_declaration: enum_access_modifier ele ENUM ele CLASS ele ID ele enum_body
-	       | enum_access_modifier ele ENUM ele CLASS ele ID ele enum_primary_constructor ele '(' ele ')' enum_body
-	       | enum_access_modifier ele ENUM ele CLASS ele ID ele enum_primary_constructor ele '(' class_agrument_list ')' enum_body
-	       | enum_access_modifier ele ENUM ele CLASS ele ID ele enum_primary_constructor ele '(' class_agrument_list ele ',' ele ')' enum_body
+	       | enum_access_modifier ele ENUM ele CLASS ele ID ele enum_primary_constructor ele '(' allowed_declaration_params ')' enum_body
 	       ;
 
 enum_body: /* empty */
@@ -207,13 +205,18 @@ argument_list: expr_ws
              | argument_list ',' expr_ws
              ;
 
-class_argument: var_declaration
-	      | var_declaration_default_value
-	      ;
+declaration_argument: var_declaration
+		    | var_declaration_default_value
+		    ;
 
-class_agrument_list: class_argument
-		   | argument_declaration_list ele ',' ele class_argument
-		   ;
+declaration_argument_list: declaration_argument
+		         | argument_declaration_list ele ',' ele declaration_argument
+		         ;
+
+allowed_declaration_params: ele
+		          | declaration_argument_list
+		          | declaration_argument_list ',' ele
+		          ;
 
 fun_declaration:
 
