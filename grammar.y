@@ -91,7 +91,8 @@ expr: INT_LITERAL
     | expr ele MUL_ASSIGNMENT ele expr
     | expr ele DIV_ASSIGNMENT ele expr
     | expr ele MOD_ASSIGNMENT ele expr
-    |
+    | expr ele '.' ele ID
+    | expr ele '.' ele ID '(' ele expr_list_e ele ')'
     ;
 
 expr_list: expr
@@ -163,12 +164,10 @@ var_declaration_default_value: var_declaration ele '=' ele expr
 condition_expr: ele '(' expr_ws ')' ele
               ;
 
-if_expr: IF condition_expr expr ele ELSE ele expr end_of_stmt
+if_expr: IF condition_expr single_or_block_stmt ELSE single_or_block_stmt end_of_stmt
        ;
 
 if_stmt: IF condition_expr single_or_block_stmt end_of_stmt
-       | IF condition_expr single_or_block_stmt ELSE single_or_block_stmt end_of_stmt
-       | IF condition_expr expr end_of_stmt
        ;
 
 while_stmt: WHILE condition_expr single_or_block_stmt end_of_stmt
@@ -214,8 +213,8 @@ enum_primary_constructor: /* empty */
 			;
 
 enum_declaration: enum_access_modifier ele ENUM ele CLASS ele ID ele enum_body
-	       | enum_access_modifier ele ENUM ele CLASS ele ID ele enum_primary_constructor ele '(' allowed_declaration_params ')' enum_body
-	       ;
+	        | enum_access_modifier ele ENUM ele CLASS ele ID ele enum_primary_constructor ele '(' allowed_declaration_params ')' enum_body
+	        ;
 
 enum_body: /* empty */
          | '{' ele '}'
