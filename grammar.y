@@ -71,7 +71,36 @@ expr: INT_LITERAL
     | ID
     | '(' expr_ws ')'
     | if_expr
+    | THIS
+    | SUPER
+    | ID ele '(' ele expr_list_e ele ')'
+    | expr ele '=' ele expr
+    | expr ele '+' ele expr
+    | expr ele '-' ele expr
+    | expr ele '*' ele expr
+    | expr ele '/' ele expr
+    | expr ele '%' ele expr
+    | expr ele '<' ele expr
+    | expr ele '>' ele expr
+    | expr ele GREATER_EQUAL ele expr
+    | expr ele LESS_EQUAL ele expr
+    | expr ele EQUAL ele expr
+    | expr ele NOT_EQUAL ele expr
+    | expr ele PLUS_ASSIGNMENT ele expr
+    | expr ele MINUS_ASSIGNMENT ele expr
+    | expr ele MUL_ASSIGNMENT ele expr
+    | expr ele DIV_ASSIGNMENT ele expr
+    | expr ele MOD_ASSIGNMENT ele expr
+    |
     ;
+
+expr_list: expr
+	 | expr_list ele ',' ele expr
+	 ;
+
+expr_list_e: /* empty */
+	   | expr_list
+	   ;
 
 expr_ws: ele expr ele
        ;
@@ -81,7 +110,6 @@ stmt: ';' ele
     | expr ';' ele
     | var_stmt
     | val_stmt
-    | multy_declaration_stmt
     | if_stmt
     | for_stmt
     | while_stmt
@@ -153,7 +181,7 @@ for_stmt: FOR ele '(' expr_ws IN range_expr ')' ele single_or_block_stmt end_of_
 do_while_stmt: DO ele single_or_block_stmt ele WHILE condition_expr end_of_stmt
              ;
 
-range_expr: expr_ws ".." expr_ws step_expr
+range_expr: expr_ws RANGE expr_ws step_expr
           | expr_ws DOWN_TO expr_ws step_expr
           | expr_ws UNTIL expr_ws step_expr
           ;
