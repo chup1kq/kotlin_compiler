@@ -162,6 +162,11 @@ step_expr: /* empty */
          | STEP expr_ws
          ;
 
+return_stmt: RETURN
+	   | RETURN end_of_stmt
+	   | RETURN expr end_of_stmt
+	   ;
+
 
 
 class_access_modifier: /* empty */
