@@ -259,3 +259,32 @@ fun_declaration: FUN ele ID ele '(' allowed_declaration_params ')' ele stmt_bloc
 fun_declaration_list: fun_declaration
 		    | fun_declaration_list ele fun_declaration
 		    ;
+
+class_primary_constructor: /* empty */
+                        | CONSTRUCTOR
+                        | PRIVATE ele CONSTRUCTOR
+                        | PUBLIC ele CONSTRUCTOR
+                        | PROTECTED ele CONSTRUCTOR
+                        ;
+
+class_declaration: class_access_modifier ele CLASS ele ID ele class_body
+                | class_access_modifier ele CLASS ele ID ele class_primary_constructor ele '(' allowed_declaration_params ')' class_body
+                ;
+
+class_body: /* empty */
+        | '{' ele '}'
+        | '{' ele class_member_list ele '}'
+        ;
+
+class_member_list: class_member
+                | class_member_list ele class_member
+                ;
+
+class_member: var_stmt
+            | val_stmt
+            | fun_declaration
+            | constructor_declaration
+            ;
+
+constructor_declaration: class_primary_constructor '(' allowed_declaration_params ')' ele stmt_block
+                    ;
