@@ -1,6 +1,6 @@
-extern int yylex();
+extern int yyparse();
 
 int main() {
-    yylex();
+    yyparse();
     return 0;
 }

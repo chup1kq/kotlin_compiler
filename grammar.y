@@ -1,8 +1,17 @@
+%{
+#include <iostream>
+using namespace std;
+
+// Объявляем yylex() и yyerror(), чтобы избежать ошибок
+int yylex();
+void yyerror(const char* s);
+%}
+
 %token IF ELSE
 %token FOR WHILE DO
 %token VAL VAR
 %token FUN RETURN
-%token CLASS THIS OPEN OVERRIDE SUPER CONSTRUCTOR
+%token CLASS THIS OPEN OVERRIDE SUPER CONSTRUCTOR ENUM
 %token PUBLIC PROTECTED PRIVATE
 %token ENDL
 %token ID
@@ -155,7 +164,7 @@ val_stmt: VAL ele var_declaration end_of_stmt
         | VAL ele ID ele '=' ele expr end_of_stmt
         ;
 
-var_declaration: ID enld_list_e ':' ele nullable_type
+var_declaration: ID ele ':' ele nullable_type
                ;
 
 var_declaration_default_value: var_declaration ele '=' ele expr
@@ -242,7 +251,7 @@ declaration_argument: var_declaration
 		    ;
 
 declaration_argument_list: declaration_argument
-		         | argument_declaration_list ele ',' ele declaration_argument
+		         | declaration_argument_list ele ',' ele declaration_argument
 		         ;
 
 allowed_declaration_params: ele
@@ -288,3 +297,20 @@ class_member: var_stmt
 
 constructor_declaration: class_primary_constructor '(' allowed_declaration_params ')' ele stmt_block
                     ;
+
+%%
+
+int yylex() {
+    return 0; // ничего не считываем, просто завершаем
+}
+
+void yyerror(const char* s) {
+    cerr << "Parser error: " << s << endl;
+}
+
+int main() {
+    cout << "Parser test started" << endl;
+    yyparse();
+    cout << "Parser test finished" << endl;
+    return 0;
+}
