@@ -31,11 +31,11 @@ notZeroDigit   [1-9]
 binDigit       [01]
 hexDigit       [0-9a-fA-F]
 
-number         -?(0|{notZeroDigit}(_*{digit})*)
-binNumber      -?0[bB]({binDigit}(_*{binDigit})*)
-hexNumber      -?0[xX]({hexDigit}(_*{hexDigit})*)
-doubleNumber   -?({digit}(_*{digit})*(?:(\.{digit}(_*{digit})*)(?:([eE][+-]{digit}))?|([eE][+-]{digit}))|(\.{digit}(_*{digit})*)([eE][+-]{digit})?)
-floatNumber    -?{digit}?(_*{digit})*(\.{digit}(_*{digit})*)?([eE][+-]{digit})?[fF]
+number         (0|{notZeroDigit}(_*{digit})*)
+binNumber      0[bB]({binDigit}(_*{binDigit})*)
+hexNumber      0[xX]({hexDigit}(_*{hexDigit})*)
+doubleNumber   ({digit}(_*{digit})*(?:(\.{digit}(_*{digit})*)(?:([eE][+-]{digit}))?|([eE][+-]{digit}))|(\.{digit}(_*{digit})*)([eE][+-]{digit})?)
+floatNumber    (?:{digit}(_*{digit})*(?:\.{digit}(_*{digit})*)?(?:[eE][+-]?{digit}(_*{digit})*)?|\.{digit}(_*{digit})*(?:[eE][+-]?{digit}(_*{digit})*)?)[fF]
 id             [a-zA-Z_][a-zA-Z0-9_]*
 
 %%
