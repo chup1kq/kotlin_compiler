@@ -300,17 +300,7 @@ constructor_declaration: class_primary_constructor '(' allowed_declaration_param
 
 %%
 
-int yylex() {
-    return 0; // ничего не считываем, просто завершаем
-}
-
 void yyerror(const char* s) {
     cerr << "Parser error: " << s << endl;
 }
 
-int main() {
-    cout << "Parser test started" << endl;
-    yyparse();
-    cout << "Parser test finished" << endl;
-    return 0;
-}

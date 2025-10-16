@@ -42,6 +42,7 @@ id             [a-zA-Z_][a-zA-Z0-9_]*
 
 %{
     std::string buff = "";
+    int comment_depth = 0;
 %}
 
 \" {
@@ -119,16 +120,36 @@ id             [a-zA-Z_][a-zA-Z0-9_]*
 
 \/\/[^\n]*                { std::cout << "Found singleline comment: " << (yytext + 2) << std::endl; }
 
-\/\*                     { BEGIN(ML_COMMENT); buff.clear(); }
-<ML_COMMENT>[^*]+|\n     { buff += yytext; }
-<ML_COMMENT>\*+[^*/]     { buff += yytext; }
-<ML_COMMENT>\*+\/ {
-    std::cout << "Found multiline comment: " << buff << std::endl;
-    BEGIN(INITIAL);
+\/\* {
+    comment_depth = 1;
+    buff.clear();
+    BEGIN(ML_COMMENT);
 }
-<ML_COMMENT><<EOF>> {
-    std::cout << "Found multiline comment: " << buff << std::endl;
-    BEGIN(INITIAL);
+
+<ML_COMMENT>{
+    "/*" {
+        comment_depth++;
+        buff += "/*";
+    }
+
+    "*/" {
+        comment_depth--;
+        if (comment_depth == 0) {
+            std::cout << "Found multiline comment: " << buff << std::endl;
+            BEGIN(INITIAL);
+        } else {
+            buff += "*/";
+        }
+    }
+
+    [^*/\n]+  { buff += yytext; }
+    \n        { buff += "\n"; }
+    .         { buff += yytext; }
+
+    <<EOF>> {
+        std::cerr << "Error: unclosed multiline comment: " << buff << std::endl;
+        BEGIN(INITIAL);
+    }
 }
 
 if          { printStatementKeyword(yytext); }
