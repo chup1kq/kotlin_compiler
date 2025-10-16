@@ -34,8 +34,8 @@ hexDigit       [0-9a-fA-F]
 number         -?(0|{notZeroDigit}(_*{digit})*)
 binNumber      -?0[bB]({binDigit}(_*{binDigit})*)
 hexNumber      -?0[xX]({hexDigit}(_*{hexDigit})*)
-doubleNumber   -?{digit}(_*{digit})*(\.{digit}(_*{digit})*)?([eE][+-]{digit})?
-floatNumber    -?{digit}(_*{digit})*(\.{digit}(_*{digit})*)?([eE][+-]{digit})?[fF]
+doubleNumber   -?(?:[0-9]+(_+[0-9]+)*|\.[0-9][0-9_]*)(_*{digit})*(\.{digit}(_*{digit})*)?([eE][+-]{digit})?
+floatNumber    -?{digit}?(_*{digit})*(\.{digit}(_*{digit})*)?([eE][+-]{digit})?[fF]
 id             [a-zA-Z_][a-zA-Z0-9_]*
 
 %%
@@ -228,20 +228,20 @@ false       { printConstantKeyword(yytext); }
 {number}                                                                            { std::cout << "Integer: " << atoi(remove_underscore(yytext).c_str()) << std::endl; }
 {doubleNumber}                                                                      { std::cout << "Double: " << strtod(remove_underscore(yytext).c_str(), NULL) << std::endl; }
 {floatNumber}                                                                       { std::cout << "Float: " << strtof(remove_underscore(yytext).c_str(), NULL) << std::endl; }
-{binNumber} { 
+{binNumber} {
     std::string binStr = remove_underscore(yytext);
     if (binStr.substr(0, 2) == "0b" || binStr.substr(0, 2) == "0B") {
         binStr = binStr.substr(2);
     }
-    std::cout << "Bin number: " << std::stoul(binStr, nullptr, 2) << std::endl; 
+    std::cout << "Bin number: " << std::stoul(binStr, nullptr, 2) << std::endl;
 }
 
-{hexNumber} { 
+{hexNumber} {
     std::string hexStr = remove_underscore(yytext);
     if (hexStr.substr(0, 2) == "0x" || hexStr.substr(0, 2) == "0X") {
         hexStr = hexStr.substr(2);
     }
-    std::cout << "Hex number: " << std::stoul(hexStr, nullptr, 16) << std::endl; 
+    std::cout << "Hex number: " << std::stoul(hexStr, nullptr, 16) << std::endl;
 }
 {id}  { std::cout << "Identificator: " << yytext << std::endl; }
 
