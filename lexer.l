@@ -7,10 +7,6 @@
     #include <cstdlib>
     #include <algorithm>
 
-    #define FOUND_CHARACTER(text) \
-        do { std::cout << "Found character: " << text << std::endl; BEGIN(INITIAL); } while(0)
-
-
     void printOperator(char* o);
     void printEndOfLine();
     void printType(char* t);
@@ -22,7 +18,7 @@
 %}
 
 %x STRING
-%x SYMBOL
+%x CHARACTER
 %x MULTILINE_STRING
 %x ML_COMMENT
 
@@ -31,11 +27,13 @@ notZeroDigit   [1-9]
 binDigit       [01]
 hexDigit       [0-9a-fA-F]
 
-number         -?(0|{notZeroDigit}(_*{digit})*)
-binNumber      -?0[bB]({binDigit}(_*{binDigit})*)
-hexNumber      -?0[xX]({hexDigit}(_*{hexDigit})*)
-doubleNumber   -?(?:[0-9]+(_+[0-9]+)*|\.[0-9][0-9_]*)(_*{digit})*(\.{digit}(_*{digit})*)?([eE][+-]{digit})?
-floatNumber    -?{digit}?(_*{digit})*(\.{digit}(_*{digit})*)?([eE][+-]{digit})?[fF]
+num            {digit}(_*{digit})*
+exp            [eE][+-]{num}
+number         (0|{notZeroDigit}(_*{digit})*)
+binNumber      0[bB]({binDigit}(_*{binDigit})*)
+hexNumber      0[xX]({hexDigit}(_*{hexDigit})*)
+doubleNumber   ({num}(?:(\.{num})(?:({exp}))?|({exp}))|(\.{num})({exp})?)
+floatNumber    (?:{num}(?:\.{num})?(?:{exp})?|\.{num}(?:{exp})?)[fF]
 id             [a-zA-Z_][a-zA-Z0-9_]*
 
 %%
@@ -51,18 +49,18 @@ id             [a-zA-Z_][a-zA-Z0-9_]*
 }
 
 <STRING>[^\"\\\n]+                   { buff += yytext; }
-<STRING,SYMBOL>\\n                   { buff += "\n"; }
-<STRING,SYMBOL>\\t                   { buff += "\t"; }
-<STRING,SYMBOL>\\b                   { buff += "\b"; }
-<STRING,SYMBOL>\\$                   { buff += "$"; }
-<STRING,SYMBOL>\\\'                  { buff += "\'"; }
-<STRING,SYMBOL>\\\"                  { buff += "\""; }
-<STRING,SYMBOL>\\\\                  { buff += "\\"; }
-<STRING,SYMBOL>\\u[0-9a-fA-F]{4}     {
+<STRING,CHARACTER>\\n                   { buff += "\n"; }
+<STRING,CHARACTER>\\t                   { buff += "\t"; }
+<STRING,CHARACTER>\\b                   { buff += "\b"; }
+<STRING,CHARACTER>\\$                   { buff += "$"; }
+<STRING,CHARACTER>\\\'                  { buff += "\'"; }
+<STRING,CHARACTER>\\\"                  { buff += "\""; }
+<STRING,CHARACTER>\\\\                  { buff += "\\"; }
+<STRING,CHARACTER>\\u[0-9a-fA-F]{4}     {
     char ch = (char)strtol(yytext + strlen(yytext) - 4, NULL, 16);
     buff += ch;
 }
-<STRING,SYMBOL>\\. {
+<STRING,CHARACTER>\\. {
     std::cerr << "Error in literal. Unsupported escape sequence: " << yytext << std::endl;
     BEGIN(INITIAL);
 }
@@ -72,23 +70,23 @@ id             [a-zA-Z_][a-zA-Z0-9_]*
     BEGIN(INITIAL);
 }
 
-<STRING,SYMBOL>\n {
+<STRING,CHARACTER>\n {
     std::cerr << "Error in literal. Found newline: " << buff << std::endl;
     BEGIN(INITIAL);
 }
 
-<STRING,SYMBOL><<EOF>> {
+<STRING,CHARACTER><<EOF>> {
     std::cerr << "Error in literal. Unexpected end of file: " << buff << std::endl;
     BEGIN(INITIAL);
 }
 
 \' {
     buff = "";
-    BEGIN(SYMBOL);
+    BEGIN(CHARACTER);
 }
 
-<SYMBOL>[^\'\\\n]+           { buff += yytext; }
-<SYMBOL>\' {
+<CHARACTER>[^\'\\\n]+           { buff += yytext; }
+<CHARACTER>\' {
     if(buff.length() == 0) {
         std::cerr << "Error in character. Empty character." << std::endl;
     }
@@ -103,14 +101,16 @@ id             [a-zA-Z_][a-zA-Z0-9_]*
 
 
 \"\"\" {
+    buff = "";
     BEGIN(MULTILINE_STRING);
-    buff.clear();
 }
-<MULTILINE_STRING>[^\n] { buff += yytext; }
-<MULTILINE_STRING>\n    { buff += "\n"; }
-<MULTILINE_STRING>\"{3} {
-    std::cout << "Found multiline string: " << buff << std::endl;
-    BEGIN(INITIAL);
+<MULTILINE_STRING>{
+    \"\"\"          {
+                        std::cout << "Found multiline string: " << buff << std::endl;
+                        BEGIN(INITIAL);
+                    }
+    [\"]{1,2}       { buff += yytext; }
+    [^"]+           { buff += yytext; }
 }
 
 <MULTILINE_STRING><<EOF>> {
@@ -120,7 +120,7 @@ id             [a-zA-Z_][a-zA-Z0-9_]*
 
 \/\/[^\n]*                { std::cout << "Found singleline comment: " << (yytext + 2) << std::endl; }
 
-\/\* {
+"/*" {
     comment_depth = 1;
     buff.clear();
     BEGIN(ML_COMMENT);
@@ -142,15 +142,18 @@ id             [a-zA-Z_][a-zA-Z0-9_]*
         }
     }
 
-    [^*/\n]+  { buff += yytext; }
-    \n        { buff += "\n"; }
-    .         { buff += yytext; }
+    [^*/]+  { buff += yytext; }
+    "*"[^/] { buff += yytext; }
+    "/"[^*] { buff += yytext; }
 
     <<EOF>> {
-        std::cerr << "Error: unclosed multiline comment: " << buff << std::endl;
+        std::cerr << "Error in multiline comment. Unclosed multiline comment: " << buff << std::endl;
         BEGIN(INITIAL);
     }
 }
+
+"*/"        { std::cerr << "Error in multiline comment. Has no open sequence." << std::endl; }
+
 
 if          { printStatementKeyword(yytext); }
 else        { printStatementKeyword(yytext); }
@@ -195,52 +198,51 @@ null        { printConstantKeyword(yytext); }
 true        { printConstantKeyword(yytext); }
 false       { printConstantKeyword(yytext); }
 
-\+          { printOperator(yytext); }
--           { printOperator(yytext); }
-\*          { printOperator(yytext); }
-\\          { printOperator(yytext); }
+"+"         { printOperator(yytext); }
+"-"         { printOperator(yytext); }
+"*"         { printOperator(yytext); }
+"/"         { printOperator(yytext); }
 
-\=          { printOperator(yytext); }
-\=\=        { printOperator(yytext); }
-\!\=        { printOperator(yytext); }
-\<          { printOperator(yytext); }
-\>          { printOperator(yytext); }
+"++"        { printOperator(yytext); }
+"--"        { printOperator(yytext); }
+"+="        { printOperator(yytext); }
+"-="        { printOperator(yytext); }
+"*="        { printOperator(yytext); }
+"/="        { printOperator(yytext); }
 
-&&          { printOperator(yytext); }
-\|\|        { printOperator(yytext); }
+"="         { printOperator(yytext); }
+"=="        { printOperator(yytext); }
+"!="        { printOperator(yytext); }
+"<"         { printOperator(yytext); }
+">"         { printOperator(yytext); }
+"&&"        { printOperator(yytext); }
+"||"        { printOperator(yytext); }
 
-\.          { printOperator(yytext); }
-\?\.        { printOperator(yytext); }
-->          { printOperator(yytext); }
+"."         { printOperator(yytext); }
+"?."        { printOperator(yytext); }
+"->"        { printOperator(yytext); }
 
-\.\.        { printOperator(yytext); }
-\.\.<       { printOperator(yytext); }
-
-\(          { printOperator(yytext); }
-\)          { printOperator(yytext); }
-\{          { printOperator(yytext); }
-\}          { printOperator(yytext); }
-\[          { printOperator(yytext); }
-\]          { printOperator(yytext); }
-\;          { printOperator(yytext); }
+".."        { printOperator(yytext); }
+"..<"       { printOperator(yytext); }
+"("         { printOperator(yytext); }
+")"         { printOperator(yytext); }
+"{"         { printOperator(yytext); }
+"}"         { printOperator(yytext); }
+"["         { printOperator(yytext); }
+"]"         { printOperator(yytext); }
+";"         { printOperator(yytext); }
 
 -?((_[0-9_]+|[0-9][0-9_]*_|[0-9][0-9_]*_\.[0-9_]*|[0-9][0-9_]*\._[0-9_]*)|0{digit}) { std::cout << "Error: invalid numeric literal with underscore: " << yytext << std::endl; }
 {number}                                                                            { std::cout << "Integer: " << atoi(remove_underscore(yytext).c_str()) << std::endl; }
 {doubleNumber}                                                                      { std::cout << "Double: " << strtod(remove_underscore(yytext).c_str(), NULL) << std::endl; }
 {floatNumber}                                                                       { std::cout << "Float: " << strtof(remove_underscore(yytext).c_str(), NULL) << std::endl; }
 {binNumber} {
-    std::string binStr = remove_underscore(yytext);
-    if (binStr.substr(0, 2) == "0b" || binStr.substr(0, 2) == "0B") {
-        binStr = binStr.substr(2);
-    }
+    std::string binStr = remove_underscore(yytext + 2);
     std::cout << "Bin number: " << std::stoul(binStr, nullptr, 2) << std::endl;
 }
 
 {hexNumber} {
-    std::string hexStr = remove_underscore(yytext);
-    if (hexStr.substr(0, 2) == "0x" || hexStr.substr(0, 2) == "0X") {
-        hexStr = hexStr.substr(2);
-    }
+    std::string hexStr = remove_underscore(yytext + 2);
     std::cout << "Hex number: " << std::stoul(hexStr, nullptr, 16) << std::endl;
 }
 {id}  { std::cout << "Identificator: " << yytext << std::endl; }
@@ -250,7 +252,7 @@ false       { printConstantKeyword(yytext); }
 [ \t]+                  { ; }
 .                       { ; }
 
-;;                      { std::cout << "Syntax error: " << yytext << std::endl; }
+";;"                    { std::cout << "Unexpected sequence: " << yytext << std::endl; }
 
 %%
 
