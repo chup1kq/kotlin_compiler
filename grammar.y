@@ -2,7 +2,6 @@
 #include <iostream>
 using namespace std;
 
-// Объявляем yylex() и yyerror(), чтобы избежать ошибок
 int yylex();
 void yyerror(const char* s);
 %}
@@ -57,17 +56,58 @@ top_level_declaration: end_of_stmt
 		     ;
 
 endl_list: ENDL
-	 | endl_list ENDL
-  	 ;
+         | ENDL endl_list
+         ;
 
-// endl_list_e
 ele: /* empty */
-           | endl_list
-      	   ;
+   | endl_list
+   ;
 
 end_of_stmt: endl_list
            | ';' ele
            ;
+
+expr_non_lines: ID '(' ele expr_list_e ele ')'
+	      | expr '=' ele expr
+	      | expr '+' ele expr
+	      | expr '-' ele expr
+	      | expr '*' ele expr
+	      | expr '/' ele expr
+	      | expr '%' ele expr
+	      | expr '<' ele expr
+	      | expr '>' ele expr
+	      | expr GREATER_EQUAL ele expr
+	      | expr LESS_EQUAL ele expr
+	      | expr EQUAL ele expr
+	      | expr NOT_EQUAL ele expr
+	      | expr PLUS_ASSIGNMENT ele expr
+	      | expr MINUS_ASSIGNMENT ele expr
+	      | expr MUL_ASSIGNMENT ele expr
+	      | expr DIV_ASSIGNMENT ele expr
+	      | expr MOD_ASSIGNMENT ele expr
+	      ;
+
+expr_with_lines: expr endl_list '+' ele expr
+	       | expr endl_list '-' ele expr
+	       | expr endl_list '*' ele expr
+	       | expr endl_list '/' ele expr
+	       | expr endl_list '%' ele expr
+	       | expr endl_list '<' ele expr
+	       | expr endl_list '>' ele expr
+	       | expr endl_list GREATER_EQUAL ele expr
+	       | expr endl_list LESS_EQUAL ele expr
+	       | expr endl_list EQUAL ele expr
+	       | expr endl_list NOT_EQUAL ele expr
+	       | expr endl_list PLUS_ASSIGNMENT ele expr
+	       | expr endl_list MINUS_ASSIGNMENT ele expr
+	       | expr endl_list MUL_ASSIGNMENT ele expr
+	       | expr endl_list DIV_ASSIGNMENT ele expr
+	       | expr endl_list MOD_ASSIGNMENT ele expr
+	       ;
+
+expr_in_brackets: '(' ele expr_with_lines ele ')'
+		| '(' ele expr_non_lines ele ')'
+		;
 
 expr: INT_LITERAL
     | FLOAT_LITERAL
@@ -78,30 +118,12 @@ expr: INT_LITERAL
     | FALSE_LITERAL
     | NULL_LITERAL
     | ID
-    | '(' expr_ws ')'
     | if_expr
     | THIS
     | SUPER
-    | ID ele '(' ele expr_list_e ele ')'
-    | expr ele '=' ele expr
-    | expr ele '+' ele expr
-    | expr ele '-' ele expr
-    | expr ele '*' ele expr
-    | expr ele '/' ele expr
-    | expr ele '%' ele expr
-    | expr ele '<' ele expr
-    | expr ele '>' ele expr
-    | expr ele GREATER_EQUAL ele expr
-    | expr ele LESS_EQUAL ele expr
-    | expr ele EQUAL ele expr
-    | expr ele NOT_EQUAL ele expr
-    | expr ele PLUS_ASSIGNMENT ele expr
-    | expr ele MINUS_ASSIGNMENT ele expr
-    | expr ele MUL_ASSIGNMENT ele expr
-    | expr ele DIV_ASSIGNMENT ele expr
-    | expr ele MOD_ASSIGNMENT ele expr
-    | expr ele '.' ele ID
-    | expr ele '.' ele ID '(' ele expr_list_e ele ')'
+    | expr_in_brackets
+    | expr_non_lines
+
     ;
 
 expr_list: expr
@@ -198,35 +220,37 @@ step_expr: /* empty */
          | STEP expr_ws
          ;
 
-return_stmt: RETURN
-	   | RETURN end_of_stmt
+return_stmt: RETURN end_of_stmt
 	   | RETURN expr end_of_stmt
 	   ;
 
-
-
-class_access_modifier: /* empty */
-		     | PUBLIC
+class_access_modifier: enum_access_modifier
                      | PROTECTED
-                     | PRIVATE
                      ;
 
-enum_access_modifier: /* empty */
-		    | PUBLIC
+enum_access_modifier: PUBLIC
 		    | PRIVATE
 		    ;
 
-enum_primary_constructor: /* empty */
-			| CONSTRUCTOR
+enum_primary_constructor: CONSTRUCTOR
 			| PRIVATE ele CONSTRUCTOR
 			;
 
-enum_declaration: enum_access_modifier ele ENUM ele CLASS ele ID ele enum_body
-	        | enum_access_modifier ele ENUM ele CLASS ele ID ele enum_primary_constructor ele '(' allowed_declaration_params ')' enum_body
+enum_declaration: ENUM ele ID
+		| ENUM ele ID ele enum_body
+		| ENUM ele ID ele '(' allowed_declaration_params ')'
+		| ENUM ele ID ele '(' allowed_declaration_params ')' enum_body
+		| ENUM ele ID ele enum_primary_constructor ele '(' allowed_declaration_params ')'
+		| ENUM ele ID ele enum_primary_constructor ele '(' allowed_declaration_params ')' enum_body
+		| enum_access_modifier ele ENUM ele ID
+		| enum_access_modifier ele ENUM ele ID ele enum_body
+		| enum_access_modifier ele ENUM ele ID ele '(' allowed_declaration_params ')'
+		| enum_access_modifier ele ENUM ele ID ele '(' allowed_declaration_params ')' enum_body
+	        | enum_access_modifier ele ENUM ele ID ele enum_primary_constructor ele '(' allowed_declaration_params ')'
+	        | enum_access_modifier ele ENUM ele ID ele enum_primary_constructor ele '(' allowed_declaration_params ')' enum_body
 	        ;
 
-enum_body: /* empty */
-         | '{' ele '}'
+enum_body: '{' ele '}'
          | '{' enum_entries '}'
          | '{' enum_entries ',' ele '}'
          | '{' enum_entries ';' ele '}'
@@ -255,33 +279,41 @@ declaration_argument_list: declaration_argument
 		         ;
 
 allowed_declaration_params: ele
-		          | declaration_argument_list
-		          | declaration_argument_list ',' ele
+		          | ele declaration_argument_list ele
+		          | ele declaration_argument_list ele ',' ele
 		          ;
 
-fun_declaration: FUN ele ID ele '(' allowed_declaration_params ')' ele stmt_block ele
-	       | FUN ele ID ele '(' allowed_declaration_params ')' ele ':' nullable_type ele stmt_block ele
-	       | FUN ele ID ele '(' allowed_declaration_params ')' ele '=' ele expr ele
-	       | FUN ele ID ele '(' allowed_declaration_params ')' ele ':' nullable_type ele '=' ele expr ele
+fun_declaration: FUN ele ID ele '(' allowed_declaration_params ')' ele stmt_block
+	       | FUN ele ID ele '(' allowed_declaration_params ')' ele ':' nullable_type ele stmt_block
+	       | FUN ele ID ele '(' allowed_declaration_params ')' ele '=' ele expr
+	       | FUN ele ID ele '(' allowed_declaration_params ')' ele ':' nullable_type ele '=' ele expr
 	       ;
 
 fun_declaration_list: fun_declaration
 		    | fun_declaration_list ele fun_declaration
 		    ;
 
-class_primary_constructor: /* empty */
-                        | CONSTRUCTOR
+class_primary_constructor: CONSTRUCTOR
                         | PRIVATE ele CONSTRUCTOR
                         | PUBLIC ele CONSTRUCTOR
                         | PROTECTED ele CONSTRUCTOR
                         ;
 
-class_declaration: class_access_modifier ele CLASS ele ID ele class_body
-                | class_access_modifier ele CLASS ele ID ele class_primary_constructor ele '(' allowed_declaration_params ')' class_body
-                ;
+class_declaration: CLASS ele ID
+		 | CLASS ele ID ele class_body
+		 | CLASS ele ID ele '(' allowed_declaration_params ')'
+		 | CLASS ele ID ele '(' allowed_declaration_params ')' ele class_body
+		 | CLASS ele ID ele class_primary_constructor ele '(' allowed_declaration_params ')'
+		 | CLASS ele ID ele class_primary_constructor ele '(' allowed_declaration_params ')' ele class_body
+		 | class_access_modifier ele CLASS ele ID
+		 | class_access_modifier ele CLASS ele ID ele class_body
+		 | class_access_modifier ele CLASS ele ID ele '(' allowed_declaration_params ')'
+		 | class_access_modifier ele CLASS ele ID ele '(' allowed_declaration_params ')' ele class_body
+                 | class_access_modifier ele CLASS ele ID ele class_primary_constructor ele '(' allowed_declaration_params ')'
+                 | class_access_modifier ele CLASS ele ID ele class_primary_constructor ele '(' allowed_declaration_params ')' ele class_body
+                 ;
 
-class_body: /* empty */
-        | '{' ele '}'
+class_body: '{' ele '}'
         | '{' ele class_member_list ele '}'
         ;
 
@@ -296,21 +328,10 @@ class_member: var_stmt
             ;
 
 constructor_declaration: class_primary_constructor '(' allowed_declaration_params ')' ele stmt_block
-                    ;
+                       ;
 
 %%
 
-int yylex() {
-    return 0; // ничего не считываем, просто завершаем
-}
-
 void yyerror(const char* s) {
     cerr << "Parser error: " << s << endl;
-}
-
-int main() {
-    cout << "Parser test started" << endl;
-    yyparse();
-    cout << "Parser test finished" << endl;
-    return 0;
 }
