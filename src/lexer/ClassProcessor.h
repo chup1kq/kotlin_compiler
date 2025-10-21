@@ -15,6 +15,12 @@ private:
 
     bool has(const std::string& lexem);
     static bool isModifierKeyword(const std::string& lexem);
+    bool hasIncompatibleModifierKeyword(const std::string& lexem);
+
+    static bool isAccessModifierKeyword(const std::string& lexem);
+    bool hasAccessModifierKeyword();
+    static bool isInheritanceModifierKeyword(const std::string& lexem);
+    bool hasInheritanceModifierKeyword();
 
 public:
     yytokentype processElement(std::string input);
