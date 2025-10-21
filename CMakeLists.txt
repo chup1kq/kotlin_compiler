@@ -30,8 +30,12 @@ ADD_FLEX_BISON_DEPENDENCY(Lexer Parser)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BUILD_DIR})
 
+include_directories(${CMAKE_SOURCE_DIR}/src/lexer)
+
 add_executable(kotlin_parser
         ${CMAKE_SOURCE_DIR}/main.cpp
         ${FLEX_Lexer_OUTPUTS}
         ${BISON_Parser_OUTPUTS}
+        src/lexer/ClassProcessor.cpp
+        src/lexer/ClassProcessor.h
 )

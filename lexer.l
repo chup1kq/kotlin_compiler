@@ -7,6 +7,10 @@
     #include <cstdlib>
     #include <algorithm>
 
+    #include "ClassProcessor.h"
+
+    ClassProcessor processor;
+
     void printOperator(char* o);
     void printEndOfLine();
     void printType(char* t);
@@ -181,7 +185,7 @@ enum        { printStatementKeyword(yytext); }
 final       { printModifierKeyword(yytext); }
 open        { printModifierKeyword(yytext); }
 private     { printModifierKeyword(yytext); }
-public      { printModifierKeyword(yytext); }
+public      { processor.processElement(yytext); printModifierKeyword(yytext); }
 protected   { printModifierKeyword(yytext); }
 
 arrayOf     { printKeyword(yytext); }
@@ -245,7 +249,10 @@ false       { printConstantKeyword(yytext); }
     std::string hexStr = remove_underscore(yytext + 2);
     std::cout << "Hex number: " << std::stoul(hexStr, nullptr, 16) << std::endl;
 }
-{id}  { std::cout << "Identificator: " << yytext << std::endl; }
+{id}  {
+    processor.processElement(yytext);
+    std::cout << "Identificator: " << yytext << std::endl;
+}
 
 \n                      { printEndOfLine(); }
 

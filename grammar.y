@@ -7,6 +7,8 @@ int yylex();
 void yyerror(const char* s);
 %}
 
+%token NON
+
 %token IF ELSE
 %token FOR WHILE DO
 %token VAL VAR
@@ -15,6 +17,8 @@ void yyerror(const char* s);
 %token PUBLIC PROTECTED PRIVATE
 %token ENDL
 %token ID
+
+%token PRIVATE_CLASS PUBLIC_CLASS PROTECTED_CLASS INTERNAL_CLASS
 
 %token INT_TYPE FLOAT_TYPE DOUBLE_TYPE SRTING_TYPE CHAR_TYPE BOOLEAN_TYPE
 
