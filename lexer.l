@@ -176,17 +176,18 @@ val         { printStatementKeyword(yytext); }
 
 fun         { printStatementKeyword(yytext); }
 
-class       { printStatementKeyword(yytext); }
+class       { processor.processElement(yytext); printStatementKeyword(yytext); }
 this        { printStatementKeyword(yytext); }
 super       { printStatementKeyword(yytext); }
 constructor { printStatementKeyword(yytext); }
 enum        { printStatementKeyword(yytext); }
 
-final       { printModifierKeyword(yytext); }
-open        { printModifierKeyword(yytext); }
-private     { printModifierKeyword(yytext); }
+final       { processor.processElement(yytext); printModifierKeyword(yytext); }
+open        { processor.processElement(yytext); printModifierKeyword(yytext); }
+override    { processor.processElement(yytext); printModifierKeyword(yytext); }
+private     { processor.processElement(yytext); printModifierKeyword(yytext); }
 public      { processor.processElement(yytext); printModifierKeyword(yytext); }
-protected   { printModifierKeyword(yytext); }
+protected   { processor.processElement(yytext); printModifierKeyword(yytext); }
 
 arrayOf     { printKeyword(yytext); }
 
