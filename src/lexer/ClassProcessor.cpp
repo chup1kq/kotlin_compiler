@@ -13,6 +13,9 @@ yytokentype ClassProcessor::processElement(std::string input) {
     else if (input == "class") {
         return foundClassKeyword();
     }
+    else if (input == "constructor") {
+        return foundConstructorKeyword();
+    }
 
     return NON;
 }
@@ -51,7 +54,7 @@ void ClassProcessor::foundOverrideKeyword() {
 yytokentype ClassProcessor::foundClassKeyword() {
     std::string incompatibleKeyword = hasIncompatibleKeyword("class");
     if (!incompatibleKeyword.empty()) {
-        std::cerr << "Error in modifier. Modifier 'class' is incompatible with previous modifier: " << incompatibleKeyword << std::endl;
+        std::cerr << "Error in modifier. Keyword 'class' is incompatible with previous modifier: " << incompatibleKeyword << std::endl;
 
         this->prevLexems.clear();
         return NON;
@@ -130,6 +133,13 @@ std::string ClassProcessor::hasIncompatibleKeyword(const std::string& lexem) {
         "open"
     };
 
+    const std::list<std::string> constructorIncompatibleKeywords = {
+        "constructor",
+        "override",
+        "open",
+        "final"
+    };
+
     const std::list<std::string>* incompatibleList = nullptr;
 
     if (lexem == "class") {
@@ -149,6 +159,9 @@ std::string ClassProcessor::hasIncompatibleKeyword(const std::string& lexem) {
     }
     else if (lexem == "enum") {
         incompatibleList = &enumIncompatibleKeywords;
+    }
+    else if (lexem == "constructor") {
+        incompatibleList = &constructorIncompatibleKeywords;
     }
 
     if (incompatibleList != nullptr) {
@@ -171,4 +184,27 @@ void ClassProcessor::foundEnumKeyword() {
     }
 
     this->prevLexems.push_front("enum");
+}
+
+yytokentype ClassProcessor::foundConstructorKeyword() {
+    std::string incompatibleKeyword = hasIncompatibleKeyword("constructor");
+    if (!incompatibleKeyword.empty()) {
+        std::cerr << "Error in modifier. Keyword 'constructor' is incompatible with previous modifier: " << incompatibleKeyword << std::endl;
+
+        this->prevLexems.clear();
+        return NON;
+    }
+
+    return combineConstructorLexem();
+}
+
+yytokentype ClassProcessor::combineConstructorLexem() {
+    if (has("private")) {
+        return PRIVATE_CONSTRUCTOR;
+    }
+    if (has("protected")) {
+        return PROTECTED_CONSTRUCTOR;
+    }
+
+    return PUBLIC_CONSTRUCTOR;
 }

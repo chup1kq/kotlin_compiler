@@ -179,7 +179,7 @@ fun         { printStatementKeyword(yytext); }
 class       { processor.processElement(yytext); printStatementKeyword(yytext); }
 this        { printStatementKeyword(yytext); }
 super       { printStatementKeyword(yytext); }
-constructor { printStatementKeyword(yytext); }
+constructor { processor.processElement(yytext); printStatementKeyword(yytext); }
 enum        { processor.processElement(yytext); printStatementKeyword(yytext); }
 
 final       { processor.processElement(yytext); printModifierKeyword(yytext); }
