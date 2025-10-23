@@ -7,6 +7,9 @@ yytokentype ClassProcessor::processElement(std::string input) {
     else if (input == "override") {
         foundOverrideKeyword();
     }
+    else if (input == "enum") {
+        foundEnumKeyword();
+    }
     else if (input == "class") {
         return foundClassKeyword();
     }
@@ -58,6 +61,13 @@ yytokentype ClassProcessor::foundClassKeyword() {
 }
 
 yytokentype ClassProcessor::combineClassLexem() {
+    if (has("enum")) {
+        if (has("private")) {
+            return PRIVATE_ENUM;
+        }
+        return PUBLIC_ENUM;
+    }
+
     yytokentype returnValue = NON;
 
     if (
@@ -101,17 +111,23 @@ std::string ClassProcessor::hasIncompatibleKeyword(const std::string& lexem) {
         "public",
         "protected",
         "private",
-        "override",
+        "override"
     };
 
     const std::list<std::string> overrideIncompatibleKeywords = {
         "private",
-        "override",
+        "override"
     };
 
     const std::list<std::string> inheritanceModifierIncompatibleKeywords = {
         "open",
         "final"
+    };
+
+    const std::list<std::string> enumIncompatibleKeywords = {
+        "enum",
+        "protected",
+        "open"
     };
 
     const std::list<std::string>* incompatibleList = nullptr;
@@ -131,6 +147,9 @@ std::string ClassProcessor::hasIncompatibleKeyword(const std::string& lexem) {
     else if (lexem == "open" || lexem == "final") {
         incompatibleList = &inheritanceModifierIncompatibleKeywords;
     }
+    else if (lexem == "enum") {
+        incompatibleList = &enumIncompatibleKeywords;
+    }
 
     if (incompatibleList != nullptr) {
         for (const auto& word : *incompatibleList) {
@@ -141,4 +160,15 @@ std::string ClassProcessor::hasIncompatibleKeyword(const std::string& lexem) {
     }
 
     return "";
+}
+
+void ClassProcessor::foundEnumKeyword() {
+    std::string incompatibleKeyword = hasIncompatibleKeyword("enum");
+    if (!incompatibleKeyword.empty()) {
+        std::cerr << "Error in modifier. Modifier 'enum' is incompatible with previous modifier: " << incompatibleKeyword << std::endl;
+
+        this->prevLexems.clear();
+    }
+
+    this->prevLexems.push_front("enum");
 }

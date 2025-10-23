@@ -180,7 +180,7 @@ class       { processor.processElement(yytext); printStatementKeyword(yytext); }
 this        { printStatementKeyword(yytext); }
 super       { printStatementKeyword(yytext); }
 constructor { printStatementKeyword(yytext); }
-enum        { printStatementKeyword(yytext); }
+enum        { processor.processElement(yytext); printStatementKeyword(yytext); }
 
 final       { processor.processElement(yytext); printModifierKeyword(yytext); }
 open        { processor.processElement(yytext); printModifierKeyword(yytext); }

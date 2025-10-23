@@ -13,6 +13,7 @@ private:
 
     void foundModifierKeyword(const std::string& lexem);
     void foundOverrideKeyword();
+    void foundEnumKeyword();
     yytokentype foundClassKeyword();
 
     bool has(const std::string& lexem);
