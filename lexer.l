@@ -174,7 +174,7 @@ step        { printStatementKeyword(yytext); }
 var         { printStatementKeyword(yytext); }
 val         { printStatementKeyword(yytext); }
 
-fun         { printStatementKeyword(yytext); }
+fun         { processor.processElement(yytext);  printStatementKeyword(yytext); }
 
 class       { processor.processElement(yytext); printStatementKeyword(yytext); }
 this        { printStatementKeyword(yytext); }

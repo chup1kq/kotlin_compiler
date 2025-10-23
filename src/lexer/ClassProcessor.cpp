@@ -16,6 +16,9 @@ yytokentype ClassProcessor::processElement(std::string input) {
     else if (input == "constructor") {
         return foundConstructorKeyword();
     }
+    else if (input == "fun") {
+        return foundFunKeyword();
+    }
 
     return NON;
 }
@@ -140,6 +143,10 @@ std::string ClassProcessor::hasIncompatibleKeyword(const std::string& lexem) {
         "final"
     };
 
+    const std::list<std::string> funIncompatibleKeywords = {
+        "fun",
+    };
+
     const std::list<std::string>* incompatibleList = nullptr;
 
     if (lexem == "class") {
@@ -162,6 +169,9 @@ std::string ClassProcessor::hasIncompatibleKeyword(const std::string& lexem) {
     }
     else if (lexem == "constructor") {
         incompatibleList = &constructorIncompatibleKeywords;
+    }
+    else if (lexem == "fun") {
+        incompatibleList = &funIncompatibleKeywords;
     }
 
     if (incompatibleList != nullptr) {
@@ -208,3 +218,68 @@ yytokentype ClassProcessor::combineConstructorLexem() {
 
     return PUBLIC_CONSTRUCTOR;
 }
+
+yytokentype ClassProcessor::foundFunKeyword() {
+    std::string incompatibleKeyword = hasIncompatibleKeyword("fun");
+    if (!incompatibleKeyword.empty()) {
+        std::cerr << "Error in modifier. Keyword 'fun' is incompatible with previous modifier: " << incompatibleKeyword << std::endl;
+
+        this->prevLexems.clear();
+        return NON;
+    }
+
+    if (has("private") && has("open")) {
+        std::cerr << "Error in modifier. Modifier 'private' is incompatible with 'open' in function declaration." << std::endl;
+
+        this->prevLexems.clear();
+        return NON;
+    }
+
+    return combineFunLexem();
+}
+
+yytokentype ClassProcessor::combineFunLexem() {
+    if (has("override")) {
+        if (has("protected") && has("final")) {
+            return PROTECTED_FINAL_OVERRIDE_FUN;
+        }
+        if (has("protected")) {
+            return PROTECTED_OPEN_OVERRIDE_FUN;
+        }
+
+        if (has("public") && has("final")) {
+            return PUBLIC_FINAL_OVERRIDE_FUN;
+        }
+        if (has("public")) {
+            return PUBLIC_OPEN_OVERRIDE_FUN;
+        }
+        if (has("final")) {
+            return FINAL_OVERRIDE_FUN;
+        }
+        return OPEN_OVERRIDE_FUN;
+    }
+
+    if (has("open")) {
+        if (has("protected")) {
+            return PROTECTED_OPEN_FUN;
+        }
+        return PUBLIC_OPEN_FUN;
+    }
+
+    if (has("final")) {
+        if (has("private")) {
+            return PRIVATE_FINAL_FUN;
+        }
+        if (has("protected")) {
+            return PROTECTED_FINAL_FUN;
+        }
+        return PUBLIC_FINAL_FUN;
+    }
+
+    if (has("private")) {
+        return PRIVATE_FUN;
+    }
+
+    return PUBLIC_FUN;
+}
+
