@@ -37,6 +37,7 @@ void ClassProcessor::foundModifierKeyword(const std::string& lexem) {
         std::cerr << "Error in modifier. Modifier '" << lexem <<"' is incompatible with previous modifier: " << incompatibleKeyword << std::endl;
 
         this->prevLexems.clear();
+        return;
     }
 
     this->prevLexems.push_front(lexem);
@@ -48,6 +49,7 @@ void ClassProcessor::foundOverrideKeyword() {
         std::cerr << "Error in modifier. Modifier 'override' is incompatible with previous modifier: " << incompatibleKeyword << std::endl;
 
         this->prevLexems.clear();
+        return;
     }
 
     this->prevLexems.push_front("override");
@@ -192,6 +194,7 @@ void ClassProcessor::foundEnumKeyword() {
         std::cerr << "Error in modifier. Modifier 'enum' is incompatible with previous modifier: " << incompatibleKeyword << std::endl;
 
         this->prevLexems.clear();
+        return;
     }
 
     this->prevLexems.push_front("enum");
