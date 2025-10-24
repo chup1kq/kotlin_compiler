@@ -139,6 +139,7 @@ std::string ClassProcessor::findIncompatibleKeyword(const std::string& lexem) {
 
     const std::list<std::string> funIncompatibleKeywords = {
         "fun",
+        "enum"
     };
 
     const std::list<std::string>* incompatibleList = nullptr;
