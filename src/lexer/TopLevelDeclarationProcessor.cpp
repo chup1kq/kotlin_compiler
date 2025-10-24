@@ -1,5 +1,8 @@
 #include "TopLevelDeclarationProcessor.h"
 
+#include <unordered_map>
+#include <vector>
+
 yytokentype TopLevelDeclarationProcessor::processAppropriateElement(const std::string& input) {
     if (isModifierKeyword(input)) {
         foundModifierKeyword(input);
@@ -37,7 +40,7 @@ void TopLevelDeclarationProcessor::foundModifierKeyword(const std::string& lexem
         return;
     }
 
-    this->prevLexems.push_front(lexem);
+    this->prevLexems.push_back(lexem);
 }
 
 void TopLevelDeclarationProcessor::foundOverrideKeyword() {
@@ -46,7 +49,7 @@ void TopLevelDeclarationProcessor::foundOverrideKeyword() {
         return;
     }
 
-    this->prevLexems.push_front("override");
+    this->prevLexems.push_back("override");
 }
 
 
@@ -95,85 +98,27 @@ yytokentype TopLevelDeclarationProcessor::combineClassLexem() {
 }
 
 std::string TopLevelDeclarationProcessor::findIncompatibleKeyword(const std::string& lexem) {
-    const std::list<std::string> classIncompatibleKeywords = {
-        "class",
-        "protected",
-        "override"
+    static const std::unordered_map<std::string, std::vector<std::string>> incompatibleMap = {
+        { "class",      { "protected", "override" } },
+        { "public",     { "public", "protected", "private" } },
+        { "protected",  { "public", "protected", "private" } },
+        { "private",    { "public", "protected", "private", "override" } },
+        { "override",   { "private", "override" } },
+        { "open",       { "open", "final" } },
+        { "final",      { "open", "final" } },
+        { "enum",       { "enum", "protected", "open" } },
+        { "constructor",{ "override", "open", "final" } },
+        { "fun",        { "enum" } }
     };
 
-    const std::list<std::string> accessModifierIncompatibleKeywords = {
-        "public",
-        "protected",
-        "private"
-    };
-
-    const std::list<std::string> privateIncompatibleKeywords = {
-        "public",
-        "protected",
-        "private",
-        "override"
-    };
-
-    const std::list<std::string> overrideIncompatibleKeywords = {
-        "private",
-        "override"
-    };
-
-    const std::list<std::string> inheritanceModifierIncompatibleKeywords = {
-        "open",
-        "final"
-    };
-
-    const std::list<std::string> enumIncompatibleKeywords = {
-        "enum",
-        "protected",
-        "open"
-    };
-
-    const std::list<std::string> constructorIncompatibleKeywords = {
-        "constructor",
-        "override",
-        "open",
-        "final"
-    };
-
-    const std::list<std::string> funIncompatibleKeywords = {
-        "fun",
-        "enum"
-    };
-
-    const std::list<std::string>* incompatibleList = nullptr;
-
-    if (lexem == "class") {
-        incompatibleList = &classIncompatibleKeywords;
-    }
-    else if (lexem == "public" || lexem == "protected") {
-        incompatibleList = &accessModifierIncompatibleKeywords;
-    }
-    else if (lexem == "private") {
-        incompatibleList = &privateIncompatibleKeywords;
-    }
-    else if (lexem == "override") {
-        incompatibleList = &overrideIncompatibleKeywords;
-    }
-    else if (lexem == "open" || lexem == "final") {
-        incompatibleList = &inheritanceModifierIncompatibleKeywords;
-    }
-    else if (lexem == "enum") {
-        incompatibleList = &enumIncompatibleKeywords;
-    }
-    else if (lexem == "constructor") {
-        incompatibleList = &constructorIncompatibleKeywords;
-    }
-    else if (lexem == "fun") {
-        incompatibleList = &funIncompatibleKeywords;
+    auto it = incompatibleMap.find(lexem);
+    if (it == incompatibleMap.end()) {
+        return "";
     }
 
-    if (incompatibleList != nullptr) {
-        for (const auto& word : *incompatibleList) {
-            if (has(word)) {
-                return word;
-            }
+    for (const auto& word : it->second) {
+        if (has(word)) {
+            return word;
         }
     }
 
@@ -186,7 +131,7 @@ void TopLevelDeclarationProcessor::foundEnumKeyword() {
         return;
     }
 
-    this->prevLexems.push_front("enum");
+    this->prevLexems.push_back("enum");
 }
 
 yytokentype TopLevelDeclarationProcessor::foundConstructorKeyword() {
