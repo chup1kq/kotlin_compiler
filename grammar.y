@@ -6,6 +6,8 @@ int yylex();
 void yyerror(const char* s);
 %}
 
+%token NON
+
 %token IF ELSE
 %token FOR WHILE DO
 %token VAL VAR
@@ -14,6 +16,20 @@ void yyerror(const char* s);
 %token PUBLIC PROTECTED PRIVATE
 %token ENDL
 %token ID
+
+%token PRIVATE_FINAL_CLASS PUBLIC_FINAL_CLASS INTERNAL_FINAL_CLASS
+%token PRIVATE_OPEN_CLASS PUBLIC_OPEN_CLASS INTERNAL_OPEN_CLASS
+
+%token PRIVATE_ENUM PUBLIC_ENUM
+
+%token PRIVATE_CONSTRUCTOR PUBLIC_CONSTRUCTOR PROTECTED_CONSTRUCTOR
+
+%token PRIVATE_FUN PUBLIC_FUN
+%token PRIVATE_FINAL_FUN PUBLIC_FINAL_FUN PROTECTED_FINAL_FUN
+%token PUBLIC_OPEN_FUN PROTECTED_OPEN_FUN
+%token PUBLIC_FINAL_OVERRIDE_FUN PROTECTED_FINAL_OVERRIDE_FUN
+%token PUBLIC_OPEN_OVERRIDE_FUN PROTECTED_OPEN_OVERRIDE_FUN
+%token OPEN_OVERRIDE_FUN FINAL_OVERRIDE_FUN
 
 %token INT_TYPE FLOAT_TYPE DOUBLE_TYPE SRTING_TYPE CHAR_TYPE BOOLEAN_TYPE
 
@@ -335,3 +351,4 @@ constructor_declaration: class_primary_constructor '(' allowed_declaration_param
 void yyerror(const char* s) {
     cerr << "Parser error: " << s << endl;
 }
+
