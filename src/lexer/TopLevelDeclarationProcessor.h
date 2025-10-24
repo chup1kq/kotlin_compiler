@@ -33,6 +33,7 @@ private:
 
 public:
     yytokentype processAppropriateElement(const std::string& input);
+    void foundInappropriateLexem(const std::string& input);
 
 };
 

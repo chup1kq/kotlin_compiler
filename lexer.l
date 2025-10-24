@@ -48,6 +48,7 @@ id             [a-zA-Z_][a-zA-Z0-9_]*
 %}
 
 \" {
+    processor.foundInappropriateLexem(yytext);
     buff = "";
     BEGIN(STRING);
 }
@@ -85,6 +86,7 @@ id             [a-zA-Z_][a-zA-Z0-9_]*
 }
 
 \' {
+    processor.foundInappropriateLexem(yytext);
     buff = "";
     BEGIN(CHARACTER);
 }
@@ -105,6 +107,7 @@ id             [a-zA-Z_][a-zA-Z0-9_]*
 
 
 \"\"\" {
+    processor.foundInappropriateLexem(yytext);
     buff = "";
     BEGIN(MULTILINE_STRING);
 }
@@ -159,26 +162,26 @@ id             [a-zA-Z_][a-zA-Z0-9_]*
 "*/"        { std::cerr << "Error in multiline comment. Has no open sequence." << std::endl; }
 
 
-if          { printStatementKeyword(yytext); }
-else        { printStatementKeyword(yytext); }
-when        { printStatementKeyword(yytext); }
-for         { printStatementKeyword(yytext); }
-in          { printStatementKeyword(yytext); }
-while       { printStatementKeyword(yytext); }
-do          { printStatementKeyword(yytext); }
-break       { printStatementKeyword(yytext); }
-continue    { printStatementKeyword(yytext); }
-downTo      { printStatementKeyword(yytext); }
-step        { printStatementKeyword(yytext); }
+if          { processor.foundInappropriateLexem(yytext); printStatementKeyword(yytext); }
+else        { processor.foundInappropriateLexem(yytext); printStatementKeyword(yytext); }
+when        { processor.foundInappropriateLexem(yytext); printStatementKeyword(yytext); }
+for         { processor.foundInappropriateLexem(yytext); printStatementKeyword(yytext); }
+in          { processor.foundInappropriateLexem(yytext); printStatementKeyword(yytext); }
+while       { processor.foundInappropriateLexem(yytext); printStatementKeyword(yytext); }
+do          { processor.foundInappropriateLexem(yytext); printStatementKeyword(yytext); }
+break       { processor.foundInappropriateLexem(yytext); printStatementKeyword(yytext); }
+continue    { processor.foundInappropriateLexem(yytext); printStatementKeyword(yytext); }
+downTo      { processor.foundInappropriateLexem(yytext); printStatementKeyword(yytext); }
+step        { processor.foundInappropriateLexem(yytext); printStatementKeyword(yytext); }
 
-var         { printStatementKeyword(yytext); }
-val         { printStatementKeyword(yytext); }
+var         { processor.foundInappropriateLexem(yytext); printStatementKeyword(yytext); }
+val         { processor.foundInappropriateLexem(yytext); printStatementKeyword(yytext); }
 
 fun         { processor.processAppropriateElement(yytext);  }
 
 class       { processor.processAppropriateElement(yytext);  }
-this        { printStatementKeyword(yytext); }
-super       { printStatementKeyword(yytext); }
+this        { processor.foundInappropriateLexem(yytext); printStatementKeyword(yytext); }
+super       { processor.foundInappropriateLexem(yytext); printStatementKeyword(yytext); }
 constructor { processor.processAppropriateElement(yytext);  }
 enum        { processor.processAppropriateElement(yytext);  }
 
@@ -189,68 +192,85 @@ private     { processor.processAppropriateElement(yytext);  }
 public      { processor.processAppropriateElement(yytext);  }
 protected   { processor.processAppropriateElement(yytext);  }
 
-arrayOf     { printKeyword(yytext); }
+arrayOf     { processor.foundInappropriateLexem(yytext); printKeyword(yytext); }
 
-Array       { printType(yytext); }
-Int         { printType(yytext); }
-Double      { printType(yytext); }
-Float       { printType(yytext); }
-String      { printType(yytext); }
-Char        { printType(yytext); }
-Boolean     { printType(yytext); }
+Array       { processor.foundInappropriateLexem(yytext); printType(yytext); }
+Int         { processor.foundInappropriateLexem(yytext); printType(yytext); }
+Double      { processor.foundInappropriateLexem(yytext); printType(yytext); }
+Float       { processor.foundInappropriateLexem(yytext);printType(yytext); }
+String      { processor.foundInappropriateLexem(yytext);printType(yytext); }
+Char        { processor.foundInappropriateLexem(yytext); printType(yytext); }
+Boolean     { processor.foundInappropriateLexem(yytext); printType(yytext); }
 
-null        { printConstantKeyword(yytext); }
-true        { printConstantKeyword(yytext); }
-false       { printConstantKeyword(yytext); }
+null        { processor.foundInappropriateLexem(yytext); printConstantKeyword(yytext); }
+true        { processor.foundInappropriateLexem(yytext); printConstantKeyword(yytext); }
+false       { processor.foundInappropriateLexem(yytext); printConstantKeyword(yytext); }
 
-"+"         { printOperator(yytext); }
-"-"         { printOperator(yytext); }
-"*"         { printOperator(yytext); }
-"/"         { printOperator(yytext); }
+"+"         { processor.foundInappropriateLexem(yytext); printOperator(yytext); }
+"-"         { processor.foundInappropriateLexem(yytext); printOperator(yytext); }
+"*"         { processor.foundInappropriateLexem(yytext); printOperator(yytext); }
+"/"         { processor.foundInappropriateLexem(yytext); printOperator(yytext); }
 
-"++"        { printOperator(yytext); }
-"--"        { printOperator(yytext); }
-"+="        { printOperator(yytext); }
-"-="        { printOperator(yytext); }
-"*="        { printOperator(yytext); }
-"/="        { printOperator(yytext); }
+"++"        { processor.foundInappropriateLexem(yytext); printOperator(yytext); }
+"--"        { processor.foundInappropriateLexem(yytext); printOperator(yytext); }
+"+="        { processor.foundInappropriateLexem(yytext); printOperator(yytext); }
+"-="        { processor.foundInappropriateLexem(yytext); printOperator(yytext); }
+"*="        { processor.foundInappropriateLexem(yytext); printOperator(yytext); }
+"/="        { processor.foundInappropriateLexem(yytext); printOperator(yytext); }
 
-"="         { printOperator(yytext); }
-"=="        { printOperator(yytext); }
-"!="        { printOperator(yytext); }
-"<"         { printOperator(yytext); }
-">"         { printOperator(yytext); }
-"&&"        { printOperator(yytext); }
-"||"        { printOperator(yytext); }
+"="         { processor.foundInappropriateLexem(yytext); printOperator(yytext); }
+"=="        { processor.foundInappropriateLexem(yytext); printOperator(yytext); }
+"!="        { processor.foundInappropriateLexem(yytext); printOperator(yytext); }
+"<"         { processor.foundInappropriateLexem(yytext); printOperator(yytext); }
+">"         { processor.foundInappropriateLexem(yytext); printOperator(yytext); }
+"&&"        { processor.foundInappropriateLexem(yytext); printOperator(yytext); }
+"||"        { processor.foundInappropriateLexem(yytext); printOperator(yytext); }
 
-"."         { printOperator(yytext); }
-"?."        { printOperator(yytext); }
-"->"        { printOperator(yytext); }
+"."         { processor.foundInappropriateLexem(yytext); printOperator(yytext); }
+"?."        { processor.foundInappropriateLexem(yytext); printOperator(yytext); }
+"->"        { processor.foundInappropriateLexem(yytext); printOperator(yytext); }
 
-".."        { printOperator(yytext); }
-"..<"       { printOperator(yytext); }
-"("         { printOperator(yytext); }
-")"         { printOperator(yytext); }
-"{"         { printOperator(yytext); }
-"}"         { printOperator(yytext); }
-"["         { printOperator(yytext); }
-"]"         { printOperator(yytext); }
-";"         { printOperator(yytext); }
+".."        { processor.foundInappropriateLexem(yytext); printOperator(yytext); }
+"..<"       { processor.foundInappropriateLexem(yytext); printOperator(yytext); }
+"("         { processor.foundInappropriateLexem(yytext); printOperator(yytext); }
+")"         { processor.foundInappropriateLexem(yytext); printOperator(yytext); }
+"{"         { processor.foundInappropriateLexem(yytext); printOperator(yytext); }
+"}"         { processor.foundInappropriateLexem(yytext); printOperator(yytext); }
+"["         { processor.foundInappropriateLexem(yytext); printOperator(yytext); }
+"]"         { processor.foundInappropriateLexem(yytext); printOperator(yytext); }
+";"         { processor.foundInappropriateLexem(yytext); printOperator(yytext); }
 
 -?((_[0-9_]+|[0-9][0-9_]*_|[0-9][0-9_]*_\.[0-9_]*|[0-9][0-9_]*\._[0-9_]*)|0{digit}) { std::cout << "Error: invalid numeric literal with underscore: " << yytext << std::endl; }
-{number}                                                                            { std::cout << "Integer: " << atoi(remove_underscore(yytext).c_str()) << std::endl; }
-{doubleNumber}                                                                      { std::cout << "Double: " << strtod(remove_underscore(yytext).c_str(), NULL) << std::endl; }
-{floatNumber}                                                                       { std::cout << "Float: " << strtof(remove_underscore(yytext).c_str(), NULL) << std::endl; }
+
+{number} {
+    processor.foundInappropriateLexem(yytext);
+    std::cout << "Integer: " << atoi(remove_underscore(yytext).c_str()) << std::endl;
+}
+
+{doubleNumber} {
+    processor.foundInappropriateLexem(yytext);
+    std::cout << "Double: " << strtod(remove_underscore(yytext).c_str(), NULL) << std::endl;
+}
+
+{floatNumber} {
+    processor.foundInappropriateLexem(yytext);
+    std::cout << "Float: " << strtof(remove_underscore(yytext).c_str(), NULL) << std::endl;
+}
+
 {binNumber} {
+    processor.foundInappropriateLexem(yytext);
     std::string binStr = remove_underscore(yytext + 2);
     std::cout << "Bin number: " << std::stoul(binStr, nullptr, 2) << std::endl;
 }
 
 {hexNumber} {
+    processor.foundInappropriateLexem(yytext);
     std::string hexStr = remove_underscore(yytext + 2);
     std::cout << "Hex number: " << std::stoul(hexStr, nullptr, 16) << std::endl;
 }
+
 {id}  {
+    processor.foundInappropriateLexem(yytext);
     std::cout << "Identificator: " << yytext << std::endl;
 }
 

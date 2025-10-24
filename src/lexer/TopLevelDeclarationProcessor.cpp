@@ -294,4 +294,10 @@ bool TopLevelDeclarationProcessor::hasIncompatibleKeywords(const std::string &le
     return false;
 }
 
+void TopLevelDeclarationProcessor::foundInappropriateLexem(const std::string& input) {
+    if (!this->prevLexems.empty()) {
+        std::cerr << "Error in modifier. Expecting top level keyword after '" << currentLexemToString("") << "', but found: " << input << std::endl;
 
+        this->prevLexems.clear();
+    }
+}
