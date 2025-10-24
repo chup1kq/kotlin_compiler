@@ -1,6 +1,6 @@
 #include "ClassProcessor.h"
 
-yytokentype ClassProcessor::processElement(std::string input) {
+yytokentype ClassProcessor::processAppropriateElement(std::string input) {
     if (isModifierKeyword(input)) {
         foundModifierKeyword(input);
     }
@@ -63,6 +63,7 @@ yytokentype ClassProcessor::foundClassKeyword() {
         return NON;
     }
 
+    printCurrentLexem("class");
     return combineClassLexem();
 }
 
@@ -205,6 +206,7 @@ yytokentype ClassProcessor::foundConstructorKeyword() {
         return NON;
     }
 
+    printCurrentLexem("constructor");
     return combineConstructorLexem();
 }
 
@@ -235,6 +237,7 @@ yytokentype ClassProcessor::foundFunKeyword() {
         return NON;
     }
 
+    printCurrentLexem("fun");
     return combineFunLexem();
 }
 
@@ -281,5 +284,16 @@ yytokentype ClassProcessor::combineFunLexem() {
     }
 
     return PUBLIC_FUN;
+}
+
+void ClassProcessor::printCurrentLexem(const std::string& lexem) {
+    std::string toPrint;
+
+    for (const auto& l : prevLexems) {
+        toPrint += l + " ";
+    }
+
+    toPrint += lexem;
+    std::cout << toPrint << std::endl;
 }
 

@@ -27,8 +27,10 @@ private:
     yytokentype combineConstructorLexem();
     yytokentype combineFunLexem();
 
+    void printCurrentLexem(const std::string& lexem);
+
 public:
-    yytokentype processElement(std::string input);
+    yytokentype processAppropriateElement(std::string input);
 
 };
 

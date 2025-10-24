@@ -174,20 +174,20 @@ step        { printStatementKeyword(yytext); }
 var         { printStatementKeyword(yytext); }
 val         { printStatementKeyword(yytext); }
 
-fun         { processor.processElement(yytext);  printStatementKeyword(yytext); }
+fun         { processor.processAppropriateElement(yytext);  }
 
-class       { processor.processElement(yytext); printStatementKeyword(yytext); }
+class       { processor.processAppropriateElement(yytext);  }
 this        { printStatementKeyword(yytext); }
 super       { printStatementKeyword(yytext); }
-constructor { processor.processElement(yytext); printStatementKeyword(yytext); }
-enum        { processor.processElement(yytext); printStatementKeyword(yytext); }
+constructor { processor.processAppropriateElement(yytext);  }
+enum        { processor.processAppropriateElement(yytext);  }
 
-final       { processor.processElement(yytext); printModifierKeyword(yytext); }
-open        { processor.processElement(yytext); printModifierKeyword(yytext); }
-override    { processor.processElement(yytext); printModifierKeyword(yytext); }
-private     { processor.processElement(yytext); printModifierKeyword(yytext); }
-public      { processor.processElement(yytext); printModifierKeyword(yytext); }
-protected   { processor.processElement(yytext); printModifierKeyword(yytext); }
+final       { processor.processAppropriateElement(yytext);  }
+open        { processor.processAppropriateElement(yytext);  }
+override    { processor.processAppropriateElement(yytext);  }
+private     { processor.processAppropriateElement(yytext);  }
+public      { processor.processAppropriateElement(yytext);  }
+protected   { processor.processAppropriateElement(yytext);  }
 
 arrayOf     { printKeyword(yytext); }
 
@@ -251,7 +251,6 @@ false       { printConstantKeyword(yytext); }
     std::cout << "Hex number: " << std::stoul(hexStr, nullptr, 16) << std::endl;
 }
 {id}  {
-    processor.processElement(yytext);
     std::cout << "Identificator: " << yytext << std::endl;
 }
 
