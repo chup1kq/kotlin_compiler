@@ -7,9 +7,9 @@
     #include <cstdlib>
     #include <algorithm>
 
-    #include "ClassProcessor.h"
+    #include "TopLevelDeclarationProcessor.h"
 
-    ClassProcessor processor;
+    TopLevelDeclarationProcessor processor;
 
     void printOperator(char* o);
     void printEndOfLine();

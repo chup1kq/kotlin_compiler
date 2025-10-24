@@ -1,6 +1,6 @@
-#include "ClassProcessor.h"
+#include "TopLevelDeclarationProcessor.h"
 
-yytokentype ClassProcessor::processAppropriateElement(std::string input) {
+yytokentype TopLevelDeclarationProcessor::processAppropriateElement(const std::string& input) {
     if (isModifierKeyword(input)) {
         foundModifierKeyword(input);
     }
@@ -23,15 +23,15 @@ yytokentype ClassProcessor::processAppropriateElement(std::string input) {
     return NON;
 }
 
-bool ClassProcessor::has(const std::string& lexem) {
+bool TopLevelDeclarationProcessor::has(const std::string& lexem) {
     return std::find(this->prevLexems.begin(), this->prevLexems.end(), lexem) != this->prevLexems.end();
 }
 
-bool ClassProcessor::isModifierKeyword(const std::string& lexem) {
+bool TopLevelDeclarationProcessor::isModifierKeyword(const std::string& lexem) {
     return lexem == "public" || lexem == "protected" || lexem == "private" || lexem == "open" || lexem == "final";
 }
 
-void ClassProcessor::foundModifierKeyword(const std::string& lexem) {
+void TopLevelDeclarationProcessor::foundModifierKeyword(const std::string& lexem) {
     if (hasIncompatibleKeywords(lexem)) {
         this->prevLexems.clear();
         return;
@@ -40,7 +40,7 @@ void ClassProcessor::foundModifierKeyword(const std::string& lexem) {
     this->prevLexems.push_front(lexem);
 }
 
-void ClassProcessor::foundOverrideKeyword() {
+void TopLevelDeclarationProcessor::foundOverrideKeyword() {
     if (hasIncompatibleKeywords("override")) {
         this->prevLexems.clear();
         return;
@@ -50,17 +50,17 @@ void ClassProcessor::foundOverrideKeyword() {
 }
 
 
-yytokentype ClassProcessor::foundClassKeyword() {
+yytokentype TopLevelDeclarationProcessor::foundClassKeyword() {
     if (hasIncompatibleKeywords("class")) {
         this->prevLexems.clear();
         return NON;
     }
 
-    printCurrentLexem("class");
+    std::cout << currentLexemToString("class") << std::endl;
     return combineClassLexem();
 }
 
-yytokentype ClassProcessor::combineClassLexem() {
+yytokentype TopLevelDeclarationProcessor::combineClassLexem() {
     if (has("enum")) {
         if (has("private")) {
             return PRIVATE_ENUM;
@@ -94,7 +94,7 @@ yytokentype ClassProcessor::combineClassLexem() {
     return returnValue;
 }
 
-std::string ClassProcessor::findIncompatibleKeyword(const std::string& lexem) {
+std::string TopLevelDeclarationProcessor::findIncompatibleKeyword(const std::string& lexem) {
     const std::list<std::string> classIncompatibleKeywords = {
         "class",
         "protected",
@@ -180,7 +180,7 @@ std::string ClassProcessor::findIncompatibleKeyword(const std::string& lexem) {
     return "";
 }
 
-void ClassProcessor::foundEnumKeyword() {
+void TopLevelDeclarationProcessor::foundEnumKeyword() {
     if (hasIncompatibleKeywords("enum")) {
         this->prevLexems.clear();
         return;
@@ -189,17 +189,17 @@ void ClassProcessor::foundEnumKeyword() {
     this->prevLexems.push_front("enum");
 }
 
-yytokentype ClassProcessor::foundConstructorKeyword() {
+yytokentype TopLevelDeclarationProcessor::foundConstructorKeyword() {
     if (hasIncompatibleKeywords("constructor")) {
         this->prevLexems.clear();
         return NON;
     }
 
-    printCurrentLexem("constructor");
+    std::cout << currentLexemToString("constructor") << std::endl;
     return combineConstructorLexem();
 }
 
-yytokentype ClassProcessor::combineConstructorLexem() {
+yytokentype TopLevelDeclarationProcessor::combineConstructorLexem() {
     if (has("private")) {
         return PRIVATE_CONSTRUCTOR;
     }
@@ -210,7 +210,7 @@ yytokentype ClassProcessor::combineConstructorLexem() {
     return PUBLIC_CONSTRUCTOR;
 }
 
-yytokentype ClassProcessor::foundFunKeyword() {
+yytokentype TopLevelDeclarationProcessor::foundFunKeyword() {
     if (hasIncompatibleKeywords("fun")) {
         this->prevLexems.clear();
         return NON;
@@ -223,11 +223,11 @@ yytokentype ClassProcessor::foundFunKeyword() {
         return NON;
     }
 
-    printCurrentLexem("fun");
+    std::cout << currentLexemToString("fun") << std::endl;
     return combineFunLexem();
 }
 
-yytokentype ClassProcessor::combineFunLexem() {
+yytokentype TopLevelDeclarationProcessor::combineFunLexem() {
     if (has("override")) {
         if (has("protected") && has("final")) {
             return PROTECTED_FINAL_OVERRIDE_FUN;
@@ -272,7 +272,7 @@ yytokentype ClassProcessor::combineFunLexem() {
     return PUBLIC_FUN;
 }
 
-void ClassProcessor::printCurrentLexem(const std::string& lexem) {
+std::string TopLevelDeclarationProcessor::currentLexemToString(const std::string& lexem) {
     std::string toPrint;
 
     for (const auto& l : prevLexems) {
@@ -280,10 +280,10 @@ void ClassProcessor::printCurrentLexem(const std::string& lexem) {
     }
 
     toPrint += lexem;
-    std::cout << toPrint << std::endl;
+    return toPrint;
 }
 
-bool ClassProcessor::hasIncompatibleKeywords(const std::string &lexem) {
+bool TopLevelDeclarationProcessor::hasIncompatibleKeywords(const std::string &lexem) {
     std::string incompatibleKeyword = findIncompatibleKeyword(lexem);
     if (!incompatibleKeyword.empty()) {
         std::cerr << "Error in modifier. Keyword '" << lexem <<"' is incompatible with previous modifier: " << incompatibleKeyword << std::endl;

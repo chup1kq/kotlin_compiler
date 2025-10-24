@@ -7,7 +7,7 @@
 
 #include "../../lexer-build/parser.hpp"
 
-class ClassProcessor {
+class TopLevelDeclarationProcessor {
 private:
     std::list<std::string> prevLexems;
 
@@ -29,10 +29,10 @@ private:
 
     bool hasIncompatibleKeywords(const std::string& lexem);
 
-    void printCurrentLexem(const std::string& lexem);
+    std::string currentLexemToString(const std::string& lexem);
 
 public:
-    yytokentype processAppropriateElement(std::string input);
+    yytokentype processAppropriateElement(const std::string& input);
 
 };
 

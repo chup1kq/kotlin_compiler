@@ -36,6 +36,6 @@ add_executable(kotlin_parser
         ${CMAKE_SOURCE_DIR}/main.cpp
         ${FLEX_Lexer_OUTPUTS}
         ${BISON_Parser_OUTPUTS}
-        src/lexer/ClassProcessor.cpp
-        src/lexer/ClassProcessor.h
+        src/lexer/TopLevelDeclarationProcessor.cpp
+        src/lexer/TopLevelDeclarationProcessor.h
 )
