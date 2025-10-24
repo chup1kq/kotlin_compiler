@@ -19,13 +19,15 @@ private:
     yytokentype foundFunKeyword();
 
     bool has(const std::string& lexem);
-    std::string hasIncompatibleKeyword(const std::string& lexem);
+    std::string findIncompatibleKeyword(const std::string& lexem);
 
     static bool isModifierKeyword(const std::string& lexem);
 
     yytokentype combineClassLexem();
     yytokentype combineConstructorLexem();
     yytokentype combineFunLexem();
+
+    bool hasIncompatibleKeywords(const std::string& lexem);
 
     void printCurrentLexem(const std::string& lexem);
 

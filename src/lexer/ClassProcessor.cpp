@@ -32,10 +32,7 @@ bool ClassProcessor::isModifierKeyword(const std::string& lexem) {
 }
 
 void ClassProcessor::foundModifierKeyword(const std::string& lexem) {
-    std::string incompatibleKeyword = hasIncompatibleKeyword(lexem);
-    if (!incompatibleKeyword.empty()) {
-        std::cerr << "Error in modifier. Modifier '" << lexem <<"' is incompatible with previous modifier: " << incompatibleKeyword << std::endl;
-
+    if (hasIncompatibleKeywords(lexem)) {
         this->prevLexems.clear();
         return;
     }
@@ -44,10 +41,7 @@ void ClassProcessor::foundModifierKeyword(const std::string& lexem) {
 }
 
 void ClassProcessor::foundOverrideKeyword() {
-    std::string incompatibleKeyword = hasIncompatibleKeyword("override");
-    if (!incompatibleKeyword.empty()) {
-        std::cerr << "Error in modifier. Modifier 'override' is incompatible with previous modifier: " << incompatibleKeyword << std::endl;
-
+    if (hasIncompatibleKeywords("override")) {
         this->prevLexems.clear();
         return;
     }
@@ -57,10 +51,7 @@ void ClassProcessor::foundOverrideKeyword() {
 
 
 yytokentype ClassProcessor::foundClassKeyword() {
-    std::string incompatibleKeyword = hasIncompatibleKeyword("class");
-    if (!incompatibleKeyword.empty()) {
-        std::cerr << "Error in modifier. Keyword 'class' is incompatible with previous modifier: " << incompatibleKeyword << std::endl;
-
+    if (hasIncompatibleKeywords("class")) {
         this->prevLexems.clear();
         return NON;
     }
@@ -103,7 +94,7 @@ yytokentype ClassProcessor::combineClassLexem() {
     return returnValue;
 }
 
-std::string ClassProcessor::hasIncompatibleKeyword(const std::string& lexem) {
+std::string ClassProcessor::findIncompatibleKeyword(const std::string& lexem) {
     const std::list<std::string> classIncompatibleKeywords = {
         "class",
         "protected",
@@ -189,10 +180,7 @@ std::string ClassProcessor::hasIncompatibleKeyword(const std::string& lexem) {
 }
 
 void ClassProcessor::foundEnumKeyword() {
-    std::string incompatibleKeyword = hasIncompatibleKeyword("enum");
-    if (!incompatibleKeyword.empty()) {
-        std::cerr << "Error in modifier. Modifier 'enum' is incompatible with previous modifier: " << incompatibleKeyword << std::endl;
-
+    if (hasIncompatibleKeywords("enum")) {
         this->prevLexems.clear();
         return;
     }
@@ -201,10 +189,7 @@ void ClassProcessor::foundEnumKeyword() {
 }
 
 yytokentype ClassProcessor::foundConstructorKeyword() {
-    std::string incompatibleKeyword = hasIncompatibleKeyword("constructor");
-    if (!incompatibleKeyword.empty()) {
-        std::cerr << "Error in modifier. Keyword 'constructor' is incompatible with previous modifier: " << incompatibleKeyword << std::endl;
-
+    if (hasIncompatibleKeywords("constructor")) {
         this->prevLexems.clear();
         return NON;
     }
@@ -225,10 +210,7 @@ yytokentype ClassProcessor::combineConstructorLexem() {
 }
 
 yytokentype ClassProcessor::foundFunKeyword() {
-    std::string incompatibleKeyword = hasIncompatibleKeyword("fun");
-    if (!incompatibleKeyword.empty()) {
-        std::cerr << "Error in modifier. Keyword 'fun' is incompatible with previous modifier: " << incompatibleKeyword << std::endl;
-
+    if (hasIncompatibleKeywords("fun")) {
         this->prevLexems.clear();
         return NON;
     }
@@ -299,4 +281,16 @@ void ClassProcessor::printCurrentLexem(const std::string& lexem) {
     toPrint += lexem;
     std::cout << toPrint << std::endl;
 }
+
+bool ClassProcessor::hasIncompatibleKeywords(const std::string &lexem) {
+    std::string incompatibleKeyword = findIncompatibleKeyword(lexem);
+    if (!incompatibleKeyword.empty()) {
+        std::cerr << "Error in modifier. Keyword '" << lexem <<"' is incompatible with previous modifier: " << incompatibleKeyword << std::endl;
+
+        return true;
+    }
+
+    return false;
+}
+
 
