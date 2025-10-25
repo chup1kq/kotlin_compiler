@@ -11,14 +11,13 @@ void yyerror(const char* s);
 %token IF ELSE
 %token FOR WHILE DO
 %token VAL VAR
-%token FUN RETURN
-%token CLASS THIS OPEN OVERRIDE SUPER CONSTRUCTOR ENUM
-%token PUBLIC PROTECTED PRIVATE
+%token RETURN
+%token THIS SUPER
 %token ENDL
 %token ID
 
-%token PRIVATE_FINAL_CLASS PUBLIC_FINAL_CLASS INTERNAL_FINAL_CLASS
-%token PRIVATE_OPEN_CLASS PUBLIC_OPEN_CLASS INTERNAL_OPEN_CLASS
+%token PRIVATE_FINAL_CLASS PUBLIC_FINAL_CLASS
+%token PRIVATE_OPEN_CLASS PUBLIC_OPEN_CLASS
 
 %token PRIVATE_ENUM PUBLIC_ENUM
 
@@ -62,7 +61,7 @@ void yyerror(const char* s);
 kotlin_file: top_level_declaration_list
 
 top_level_declaration_list: top_level_declaration
-			  | top_level_declaration_list ele top_level_declaration
+			  | top_level_declaration_list top_level_declaration
 			  ;
 
 top_level_declaration: end_of_stmt
@@ -80,10 +79,11 @@ ele: /* empty */
    ;
 
 end_of_stmt: endl_list
-           | ';' ele
+           | ';'
            ;
 
-expr_non_lines: ID '(' ele expr_list_e ele ')'
+expr_non_lines: ID '(' ele ')'
+	      | ID '(' ele expr_list ele ')'
 	      | expr '=' ele expr
 	      | expr '+' ele expr
 	      | expr '-' ele expr
@@ -146,16 +146,12 @@ expr_list: expr
 	 | expr_list ele ',' ele expr
 	 ;
 
-expr_list_e: /* empty */
-	   | expr_list
-	   ;
-
 expr_ws: ele expr ele
        ;
 
-stmt: ';' ele
+stmt: ';'
     | expr endl_list
-    | expr ';' ele
+    | expr ';'
     | var_stmt
     | val_stmt
     | if_stmt
@@ -211,7 +207,7 @@ var_declaration_default_value: var_declaration ele '=' ele expr
 condition_expr: ele '(' expr_ws ')' ele
               ;
 
-if_expr: IF condition_expr single_or_block_stmt ELSE single_or_block_stmt end_of_stmt
+if_expr: IF condition_expr stmt ELSE stmt end_of_stmt
        ;
 
 if_stmt: IF condition_expr single_or_block_stmt end_of_stmt
@@ -224,7 +220,7 @@ for_stmt: FOR ele '(' expr_ws IN range_expr ')' ele single_or_block_stmt end_of_
         | FOR ele '(' expr_ws IN expr_ws ')' ele single_or_block_stmt end_of_stmt
         ;
 
-do_while_stmt: DO ele single_or_block_stmt ele WHILE condition_expr end_of_stmt
+do_while_stmt: DO ele single_or_block_stmt ele WHILE ele '(' expr_ws ')' end_of_stmt
              ;
 
 range_expr: expr_ws RANGE expr_ws step_expr
@@ -240,30 +236,19 @@ return_stmt: RETURN end_of_stmt
 	   | RETURN expr end_of_stmt
 	   ;
 
-class_access_modifier: enum_access_modifier
-                     | PROTECTED
-                     ;
+enum: PRIVATE_ENUM
+    | PUBLIC_ENUM
+    ;
 
-enum_access_modifier: PUBLIC
-		    | PRIVATE
-		    ;
+enum_constructor: PRIVATE_CONSTRUCTOR
+		;
 
-enum_primary_constructor: CONSTRUCTOR
-			| PRIVATE ele CONSTRUCTOR
-			;
-
-enum_declaration: ENUM ele ID
-		| ENUM ele ID ele enum_body
-		| ENUM ele ID ele '(' allowed_declaration_params ')'
-		| ENUM ele ID ele '(' allowed_declaration_params ')' enum_body
-		| ENUM ele ID ele enum_primary_constructor ele '(' allowed_declaration_params ')'
-		| ENUM ele ID ele enum_primary_constructor ele '(' allowed_declaration_params ')' enum_body
-		| enum_access_modifier ele ENUM ele ID
-		| enum_access_modifier ele ENUM ele ID ele enum_body
-		| enum_access_modifier ele ENUM ele ID ele '(' allowed_declaration_params ')'
-		| enum_access_modifier ele ENUM ele ID ele '(' allowed_declaration_params ')' enum_body
-	        | enum_access_modifier ele ENUM ele ID ele enum_primary_constructor ele '(' allowed_declaration_params ')'
-	        | enum_access_modifier ele ENUM ele ID ele enum_primary_constructor ele '(' allowed_declaration_params ')' enum_body
+enum_declaration: enum ele ID
+		| enum ele ID ele enum_body
+		| enum ele ID ele '(' allowed_declaration_params ')'
+		| enum ele ID ele '(' allowed_declaration_params ')' enum_body
+		| enum ele ID ele enum_constructor ele '(' allowed_declaration_params ')'
+		| enum ele ID ele enum_constructor ele '(' allowed_declaration_params ')' enum_body
 	        ;
 
 enum_body: '{' ele '}'
@@ -299,43 +284,57 @@ allowed_declaration_params: ele
 		          | ele declaration_argument_list ele ',' ele
 		          ;
 
-fun_declaration: FUN ele ID ele '(' allowed_declaration_params ')' ele stmt_block
-	       | FUN ele ID ele '(' allowed_declaration_params ')' ele ':' nullable_type ele stmt_block
-	       | FUN ele ID ele '(' allowed_declaration_params ')' ele '=' ele expr
-	       | FUN ele ID ele '(' allowed_declaration_params ')' ele ':' nullable_type ele '=' ele expr
+fun: PRIVATE_FUN
+   | PUBLIC_FUN
+   | PRIVATE_FINAL_FUN
+   | PUBLIC_FINAL_FUN
+   | PROTECTED_FINAL_FUN
+   | PUBLIC_OPEN_FUN
+   | PROTECTED_OPEN_FUN
+   | PUBLIC_FINAL_OVERRIDE_FUN
+   | PROTECTED_FINAL_OVERRIDE_FUN
+   | PUBLIC_OPEN_OVERRIDE_FUN
+   | PROTECTED_OPEN_OVERRIDE_FUN
+   | OPEN_OVERRIDE_FUN
+   | FINAL_OVERRIDE_FUN
+   ;
+
+fun_declaration: fun ele ID ele '(' allowed_declaration_params ')' ele stmt_block
+	       | fun ele ID ele '(' allowed_declaration_params ')' ele ':' nullable_type ele stmt_block
+	       | fun ele ID ele '(' allowed_declaration_params ')' ele '=' ele expr
+	       | fun ele ID ele '(' allowed_declaration_params ')' ele ':' nullable_type ele '=' ele expr
 	       ;
 
 fun_declaration_list: fun_declaration
 		    | fun_declaration_list ele fun_declaration
 		    ;
 
-class_primary_constructor: CONSTRUCTOR
-                        | PRIVATE ele CONSTRUCTOR
-                        | PUBLIC ele CONSTRUCTOR
-                        | PROTECTED ele CONSTRUCTOR
-                        ;
+class_constructor: PRIVATE_CONSTRUCTOR
+		 | PUBLIC_CONSTRUCTOR
+		 | PROTECTED_CONSTRUCTOR
+		 ;
 
-class_declaration: CLASS ele ID
-		 | CLASS ele ID ele class_body
-		 | CLASS ele ID ele '(' allowed_declaration_params ')'
-		 | CLASS ele ID ele '(' allowed_declaration_params ')' ele class_body
-		 | CLASS ele ID ele class_primary_constructor ele '(' allowed_declaration_params ')'
-		 | CLASS ele ID ele class_primary_constructor ele '(' allowed_declaration_params ')' ele class_body
-		 | class_access_modifier ele CLASS ele ID
-		 | class_access_modifier ele CLASS ele ID ele class_body
-		 | class_access_modifier ele CLASS ele ID ele '(' allowed_declaration_params ')'
-		 | class_access_modifier ele CLASS ele ID ele '(' allowed_declaration_params ')' ele class_body
-                 | class_access_modifier ele CLASS ele ID ele class_primary_constructor ele '(' allowed_declaration_params ')'
-                 | class_access_modifier ele CLASS ele ID ele class_primary_constructor ele '(' allowed_declaration_params ')' ele class_body
-                 ;
+class: PRIVATE_FINAL_CLASS
+     | PUBLIC_FINAL_CLASS
+     | PRIVATE_OPEN_CLASS
+     | PUBLIC_OPEN_CLASS
+     ;
+
+class_declaration: class ele ID
+		 | class ele ID ele class_body
+		 | class ele ID ele '(' allowed_declaration_params ')'
+		 | class ele ID ele '(' allowed_declaration_params ')' ele class_body
+		 | class ele ID ele class_constructor ele '(' allowed_declaration_params ')'
+		 | class ele ID ele class_constructor ele '(' allowed_declaration_params ')' ele class_body
+		 ;
 
 class_body: '{' ele '}'
-        | '{' ele class_member_list ele '}'
-        ;
+          | '{' ele class_member_list ele '}'
+          ;
 
 class_member_list: class_member
-                | class_member_list ele class_member
-                ;
+                 | class_member_list ele class_member
+                 ;
 
 class_member: var_stmt
             | val_stmt
@@ -343,7 +342,7 @@ class_member: var_stmt
             | constructor_declaration
             ;
 
-constructor_declaration: class_primary_constructor '(' allowed_declaration_params ')' ele stmt_block
+constructor_declaration: class_constructor '(' allowed_declaration_params ')' ele stmt_block
                        ;
 
 %%
