@@ -13,7 +13,7 @@ void yyerror(const char* s);
 %token VAL VAR
 %token RETURN
 %token THIS SUPER
-%token ARRAY
+%token ARRAY ARRAY_OF
 %token ENDL
 %token ID
 
@@ -102,6 +102,15 @@ expr_non_lines: ID '(' ele ')'
 	      | expr MUL_ASSIGNMENT ele expr
 	      | expr DIV_ASSIGNMENT ele expr
 	      | expr MOD_ASSIGNMENT ele expr
+	      | expr DECREMENT %prec POST_DECREMENT
+	      | expr INCREMENT %prec POST_INCREMENT
+              | expr '.' ele ID '(' ele ')'
+              | expr '.' ele ID '(' ele expr_list ele ')'
+              | expr SAFE_CALL ele ID '(' ele ')'
+              | expr SAFE_CALL ele ID '(' ele expr_list ele ')'
+              | ARRAY_OF '(' ele ')'
+              | ARRAY_OF '(' ele expr_list ele ')'
+              | ID array_index_access_list_non_lines
 	      ;
 
 expr_with_lines: ID endl_list '(' ele ')'
@@ -122,10 +131,19 @@ expr_with_lines: ID endl_list '(' ele ')'
 	       | expr endl_list MUL_ASSIGNMENT ele expr
 	       | expr endl_list DIV_ASSIGNMENT ele expr
 	       | expr endl_list MOD_ASSIGNMENT ele expr
+	       | expr endl_list DECREMENT %prec POST_DECREMENT
+	       | expr endl_list INCREMENT %prec POST_INCREMENT
+	       | expr '.' ele ID endl_list '(' ele ')'
+	       | expr '.' ele ID endl_list '(' ele expr_list ele ')'
+	       | expr SAFE_CALL ele ID endl_list '(' ele ')'
+	       | expr SAFE_CALL ele ID endl_list '(' ele expr_list ele ')'
+	       | ARRAY_OF endl_list '(' ele ')'
+	       | ARRAY_OF endl_list '(' ele expr_list ele ')'
+	       | ID endl_list array_index_access_list_with_lines
 	       ;
 
 expr_in_brackets: '(' ele expr_with_lines ele ')'
-		| '(' ele expr_non_lines ele ')'
+		| '(' ele expr ele ')'
 		;
 
 expr: INT_LITERAL
@@ -143,14 +161,14 @@ expr: INT_LITERAL
     | expr_in_brackets
     | expr_non_lines
     | expr '.' ele ID
-    | expr '.' ele ID '(' ele ')'
-    | expr '.' ele ID '(' ele expr_list ele ')'
     | expr SAFE_CALL ele ID
-    | expr SAFE_CALL ele ID '(' ele ')'
-    | expr SAFE_CALL ele ID '(' ele expr_list ele ')'
     | expr OR ele expr
     | expr AND ele expr
     | '!' expr
+    | '-' ele expr %prec UMINUS
+    | '+' ele expr %prec UPLUS
+    | INCREMENT ele expr %prec PREF_INCREMENT
+    | DECREMENT ele expr %prec PREF_DECREMENT
     ;
 
 expr_list: expr
@@ -193,6 +211,16 @@ type: INT_TYPE
     | ID
     | ARRAY ele '<' ele type ele '>'
     ;
+
+array_index_access: '[' ele expr ele ']'
+
+array_index_access_list_non_lines: array_index_access
+		                 | array_index_access_list_non_lines array_index_access
+		                 ;
+
+array_index_access_list_with_lines: array_index_access
+			 	  | array_index_access_list_with_lines endl_list array_index_access
+			 	  ;
 
 nullable_type: type
              | type ele '?'
