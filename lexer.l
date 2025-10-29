@@ -25,6 +25,7 @@
 %x CHARACTER
 %x MULTILINE_STRING
 %x ML_COMMENT
+%x SL_COMMENT
 
 digit          [0-9]
 notZeroDigit   [1-9]
@@ -125,7 +126,8 @@ id             [a-zA-Z_][a-zA-Z0-9_]*
     BEGIN(INITIAL);
 }
 
-\/\/[^\n]*                { std::cout << "Found singleline comment: " << (yytext + 2) << std::endl; }
+\/\/ { BEGIN(SL_COMMENT); }
+<SL_COMMENT>[^\n]*                { std::cout << "Found singleline comment: " << (yytext + 2) << std::endl; BEGIN(INITIAL); }
 
 "/*" {
     comment_depth = 1;
@@ -274,7 +276,32 @@ false       { processor.foundInappropriateLexem(yytext); printConstantKeyword(yy
     std::cout << "Identificator: " << yytext << std::endl;
 }
 
-\n                      { printEndOfLine(); }
+\n+ {
+    int c;
+    int c_next;
+    while ((c = yyinput()) == '\n' || c == ' ' || c == '\t') {
+        ;
+    }
+
+    if (c == '/') {
+        c_next = yyinput();
+        if (c_next == '/') {
+            BEGIN(SL_COMMENT);
+        }
+        else if (c_next == '*') {
+            comment_depth = 1;
+            buff.clear();
+            BEGIN(ML_COMMENT);
+        }
+    }
+
+    else if (c == '.') {
+        unput(c);
+    } else {
+        printEndOfLine();
+        unput(c);
+    }
+}
 
 [ \t]+                  { ; }
 .                       { ; }

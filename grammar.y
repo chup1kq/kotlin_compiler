@@ -103,7 +103,9 @@ expr_non_lines: ID '(' ele ')'
 	      | expr MOD_ASSIGNMENT ele expr
 	      ;
 
-expr_with_lines: expr endl_list '+' ele expr
+expr_with_lines: ID endl_list '(' ele ')'
+	       | ID endl_list '(' ele expr_list ele ')'
+	       | expr endl_list '+' ele expr
 	       | expr endl_list '-' ele expr
 	       | expr endl_list '*' ele expr
 	       | expr endl_list '/' ele expr
@@ -139,7 +141,9 @@ expr: INT_LITERAL
     | SUPER
     | expr_in_brackets
     | expr_non_lines
-
+    | expr '.' ele ID
+    | expr '.' ele ID '(' ele ')'
+    | expr '.' ele ID '(' ele expr_list ele ')'
     ;
 
 expr_list: expr
@@ -181,12 +185,9 @@ type: INT_TYPE
     | BOOLEAN_TYPE
     ;
 
-nullable_type: type nullable_e
+nullable_type: type
+             | type ele '?'
              ;
-
-nullable_e: /* empty */
-	  | ele '?'
-          ;
 
 var_stmt: VAR ele var_declaration end_of_stmt
         | VAR ele var_declaration ele '=' ele expr end_of_stmt
