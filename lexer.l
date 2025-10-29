@@ -308,6 +308,14 @@ false       { processor.foundInappropriateLexem(yytext); printConstantKeyword(yy
             unput(c_next);
             unput(c);
         }
+    } else if (c == '!'){
+        unput(c);
+    } else if (c == '?') {
+        c_next = yyinput();
+        if (c_next == '.') {
+            unput(c_next);
+            unput(c);
+        }
     } else {
         printEndOfLine();
         unput(c);

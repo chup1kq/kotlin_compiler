@@ -148,8 +148,9 @@ expr: INT_LITERAL
     | expr SAFE_CALL ele ID
     | expr SAFE_CALL ele ID '(' ele ')'
     | expr SAFE_CALL ele ID '(' ele expr_list ele ')'
-    | expr OR expr
-    | expr AND expr
+    | expr OR ele expr
+    | expr AND ele expr
+    | '!' expr
     ;
 
 expr_list: expr
