@@ -13,6 +13,7 @@ void yyerror(const char* s);
 %token VAL VAR
 %token RETURN
 %token THIS SUPER
+%token ARRAY
 %token ENDL
 %token ID
 
@@ -144,6 +145,11 @@ expr: INT_LITERAL
     | expr '.' ele ID
     | expr '.' ele ID '(' ele ')'
     | expr '.' ele ID '(' ele expr_list ele ')'
+    | expr SAFE_CALL ele ID
+    | expr SAFE_CALL ele ID '(' ele ')'
+    | expr SAFE_CALL ele ID '(' ele expr_list ele ')'
+    | expr OR expr
+    | expr AND expr
     ;
 
 expr_list: expr
@@ -183,6 +189,8 @@ type: INT_TYPE
     | SRTING_TYPE
     | CHAR_TYPE
     | BOOLEAN_TYPE
+    | ID
+    | ARRAY ele '<' ele type ele '>'
     ;
 
 nullable_type: type
