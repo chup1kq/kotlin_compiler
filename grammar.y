@@ -16,6 +16,7 @@ void yyerror(const char* s);
 %token ARRAY ARRAY_OF
 %token ENDL
 %token ID
+%token DOWN_TO UNTIL STEP IN
 
 %token PRIVATE_FINAL_CLASS PUBLIC_FINAL_CLASS
 %token PRIVATE_OPEN_CLASS PUBLIC_OPEN_CLASS
@@ -38,22 +39,17 @@ void yyerror(const char* s);
 %token TRUE_LITERAL FALSE_LITERAL
 %token NULL_LITERAL
 
-%nonassoc INCREMENT DECREMENT
-%nonassoc ENDL
-%nonassoc '{' ':'
 %right '=' PLUS_ASSIGNMENT MINUS_ASSIGNMENT MUL_ASSIGNMENT DIV_ASSIGNMENT MOD_ASSIGNMENT
 %left OR
 %left AND
 %left EQUAL NOT_EQUAL
-%left '>' '<' GREATER_EQUAL LESS_EQUAL
-%left IN
-%left RANGE DOWN_TO STEP UNTIL
+%left '<' '>' LESS_EQUAL GREATER_EQUAL
+%left RANGE
 %left '+' '-'
 %left '*' '/' '%'
-%left UMINUS UPLUS
-%right PREF_INCREMENT PREF_DECREMENT '!'
-%left POST_INCREMENT POST_DECREMENT '.' SAFE_CALL
-%nonassoc '(' ')' '[' ']'
+%nonassoc ':'
+%right UMINUS UPLUS PREF_INCREMENT PREF_DECREMENT '!'
+%left POST_INCREMENT POST_DECREMENT '.' SAFE_CALL '?' '[' ']' '(' ')'
 
 %start kotlin_file
 
@@ -102,8 +98,6 @@ expr_non_lines: ID '(' ele ')'
 	      | expr MUL_ASSIGNMENT ele expr
 	      | expr DIV_ASSIGNMENT ele expr
 	      | expr MOD_ASSIGNMENT ele expr
-	      | expr DECREMENT %prec POST_DECREMENT
-	      | expr INCREMENT %prec POST_INCREMENT
               | expr '.' ele ID '(' ele ')'
               | expr '.' ele ID '(' ele expr_list ele ')'
               | expr SAFE_CALL ele ID '(' ele ')'
@@ -131,8 +125,6 @@ expr_with_lines: ID endl_list '(' ele ')'
 	       | expr endl_list MUL_ASSIGNMENT ele expr
 	       | expr endl_list DIV_ASSIGNMENT ele expr
 	       | expr endl_list MOD_ASSIGNMENT ele expr
-	       | expr endl_list DECREMENT %prec POST_DECREMENT
-	       | expr endl_list INCREMENT %prec POST_INCREMENT
 	       | expr '.' ele ID endl_list '(' ele ')'
 	       | expr '.' ele ID endl_list '(' ele expr_list ele ')'
 	       | expr SAFE_CALL ele ID endl_list '(' ele ')'
@@ -167,8 +159,6 @@ expr: INT_LITERAL
     | '!' expr
     | '-' ele expr %prec UMINUS
     | '+' ele expr %prec UPLUS
-    | INCREMENT ele expr %prec PREF_INCREMENT
-    | DECREMENT ele expr %prec PREF_DECREMENT
     ;
 
 expr_list: expr
