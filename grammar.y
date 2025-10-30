@@ -185,11 +185,8 @@ stmt_list: stmt
 
 stmt_block: '{' ele '}'
 	  | '{' ele stmt_list ele '}'
+	  | stmt
 	  ;
-
-single_or_block_stmt: stmt
-                    | stmt_block
-                    ;
 
 type: INT_TYPE
     | FLOAT_TYPE
@@ -240,17 +237,17 @@ if_expr: IF condition_expr stmt ELSE stmt end_of_stmt
        | IF condition_expr expr ELSE expr end_of_stmt
        ;
 
-if_stmt: IF condition_expr single_or_block_stmt end_of_stmt
+if_stmt: IF condition_expr stmt_block end_of_stmt
        ;
 
-while_stmt: WHILE condition_expr single_or_block_stmt end_of_stmt
+while_stmt: WHILE condition_expr stmt_block end_of_stmt
           ;
 
-for_stmt: FOR ele '(' expr_ws IN range_expr ')' ele single_or_block_stmt end_of_stmt
-        | FOR ele '(' expr_ws IN expr_ws ')' ele single_or_block_stmt end_of_stmt
+for_stmt: FOR ele '(' expr_ws IN range_expr ')' ele stmt_block end_of_stmt
+        | FOR ele '(' expr_ws IN expr_ws ')' ele stmt_block end_of_stmt
         ;
 
-do_while_stmt: DO ele single_or_block_stmt ele WHILE ele '(' expr_ws ')' end_of_stmt
+do_while_stmt: DO ele stmt_block ele WHILE ele '(' expr_ws ')' end_of_stmt
              ;
 
 range_expr: expr_ws RANGE expr_ws step_expr
