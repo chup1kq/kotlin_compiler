@@ -46,6 +46,8 @@ id             [a-zA-Z_][a-zA-Z0-9_]*
 %{
     std::string buff = "";
     int comment_depth = 0;
+    int open_bracket = 0;
+    int open_square_brackets = 0;
 %}
 
 \" {
@@ -234,12 +236,12 @@ false       { processor.foundInappropriateLexem(yytext); printConstantKeyword(yy
 
 ".."        { processor.foundInappropriateLexem(yytext); printOperator(yytext); }
 "..<"       { processor.foundInappropriateLexem(yytext); printOperator(yytext); }
-"("         { processor.foundInappropriateLexem(yytext); printOperator(yytext); }
-")"         { processor.foundInappropriateLexem(yytext); printOperator(yytext); }
+"("         { processor.foundInappropriateLexem(yytext); open_bracket += 1; printOperator(yytext); }
+")"         { processor.foundInappropriateLexem(yytext); open_bracket -= 1; printOperator(yytext); }
 "{"         { processor.foundInappropriateLexem(yytext); printOperator(yytext); }
 "}"         { processor.foundInappropriateLexem(yytext); printOperator(yytext); }
-"["         { processor.foundInappropriateLexem(yytext); printOperator(yytext); }
-"]"         { processor.foundInappropriateLexem(yytext); printOperator(yytext); }
+"["         { processor.foundInappropriateLexem(yytext); open_square_brackets += 1; printOperator(yytext); }
+"]"         { processor.foundInappropriateLexem(yytext); open_square_brackets -= 1; printOperator(yytext); }
 ";"         { processor.foundInappropriateLexem(yytext); printOperator(yytext); }
 
 -?((_[0-9_]+|[0-9][0-9_]*_|[0-9][0-9_]*_\.[0-9_]*|[0-9][0-9_]*\._[0-9_]*)|0{digit}) { std::cout << "Error: invalid numeric literal with underscore: " << yytext << std::endl; }
@@ -317,7 +319,9 @@ false       { processor.foundInappropriateLexem(yytext); printConstantKeyword(yy
             unput(c);
         }
     } else {
-        printEndOfLine();
+        if ((open_bracket == 0) && (open_square_brackets == 0)) {
+            printEndOfLine();
+        }
         unput(c);
     }
 }
