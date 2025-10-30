@@ -169,8 +169,7 @@ expr_ws: ele expr ele
        ;
 
 stmt: ';'
-    | expr endl_list
-    | expr ';'
+    | expr end_of_stmt
     | var_stmt
     | val_stmt
     | if_stmt
