@@ -235,6 +235,9 @@ condition_expr: ele '(' expr_ws ')' ele
               ;
 
 if_expr: IF condition_expr stmt ELSE stmt end_of_stmt
+       | IF condition_expr stmt ELSE expr end_of_stmt
+       | IF condition_expr expr ELSE stmt end_of_stmt
+       | IF condition_expr expr ELSE expr end_of_stmt
        ;
 
 if_stmt: IF condition_expr single_or_block_stmt end_of_stmt
