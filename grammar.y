@@ -199,7 +199,7 @@ type: INT_TYPE
     | CHAR_TYPE
     | BOOLEAN_TYPE
     | ID
-    | ARRAY ele '<' ele type ele '>'
+    | ARRAY ele '<' ele nullable_type ele '>'
     ;
 
 array_index_access: '[' ele expr ele ']'
