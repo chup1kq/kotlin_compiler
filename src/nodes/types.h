@@ -1,0 +1,71 @@
+//
+// Created by izino on 12.11.2025.
+//
+
+#ifndef KOTLIN_COMPILER_TYPES_H
+#define KOTLIN_COMPILER_TYPES_H
+
+enum ModifierType {
+    PUBLIC,
+    PRIVATE,
+    PROTECTED,
+    OPEN,
+    FINAL,
+    OVERRIDE,
+};
+
+enum ExptType {
+    NULL_LITERAL,
+    IDENTIFIER,
+    BOOL_LITERAL,
+    INTEGER_LITERAL,
+    FLOAT_LITERAL,
+    DOUBLE_LITERAL,
+    CHAR_LITERAL,
+    STRING_LITERAL,
+    IF_STMT,
+    PLUS,
+    MINUS,
+    DIV,
+    MUL,
+    MOD,
+    LESS,
+    GREAT,
+    LESS_EQUAL,
+    GREAT_EQUAL,
+    EQUAL,
+    NOT_EQUAL,
+    FUNCTION_CALL,
+    BRACKETS,
+    ASSIGNMENT,
+    PLUS_ASSIGNMENT,
+    MINUS_ASSIGNMENT,
+    DIV_ASSIGNMENT,
+    MUL_ASSIGNMENT,
+    MOD_ASSIGNMENT,
+    THIS,
+    SUPER,
+    RANGE,
+    PREF_INCREMENT,
+    PREF_DECREMENT,
+    POST_INCREMENT,
+    POST_DECREMENT,
+    UNARY_PLUS,
+    UNARY_MINUS,
+    NOT,
+    DISJUNCTION,
+    CONJUNCTION,
+};
+
+enum StmtType {
+    EXPRESSION,
+    WHILE,
+    FOR,
+    DO_WHILE,
+    EMPTY,
+    VAR,
+    VAL,
+    RETURN,
+};
+
+#endif //KOTLIN_COMPILER_TYPES_H
