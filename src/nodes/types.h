@@ -1,7 +1,3 @@
-//
-// Created by izino on 12.11.2025.
-//
-
 #ifndef KOTLIN_COMPILER_TYPES_H
 #define KOTLIN_COMPILER_TYPES_H
 
