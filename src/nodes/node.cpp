@@ -51,3 +51,32 @@ ExprNode * ExprNode::createExprNode(ExprType type, ExprNode *left, ExprNode *rig
     node->right = right;
     return node;
 }
+
+ExprNode * ExprNode::createIfNode(ExprNode *ifCond, ExprNode *trueB, ExprNode *falseB) {
+    ExprNode* node = new ExprNode();
+    node->type = IF_STMT;
+    node->cond = ifCond;
+    node->trueExpr = trueB;
+    node->falseExpr = falseB;
+    return node;
+}
+
+StmtNode * StmtNode::createCycleNode(StmtType type, ExprNode *cycleCond, StmtNode *cycleStmt) {
+    StmtNode* node = new StmtNode();
+    node->type = type;
+    node->cond = cycleCond;
+    node->cycleStmt = cycleStmt;
+    return node;
+}
+
+StmtNode * StmtNode::createBreakNode() {
+    StmtNode* node = new StmtNode();
+    node->type = BREAK;
+    return node;
+}
+
+StmtNode * StmtNode::createContinueNode() {
+    StmtNode* node = new StmtNode();
+    node->type = CONTINUE;
+    return node;
+}
