@@ -4,9 +4,36 @@
 #include <list>
 #include <string>
 
+class ExprNode;
+class StmtNode;
+using namespace std;
+
 #include "types.h"
 
-class ExprNode {
+class Node {
+protected:
+    static unsigned int maxId;
+
+public:
+    unsigned int id;
+    Node() {id = ++maxId;};
+};
+
+class ExprListNode: public Node {
+public:
+    list<ExprNode*> *exprs;
+
+    static ExprListNode* addExprToList(ExprListNode *list, ExprNode *expr);
+};
+
+class StmtListNode: public Node {
+public:
+    list<StmtNode*> *stmts;
+
+    static StmtListNode* addStmtToList(StmtListNode *list, StmtNode *stmt);
+};
+
+class ExprNode : public Node {
 public:
     ExprType type;
     ExprNode* left;
@@ -28,7 +55,7 @@ public:
     static ExprNode* createAssignmentNode(ExprType type, ExprNode* left, ExprNode* right);
 };
 
-class StmtNode {
+class StmtNode : public Node {
 public:
     StmtType type;
     ExprNode *cond;
