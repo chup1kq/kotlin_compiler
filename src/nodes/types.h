@@ -10,7 +10,7 @@ enum ModifierType {
     OVERRIDE,
 };
 
-enum ExptType {
+enum ExprType {
     NULL_LITERAL,
     IDENTIFIER,
     BOOL_LITERAL,

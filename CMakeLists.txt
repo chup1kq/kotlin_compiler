@@ -38,5 +38,7 @@ add_executable(kotlin_parser
         ${BISON_Parser_OUTPUTS}
         src/lexer/TopLevelDeclarationProcessor.cpp
         src/lexer/TopLevelDeclarationProcessor.h
+        src/nodes/node.cpp
+        src/nodes/node.h
         src/nodes/types.h
 )
