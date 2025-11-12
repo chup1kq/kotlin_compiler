@@ -62,6 +62,8 @@ enum StmtType {
     VAR,
     VAL,
     RETURN,
+    BREAK,
+    CONTINUE,
 };
 
 #endif //KOTLIN_COMPILER_TYPES_H
