@@ -319,7 +319,17 @@ class_declaration: class ele ID
 		 | class ele ID ele '(' class_allowed_declaration_params ')' ele class_body
 		 | class ele ID ele class_constructor ele '(' class_allowed_declaration_params ')'
 		 | class ele ID ele class_constructor ele '(' class_allowed_declaration_params ')' ele class_body
+		 | class ele ID ele inheritance
+		 | class ele ID ele inheritance ele class_body
+		 | class ele ID ele '(' class_allowed_declaration_params ')' ele inheritance
+		 | class ele ID ele '(' class_allowed_declaration_params ')' ele inheritance ele class_body
+		 | class ele ID ele class_constructor ele '(' class_allowed_declaration_params ')' ele inheritance
+		 | class ele ID ele class_constructor ele '(' class_allowed_declaration_params ')' ele inheritance ele class_body
 		 ;
+
+inheritance: ID ele '(' ele expr_list ele ')'
+	   | ID ele '(' ele expr_list ele ',' ele ')'
+	   ;
 
 class_body: '{' ele '}'
           | '{' ele class_member_list ele '}'
