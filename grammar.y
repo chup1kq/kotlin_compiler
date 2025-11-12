@@ -223,10 +223,10 @@ enum_constructor: PRIVATE_CONSTRUCTOR
 
 enum_declaration: enum ele ID
 		| enum ele ID ele enum_body
-		| enum ele ID ele '(' allowed_declaration_params ')'
-		| enum ele ID ele '(' allowed_declaration_params ')' enum_body
-		| enum ele ID ele enum_constructor ele '(' allowed_declaration_params ')'
-		| enum ele ID ele enum_constructor ele '(' allowed_declaration_params ')' enum_body
+		| enum ele ID ele '(' class_allowed_declaration_params ')'
+		| enum ele ID ele '(' class_allowed_declaration_params ')' enum_body
+		| enum ele ID ele enum_constructor ele '(' class_allowed_declaration_params ')'
+		| enum ele ID ele enum_constructor ele '(' class_allowed_declaration_params ')' enum_body
 	        ;
 
 enum_body: '{' ele '}'
@@ -261,6 +261,21 @@ allowed_declaration_params: ele
 		          | ele declaration_argument_list ele
 		          | ele declaration_argument_list ele ',' ele
 		          ;
+
+class_declaration_argument: VAR ele declaration_argument
+			  | VAL ele declaration_argument
+			  ;
+
+class_declaration_argument_list: class_declaration_argument
+		               | class_declaration_argument_list ele ',' ele class_declaration_argument
+		               ;
+
+class_allowed_declaration_params: ele
+			        | ele declaration_argument_list ele
+			        | ele declaration_argument_list ele ',' ele
+			        | ele class_declaration_argument_list ele
+			        | ele class_declaration_argument_list ele ',' ele
+			        ;
 
 fun: PRIVATE_FUN
    | PUBLIC_FUN
@@ -300,10 +315,10 @@ class: PRIVATE_FINAL_CLASS
 
 class_declaration: class ele ID
 		 | class ele ID ele class_body
-		 | class ele ID ele '(' allowed_declaration_params ')'
-		 | class ele ID ele '(' allowed_declaration_params ')' ele class_body
-		 | class ele ID ele class_constructor ele '(' allowed_declaration_params ')'
-		 | class ele ID ele class_constructor ele '(' allowed_declaration_params ')' ele class_body
+		 | class ele ID ele '(' class_allowed_declaration_params ')'
+		 | class ele ID ele '(' class_allowed_declaration_params ')' ele class_body
+		 | class ele ID ele class_constructor ele '(' class_allowed_declaration_params ')'
+		 | class ele ID ele class_constructor ele '(' class_allowed_declaration_params ')' ele class_body
 		 ;
 
 class_body: '{' ele '}'
