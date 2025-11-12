@@ -128,8 +128,20 @@ id             [a-zA-Z_][a-zA-Z0-9_]*
     BEGIN(INITIAL);
 }
 
-\/\/ { BEGIN(SL_COMMENT); }
-<SL_COMMENT>[^\n]*                { std::cout << "Found singleline comment: " << (yytext + 2) << std::endl; BEGIN(INITIAL); }
+"//" {
+    BEGIN(SL_COMMENT);
+}
+
+<SL_COMMENT>[^\n]+ {
+    std::cout << "Found singleline comment: " << yytext << std::endl;
+    BEGIN(INITIAL);
+}
+
+<SL_COMMENT>\n {
+    std::cout << "Found empty singleline comment." << std::endl;
+    BEGIN(INITIAL);
+}
+
 
 "/*" {
     comment_depth = 1;
@@ -311,6 +323,8 @@ false       { processor.foundInappropriateLexem(yytext); printConstantKeyword(yy
             unput(c);
         }
     } else if (c == '!'){
+        unput(c);
+    } else if (c == '='){
         unput(c);
     } else if (c == '?') {
         c_next = yyinput();

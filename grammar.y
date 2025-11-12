@@ -169,29 +169,29 @@ nullable_type: type
              ;
 
 var_stmt: VAR ele var_declaration end_of_stmt
-        | VAR ele var_declaration ele '=' ele expr end_of_stmt
-        | VAR ele ID ele '=' ele expr end_of_stmt
+        | VAR ele var_declaration '=' ele expr end_of_stmt
+        | VAR ele ID '=' ele expr end_of_stmt
         ;
 
 val_stmt: VAL ele var_declaration end_of_stmt
-        | VAL ele var_declaration ele '=' ele expr end_of_stmt
-        | VAL ele ID ele '=' ele expr end_of_stmt
+        | VAL ele var_declaration '=' ele expr end_of_stmt
+        | VAL ele ID '=' ele expr end_of_stmt
         ;
 
 var_declaration: ID ele ':' ele nullable_type
                ;
 
-var_declaration_default_value: var_declaration ele '=' ele expr
+var_declaration_default_value: var_declaration '=' ele expr
 			     ;
 
 condition_expr: ele '(' expr_ws ')' ele
               ;
 
-if_expr: IF condition_expr stmt ELSE stmt
-       | IF condition_expr expr ELSE stmt
+if_expr: IF condition_expr stmt_block ELSE stmt_block
+       | IF condition_expr expr ELSE stmt_block
        ;
 
-if_stmt: IF condition_expr stmt_block end_of_stmt
+if_stmt: IF condition_expr stmt_block
        ;
 
 while_stmt: WHILE condition_expr stmt_block end_of_stmt
