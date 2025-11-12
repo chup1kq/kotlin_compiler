@@ -48,7 +48,7 @@ void yyerror(const char* s);
 %left '+' '-'
 %left '*' '/' '%'
 %nonassoc ':'
-%right UMINUS UPLUS PREF_INCREMENT PREF_DECREMENT '!'
+%right UMINUS UPLUS INCREMENT DECREMENT '!'
 %left POST_INCREMENT POST_DECREMENT '.' SAFE_CALL '?' '[' ']' '(' ')'
 
 %start kotlin_file
@@ -122,6 +122,10 @@ expr: INT_LITERAL
     | expr MUL_ASSIGNMENT ele expr
     | expr DIV_ASSIGNMENT ele expr
     | expr MOD_ASSIGNMENT ele expr
+    | INCREMENT ele expr
+    | DECREMENT ele expr
+    | expr INCREMENT %prec POST_INCREMENT
+    | expr DECREMENT %prec POST_DECREMENT
     | ARRAY_OF '(' ele ')'
     | ARRAY_OF '(' ele expr_list ele ')'
     | ID '[' expr ']'
