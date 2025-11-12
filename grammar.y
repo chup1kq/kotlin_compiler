@@ -138,7 +138,6 @@ stmt: ';'
     | expr end_of_stmt
     | var_stmt
     | val_stmt
-    | if_stmt
     | for_stmt
     | while_stmt
     | do_while_stmt
@@ -189,9 +188,7 @@ condition_expr: ele '(' expr_ws ')' ele
 
 if_expr: IF condition_expr stmt_block ELSE stmt_block
        | IF condition_expr expr ELSE stmt_block
-       ;
-
-if_stmt: IF condition_expr stmt_block
+       | IF condition_expr stmt_block
        ;
 
 while_stmt: WHILE condition_expr stmt_block end_of_stmt
