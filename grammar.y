@@ -11,7 +11,7 @@ void yyerror(const char* s);
 %token IF ELSE
 %token FOR WHILE DO
 %token VAL VAR
-%token RETURN
+%token RETURN BREAK CONTINUE
 %token THIS SUPER
 %token ARRAY ARRAY_OF
 %token ENDL
@@ -146,6 +146,8 @@ stmt: ';'
     | while_stmt
     | do_while_stmt
     | return_stmt
+    | BREAK end_of_stmt
+    | CONTINUE end_of_stmt
     ;
 
 stmt_list: stmt
