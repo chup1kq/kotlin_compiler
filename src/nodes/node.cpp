@@ -51,12 +51,3 @@ ExprNode * ExprNode::createExprNode(ExprType type, ExprNode *left, ExprNode *rig
     node->right = right;
     return node;
 }
-
-ExprNode * ExprNode::createAssignmentNode(ExprType type, ExprNode *left, ExprNode *right) {
-    ExprNode* node = new ExprNode();
-    node->type = type;
-    node->left = left;
-    node->right = right;
-    return node;
-
-}

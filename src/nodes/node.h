@@ -52,7 +52,6 @@ public:
     static ExprNode* createStringNode(std::string value);
     static ExprNode* createBoolNode(bool value);
     static ExprNode* createExprNode(ExprType type, ExprNode* left, ExprNode* right);
-    static ExprNode* createAssignmentNode(ExprType type, ExprNode* left, ExprNode* right);
 };
 
 class StmtNode : public Node {
