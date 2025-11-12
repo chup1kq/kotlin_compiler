@@ -38,6 +38,8 @@ public:
 
     static StmtNode* createIfNode(ExprNode* ifCond, ExprNode* trueB, ExprNode* falseB);
     static StmtNode* createCycleNode(StmtType  type, ExprNode* cycleCond, StmtNode* cycleStmt);
+    static StmtNode* createBreakNode();
+    static StmtNode* createContinueNode();
 };
 
 
