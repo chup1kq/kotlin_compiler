@@ -43,26 +43,27 @@ public:
     double doubleValue;
     bool boolValue;
     char charValue;
-    std::string stringValue;
+    string stringValue;
+    ExprNode *cond;
+    ExprNode *trueExpr, *falseExpr;
 
     static ExprNode* createIntNode(int value);
     static ExprNode* createFloatNode(float value);
     static ExprNode* createDoubleNode(double value);
     static ExprNode* createCharNode(char value);
-    static ExprNode* createStringNode(std::string value);
+    static ExprNode* createStringNode(string value);
     static ExprNode* createBoolNode(bool value);
     static ExprNode* createExprNode(ExprType type, ExprNode* left, ExprNode* right);
+    static ExprNode* createIfNode(ExprNode* ifCond, ExprNode* trueB, ExprNode* falseB);
 };
 
 class StmtNode : public Node {
 public:
     StmtType type;
     ExprNode *cond;
-    StmtNode *trueStmt, *falseStmt;
     StmtNode *cycleStmt;
-    std::list<StmtNode *> blockStmts;
-
-    static StmtNode* createIfNode(ExprNode* ifCond, ExprNode* trueB, ExprNode* falseB);
+    list<StmtNode *> blockStmts;
+    
     static StmtNode* createCycleNode(StmtType  type, ExprNode* cycleCond, StmtNode* cycleStmt);
     static StmtNode* createBreakNode();
     static StmtNode* createContinueNode();
