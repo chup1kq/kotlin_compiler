@@ -67,14 +67,11 @@ top_level_declaration: class_declaration
 		     | ';' ele
 		     ;
 
-endl_list: ENDL
-         ;
-
 ele: /* empty */
-   | endl_list
+   | ENDL
    ;
 
-end_of_stmt: endl_list
+end_of_stmt: ENDL
            | ';' ele
            ;
 
