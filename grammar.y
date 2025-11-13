@@ -154,7 +154,6 @@ stmt_list: stmt
 	 ;
 
 stmt_block: '{' ele '}'
-	  | stmt
 	  | '{' ele stmt_list '}'
 	  | '{' ele expr '}'
 	  | '{' ele stmt_list expr '}'
@@ -198,6 +197,7 @@ if_expr: IF condition_expr stmt_block ELSE stmt_block
        ;
 
 while_stmt: WHILE condition_expr stmt_block end_of_stmt
+	  | WHILE condition_expr stmt
           ;
 
 for_stmt: FOR ele '(' expr_ws IN range_expr ')' ele stmt_block end_of_stmt
@@ -299,8 +299,8 @@ fun: PRIVATE_FUN
 
 fun_declaration: fun ele ID ele '(' allowed_declaration_params ')' ele stmt_block
 	       | fun ele ID ele '(' allowed_declaration_params ')' ele ':' nullable_type ele stmt_block
-	       | fun ele ID ele '(' allowed_declaration_params ')' ele '=' ele stmt
-	       | fun ele ID ele '(' allowed_declaration_params ')' ele ':' nullable_type ele '=' ele stmt
+	       | fun ele ID ele '(' allowed_declaration_params ')' ele '=' ele expr end_of_stmt
+	       | fun ele ID ele '(' allowed_declaration_params ')' ele ':' nullable_type ele '=' ele expr end_of_stmt
 	       ;
 
 fun_declaration_list: fun_declaration
