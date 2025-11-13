@@ -162,8 +162,10 @@ stmt_list: stmt
 	 ;
 
 stmt_block: '{' ele '}'
-	  | '{' ele stmt_list ele '}'
 	  | stmt
+	  | '{' ele stmt_list ele '}'
+	  | '{' ele expr '}'
+	  | '{' ele stmt_list expr '}'
 	  ;
 
 type: INT_TYPE
