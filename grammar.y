@@ -76,7 +76,7 @@ ele: /* empty */
    ;
 
 end_of_stmt: endl_list
-           | ';'
+           | ';' ele
            ;
 
 expr: INT_LITERAL
@@ -128,15 +128,8 @@ expr: INT_LITERAL
     | expr DECREMENT %prec POST_DECREMENT
     | ARRAY_OF '(' ele ')'
     | ARRAY_OF '(' ele expr_list ele ')'
-    | ID array_call_list
+    | ID '[' expr ']'
     ;
-
-array_call: '[' expr ']'
-	  ;
-
-array_call_list: array_call
-	       | array_call_list array_call
-	       ;
 
 expr_list: expr
 	 | expr_list ele ',' ele expr
