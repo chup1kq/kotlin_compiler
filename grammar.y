@@ -302,8 +302,8 @@ fun: PRIVATE_FUN
 
 fun_declaration: fun ele ID ele '(' allowed_declaration_params ')' ele stmt_block
 	       | fun ele ID ele '(' allowed_declaration_params ')' ele ':' nullable_type ele stmt_block
-	       | fun ele ID ele '(' allowed_declaration_params ')' ele '=' ele expr
-	       | fun ele ID ele '(' allowed_declaration_params ')' ele ':' nullable_type ele '=' ele expr
+	       | fun ele ID ele '(' allowed_declaration_params ')' ele '=' ele stmt
+	       | fun ele ID ele '(' allowed_declaration_params ')' ele ':' nullable_type ele '=' ele stmt
 	       ;
 
 fun_declaration_list: fun_declaration
