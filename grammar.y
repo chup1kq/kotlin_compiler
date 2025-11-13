@@ -68,7 +68,6 @@ top_level_declaration: class_declaration
 		     ;
 
 endl_list: ENDL
-         | ENDL endl_list
          ;
 
 ele: /* empty */
