@@ -91,19 +91,19 @@ expr: INT_LITERAL
     | THIS
     | SUPER
     | expr '.' ele ID
-    | expr '.' ele ID '(' ele ')'
-    | expr '.' ele ID '(' ele expr_list ele ')'
+    | expr '.' ele ID '(' ')'
+    | expr '.' ele ID '(' expr_list ')'
     | expr SAFE_CALL ele ID
-    | expr SAFE_CALL ele ID '(' ele ')'
-    | expr SAFE_CALL ele ID '(' ele expr_list ele ')'
+    | expr SAFE_CALL ele ID '(' ')'
+    | expr SAFE_CALL ele ID '(' expr_list ')'
     | expr OR ele expr
     | expr AND ele expr
     | '!' expr
     | '-' ele expr %prec UMINUS
     | '+' ele expr %prec UPLUS
     | '(' expr ')'
-    | ID '(' ele ')'
-    | ID '(' ele expr_list ele ')'
+    | ID '(' ')'
+    | ID '(' expr_list ')'
     | expr '=' ele expr
     | expr '+' ele expr
     | expr '-' ele expr
@@ -125,8 +125,8 @@ expr: INT_LITERAL
     | DECREMENT ele expr
     | expr INCREMENT %prec POST_INCREMENT
     | expr DECREMENT %prec POST_DECREMENT
-    | ARRAY_OF '(' ele ')'
-    | ARRAY_OF '(' ele expr_list ele ')'
+    | ARRAY_OF '(' ')'
+    | ARRAY_OF '(' expr_list ')'
     | ID '[' expr ']'
     ;
 
@@ -170,8 +170,7 @@ type: INT_TYPE
     | ARRAY ele '<' ele nullable_type ele '>'
     ;
 
-nullable_type: type
-             | type ele '?'
+nullable_type: type ele '?'
              ;
 
 var_stmt: VAR ele var_declaration end_of_stmt
@@ -264,9 +263,8 @@ declaration_argument_list: declaration_argument
 		         | declaration_argument_list ele ',' ele declaration_argument
 		         ;
 
-allowed_declaration_params: ele
-		          | ele declaration_argument_list ele
-		          | ele declaration_argument_list ele ',' ele
+allowed_declaration_params: declaration_argument_list
+		          | declaration_argument_list ele ','
 		          ;
 
 class_declaration_argument: VAR ele declaration_argument
