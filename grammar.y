@@ -72,7 +72,7 @@ ele: /* empty */
    ;
 
 end_of_stmt: ENDL
-           | ';' ele
+           | ';'
            ;
 
 expr: INT_LITERAL
