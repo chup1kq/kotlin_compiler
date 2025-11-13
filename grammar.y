@@ -61,10 +61,10 @@ top_level_declaration_list: top_level_declaration
 			  | top_level_declaration_list top_level_declaration
 			  ;
 
-top_level_declaration: end_of_stmt
-		     | class_declaration
+top_level_declaration: class_declaration
 		     | fun_declaration
 		     | enum_declaration
+		     | ';' ele
 		     ;
 
 endl_list: ENDL
@@ -138,7 +138,7 @@ expr_list: expr
 expr_ws: ele expr ele
        ;
 
-stmt: ';'
+stmt: ';' ele
     | expr end_of_stmt
     | var_stmt
     | val_stmt
@@ -229,12 +229,12 @@ enum: PRIVATE_ENUM
 enum_constructor: PRIVATE_CONSTRUCTOR
 		;
 
-enum_declaration: enum ele ID
-		| enum ele ID ele enum_body
-		| enum ele ID ele '(' class_allowed_declaration_params ')'
-		| enum ele ID ele '(' class_allowed_declaration_params ')' enum_body
-		| enum ele ID ele enum_constructor ele '(' class_allowed_declaration_params ')'
-		| enum ele ID ele enum_constructor ele '(' class_allowed_declaration_params ')' enum_body
+enum_declaration: enum ele ID ele
+		| enum ele ID ele enum_body ele
+		| enum ele ID ele '(' class_allowed_declaration_params ')' ele
+		| enum ele ID ele '(' class_allowed_declaration_params ')' enum_body ele
+		| enum ele ID ele enum_constructor ele '(' class_allowed_declaration_params ')' ele
+		| enum ele ID ele enum_constructor ele '(' class_allowed_declaration_params ')' enum_body ele
 	        ;
 
 enum_body: '{' ele '}'
@@ -321,18 +321,18 @@ class: PRIVATE_FINAL_CLASS
      | PUBLIC_OPEN_CLASS
      ;
 
-class_declaration: class ele ID
-		 | class ele ID ele class_body
-		 | class ele ID ele '(' class_allowed_declaration_params ')'
-		 | class ele ID ele '(' class_allowed_declaration_params ')' ele class_body
-		 | class ele ID ele class_constructor ele '(' class_allowed_declaration_params ')'
-		 | class ele ID ele class_constructor ele '(' class_allowed_declaration_params ')' ele class_body
-		 | class ele ID ele inheritance
-		 | class ele ID ele inheritance ele class_body
-		 | class ele ID ele '(' class_allowed_declaration_params ')' ele inheritance
-		 | class ele ID ele '(' class_allowed_declaration_params ')' ele inheritance ele class_body
-		 | class ele ID ele class_constructor ele '(' class_allowed_declaration_params ')' ele inheritance
-		 | class ele ID ele class_constructor ele '(' class_allowed_declaration_params ')' ele inheritance ele class_body
+class_declaration: class ele ID ele
+		 | class ele ID ele class_body ele
+		 | class ele ID ele '(' class_allowed_declaration_params ')' ele
+		 | class ele ID ele '(' class_allowed_declaration_params ')' ele class_body ele
+		 | class ele ID ele class_constructor ele '(' class_allowed_declaration_params ')' ele
+		 | class ele ID ele class_constructor ele '(' class_allowed_declaration_params ')' ele class_body ele
+		 | class ele ID ele inheritance ele
+		 | class ele ID ele inheritance ele class_body ele
+		 | class ele ID ele '(' class_allowed_declaration_params ')' ele inheritance ele
+		 | class ele ID ele '(' class_allowed_declaration_params ')' ele inheritance ele class_body ele
+		 | class ele ID ele class_constructor ele '(' class_allowed_declaration_params ')' ele inheritance ele
+		 | class ele ID ele class_constructor ele '(' class_allowed_declaration_params ')' ele inheritance ele class_body ele
 		 ;
 
 inheritance: ID ele '(' ele ')'
