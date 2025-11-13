@@ -2,6 +2,8 @@
 
 #include "types.h"
 
+unsigned int Node::maxId = 0;
+
 ExprNode* ExprNode::createIntNode(int value) {
     ExprNode* node = new ExprNode();
     node->type = INTEGER_LITERAL;
