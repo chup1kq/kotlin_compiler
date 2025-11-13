@@ -188,7 +188,7 @@ var_declaration: ID ele ':' ele nullable_type
 var_declaration_default_value: var_declaration '=' ele expr
 			     ;
 
-condition_expr: ele '(' expr_ws ')' ele
+condition_expr: ele '(' expr ')' ele
               ;
 
 if_expr: IF condition_expr stmt_block ELSE stmt_block
