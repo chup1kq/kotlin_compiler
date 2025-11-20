@@ -64,7 +64,7 @@ top_level_declaration_list: top_level_declaration
 top_level_declaration: class_declaration
 		     | fun_declaration
 		     | enum_declaration
-		     | ';' ele
+		     | ';'
 		     ;
 
 ele: /* empty */
@@ -124,6 +124,8 @@ expr: INT_LITERAL
     | expr DECREMENT %prec POST_DECREMENT
     | ARRAY_OF '(' ')'
     | ARRAY_OF '(' expr_list ')'
+    | ARRAY_OF '<' ele nullable_type ele '>' '(' ')'
+    | ARRAY_OF '<' ele nullable_type ele '>' '(' expr_list ')'
     | ID '[' expr ']'
     ;
 
@@ -134,7 +136,7 @@ expr_list: expr
 expr_ws: ele expr ele
        ;
 
-stmt: ';' ele
+stmt: ';'
     | expr end_of_stmt
     | var_stmt
     | val_stmt
@@ -190,7 +192,9 @@ condition_expr: ele '(' expr ')' ele
 
 if_expr: IF condition_expr stmt_block ELSE stmt_block
        | IF condition_expr expr ELSE stmt_block
+       | IF condition_expr expr ELSE stmt
        | IF condition_expr stmt_block
+       | IF condition_expr stmt
        ;
 
 while_stmt: WHILE condition_expr stmt_block end_of_stmt
