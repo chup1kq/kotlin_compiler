@@ -14,13 +14,19 @@ yytokentype TopLevelDeclarationProcessor::processAppropriateElement(const std::s
         foundEnumKeyword();
     }
     else if (input == "class") {
-        return foundClassKeyword();
+        yytokentype returnLexem = foundClassKeyword();
+        this->prevLexems.clear();
+        return returnLexem;
     }
     else if (input == "constructor") {
-        return foundConstructorKeyword();
+        yytokentype returnLexem = foundConstructorKeyword();
+        this->prevLexems.clear();
+        return returnLexem;
     }
     else if (input == "fun") {
-        return foundFunKeyword();
+        yytokentype returnLexem = foundFunKeyword();
+        this->prevLexems.clear();
+        return returnLexem;
     }
 
     return NON;
