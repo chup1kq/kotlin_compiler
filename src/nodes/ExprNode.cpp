@@ -1,7 +1,5 @@
 #include "ExprNode.h"
 
-#include "../../lexer-build/parser.hpp"
-
 ExprNode* ExprNode::createIntNode(int value) {
     ExprNode* node = new ExprNode();
     node->type = INTEGER_LITERAL;
@@ -11,14 +9,14 @@ ExprNode* ExprNode::createIntNode(int value) {
 
 ExprNode* ExprNode::createFloatNode(float value) {
     ExprNode* node = new ExprNode();
-    node->type = ExprType::FLOAT_LITERAL;
+    node->type = FLOAT_LITERAL;
     node->floatValue = value;
     return node;
 }
 
 ExprNode* ExprNode::createDoubleNode(double value) {
     ExprNode* node = new ExprNode();
-    node->type = ExprType::DOUBLE_LITERAL;
+    node->type = DOUBLE_LITERAL;
     node->doubleValue = value;
     return node;
 }
@@ -32,14 +30,14 @@ ExprNode* ExprNode::createBoolNode(bool value) {
 
 ExprNode * ExprNode::createCharNode(char value) {
     ExprNode* node = new ExprNode();
-    node->type = ExprType::CHAR_LITERAL;
+    node->type = CHAR_LITERAL;
     node->charValue = value;
     return node;
 }
 
 ExprNode * ExprNode::createStringNode(std::string value) {
     ExprNode* node = new ExprNode();
-    node->type = ExprType::STRING_LITERAL;
+    node->type = STRING_LITERAL;
     node->stringValue = value;
     return node;
 }
@@ -101,19 +99,19 @@ ExprNode * ExprNode::createIDExpressionNode(string name) {
 
 ExprNode * ExprNode::createThisExprNode() {
     ExprNode* node = new ExprNode();
-    node->type = ExprType::THIS;
+    node->type = THIS;
     return node;
 }
 
 ExprNode * ExprNode::createSuperExprNode() {
     ExprNode* node = new ExprNode();
-    node->type = ExprType::SUPER;
+    node->type = SUPER;
     return node;
 }
 
 ExprNode * ExprNode::createRangeExprNode(ExprNode *left, ExprNode *right) {
     ExprNode* node = new ExprNode();
-    node->type = ExprType::RANGE;
+    node->type = RANGE;
     node->left = left;
     node->right = right;
     return node;
@@ -142,7 +140,7 @@ ExprNode * ExprNode::createUnaryExprNode(ExprType type, ExprNode *expr) {
 
 ExprNode * ExprNode::createNotExprNode(ExprNode *expr) {
     ExprNode* node = new ExprNode();
-    node->type = ExprType::NOT;
+    node->type = NOT;
     node->left = expr;
     return node;
 }
