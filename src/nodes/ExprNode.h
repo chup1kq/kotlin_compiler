@@ -30,7 +30,17 @@ public:
     static ExprNode* createExprNode(ExprType type, ExprNode* left, ExprNode* right);
     static ExprNode* createIfNode(ExprNode* ifCond, ExprNode* trueB, ExprNode* falseB);
     static ExprNode* createFuncCallExprNode(string name, ExprListNode* params);
-    static ExprNode* createAccessExprNode(string name, ExprNode* exprNode);
+    static ExprNode* createAccessExprNode(string name, ExprNode* expr);
+    static ExprNode* createAssignmentExprNode(ExprType type, ExprNode* left, ExprNode* right);
+    static ExprNode* createBracketExprNode(ExprNode* expr);
+    static ExprNode* createIDExpressionNode(string name);
+    static ExprNode* createThisExprNode();
+    static ExprNode* createSuperExprNode();
+    static ExprNode* createRangeExprNode(ExprNode* left, ExprNode* right);
+    static ExprNode* createPrefExprNode(ExprType type, ExprNode* expr);
+    static ExprNode* createPostExprNode(ExprType type, ExprNode* expr);
+    static ExprNode* createUnaryExprNode(ExprType type, ExprNode* expr);
+    static ExprNode* createNotExprNode(ExprNode* expr);
 };
 
 
