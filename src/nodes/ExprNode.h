@@ -19,7 +19,7 @@ public:
     ExprNode *cond;
     ExprNode *trueExpr, *falseExpr;
     ExprListNode* params;
-    string functionName;
+    string identifierName;
 
     static ExprNode* createIntNode(int value);
     static ExprNode* createFloatNode(float value);
@@ -30,6 +30,7 @@ public:
     static ExprNode* createExprNode(ExprType type, ExprNode* left, ExprNode* right);
     static ExprNode* createIfNode(ExprNode* ifCond, ExprNode* trueB, ExprNode* falseB);
     static ExprNode* createFuncCallExprNode(string name, ExprListNode* params);
+    static ExprNode* createAccessExprNode(string name, ExprNode* exprNode);
 };
 
 

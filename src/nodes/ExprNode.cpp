@@ -62,7 +62,15 @@ ExprNode * ExprNode::createIfNode(ExprNode *ifCond, ExprNode *trueB, ExprNode *f
 ExprNode * ExprNode::createFuncCallExprNode(string name, ExprListNode *params) {
     ExprNode* node = new ExprNode();
     node->type = FUNC_CALL;
-    node->functionName = name;
+    node->identifierName = name;
     node->params = params;
+    return node;
+}
+
+ExprNode * ExprNode::createAccessExprNode(string name, ExprNode *exprNode) {
+    ExprNode* node = new ExprNode();
+    node->type = FIELD_ACCESS;
+    node->identifierName = name;
+    node->left = exprNode;
     return node;
 }
