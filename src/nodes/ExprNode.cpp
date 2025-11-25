@@ -1,8 +1,4 @@
-#include "node.h"
-
-#include "types.h"
-
-unsigned int Node::maxId = 0;
+#include "ExprNode.h"
 
 ExprNode* ExprNode::createIntNode(int value) {
     ExprNode* node = new ExprNode();
@@ -60,25 +56,5 @@ ExprNode * ExprNode::createIfNode(ExprNode *ifCond, ExprNode *trueB, ExprNode *f
     node->cond = ifCond;
     node->trueExpr = trueB;
     node->falseExpr = falseB;
-    return node;
-}
-
-StmtNode * StmtNode::createCycleNode(StmtType type, ExprNode *cycleCond, StmtNode *cycleStmt) {
-    StmtNode* node = new StmtNode();
-    node->type = type;
-    node->cond = cycleCond;
-    node->cycleStmt = cycleStmt;
-    return node;
-}
-
-StmtNode * StmtNode::createBreakNode() {
-    StmtNode* node = new StmtNode();
-    node->type = BREAK;
-    return node;
-}
-
-StmtNode * StmtNode::createContinueNode() {
-    StmtNode* node = new StmtNode();
-    node->type = CONTINUE;
     return node;
 }
