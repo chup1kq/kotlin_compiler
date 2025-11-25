@@ -16,7 +16,7 @@ void yyerror(const char* s);
 %token ARRAY ARRAY_OF
 %token ENDL
 %token ID
-%token DOWN_TO UNTIL STEP IN
+%token IN
 
 %token PRIVATE_FINAL_CLASS PUBLIC_FINAL_CLASS
 %token PRIVATE_OPEN_CLASS PUBLIC_OPEN_CLASS
@@ -44,7 +44,7 @@ void yyerror(const char* s);
 %left AND
 %left EQUAL NOT_EQUAL
 %left '<' '>' LESS_EQUAL GREATER_EQUAL
-%left RANGE
+%left RANGE DOWN_TO UNTIL STEP
 %left '+' '-'
 %left '*' '/' '%'
 %nonassoc ':'
@@ -95,6 +95,10 @@ expr: INT_LITERAL
     | expr SAFE_CALL ele ID '(' expr_list ')'
     | expr OR ele expr
     | expr AND ele expr
+    | expr RANGE ele expr
+    | expr DOWN_TO ele expr
+    | expr UNTIL ele expr
+    | expr STEP ele expr
     | '!' expr
     | '-' ele expr %prec UMINUS
     | '+' ele expr %prec UPLUS
@@ -184,6 +188,12 @@ val_stmt: VAL ele var_declaration end_of_stmt
 var_declaration: ID ele ':' ele nullable_type
                ;
 
+var_declaration_list: ID
+		    | var_declaration
+		    | var_declaration_list ',' ID
+		    | var_declaration_list ',' var_declaration
+		    ;
+
 var_declaration_default_value: var_declaration '=' ele expr
 			     ;
 
@@ -201,21 +211,14 @@ while_stmt: WHILE condition_expr stmt_block end_of_stmt
 	  | WHILE condition_expr stmt
           ;
 
-for_stmt: FOR ele '(' expr_ws IN range_expr ')' ele stmt_block end_of_stmt
-        | FOR ele '(' expr_ws IN expr_ws ')' ele stmt_block end_of_stmt
+for_stmt: FOR ele '(' ID IN expr ')' ele stmt_block end_of_stmt
+        | FOR ele '(' ID IN expr ')' ele stmt
+	| FOR ele '(' '(' var_declaration_list ')' IN expr ')' ele stmt_block end_of_stmt
+	| FOR ele '(' '(' var_declaration_list ')' IN expr ')' ele stmt
         ;
 
 do_while_stmt: DO ele stmt_block ele WHILE ele '(' expr_ws ')' end_of_stmt
              ;
-
-range_expr: expr_ws RANGE expr_ws step_expr
-          | expr_ws DOWN_TO expr_ws step_expr
-          | expr_ws UNTIL expr_ws step_expr
-          ;
-
-step_expr: /* empty */
-         | STEP expr_ws
-         ;
 
 return_stmt: RETURN end_of_stmt
 	   | RETURN expr end_of_stmt
