@@ -2,6 +2,7 @@
 #define KOTLIN_COMPILER_EXPRNODE_H
 #include "Node.h"
 #include "types.h"
+#include "ExprListNode.h"
 
 
 class ExprNode : public Node {
@@ -17,6 +18,8 @@ public:
     string stringValue;
     ExprNode *cond;
     ExprNode *trueExpr, *falseExpr;
+    ExprListNode* params;
+    string functionName;
 
     static ExprNode* createIntNode(int value);
     static ExprNode* createFloatNode(float value);
@@ -26,6 +29,7 @@ public:
     static ExprNode* createBoolNode(bool value);
     static ExprNode* createExprNode(ExprType type, ExprNode* left, ExprNode* right);
     static ExprNode* createIfNode(ExprNode* ifCond, ExprNode* trueB, ExprNode* falseB);
+    static ExprNode* createFuncCallExprNode(string name, ExprListNode* params);
 };
 
 

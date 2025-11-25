@@ -58,3 +58,11 @@ ExprNode * ExprNode::createIfNode(ExprNode *ifCond, ExprNode *trueB, ExprNode *f
     node->falseExpr = falseB;
     return node;
 }
+
+ExprNode * ExprNode::createFuncCallExprNode(string name, ExprListNode *params) {
+    ExprNode* node = new ExprNode();
+    node->type = FUNC_CALL;
+    node->functionName = name;
+    node->params = params;
+    return node;
+}

@@ -51,6 +51,7 @@ enum ExprType {
     NOT,
     DISJUNCTION,
     CONJUNCTION,
+    FUNC_CALL
 };
 
 enum StmtType {
