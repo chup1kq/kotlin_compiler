@@ -51,4 +51,8 @@ add_executable(kotlin_parser
         src/nodes/StmtNode.h
         src/nodes/TypeNode.h
         src/nodes/TypeNode.cpp
+        src/nodes/VarDeclaration.cpp
+        src/nodes/VarDeclaration.h
+        src/nodes/VarDeclarationList.cpp
+        src/nodes/VarDeclarationList.h
 )

@@ -153,19 +153,16 @@ expr_list: expr
 	 | expr_list ele ',' ele expr
 	 ;
 
-expr_ws: ele expr ele
-       ;
-
-stmt: ';' {$$ = createEmptyStmt();}
-    | expr end_of_stmt {$$ = createStmtFromExpr($1);}
-    | var_stmt
-    | val_stmt
+stmt: ';' { $$ = createEmptyStmt(); }
+    | expr end_of_stmt { $$ = createStmtFromExpr($1); }
+    | var_stmt { $$ = $1; }
+    | val_stmt { $$ = $1; }
     | for_stmt
-    | while_stmt
-    | do_while_stmt
-    | return_stmt
-    | BREAK end_of_stmt
-    | CONTINUE end_of_stmt
+    | while_stmt  { $$ = $1; }
+    | do_while_stmt { $$ = $1; }
+    | return_stmt { $$ = $1; }
+    | BREAK end_of_stmt { $$ = createBreakNode(); }
+    | CONTINUE end_of_stmt { $$ = createContinueNode(); }
     ;
 
 stmt_list: stmt
@@ -191,20 +188,20 @@ type: INT_TYPE { $$ = createType(_INT, false); }
 nullable_type: type ele '?' { $$ = makeNullableType($1) }
              ;
 
-var_stmt: var ele var_declaration end_of_stmt
-        | var ele var_declaration_default_value end_of_stmt
-        | var ele ID '=' ele expr end_of_stmt
+var_stmt: var ele var_declaration end_of_stmt { $$ = createVarOrValStmtNode(VAR, $3); }
+        | var ele var_declaration_default_value end_of_stmt { $$ = createVarOrValStmtNode(VAR, $3); }
+        | var ele ID '=' ele expr end_of_stmt { $$ = createVarOrValStmtNode(VAR, createVarDeclaration($3, NULL, $6)); }
         ;
 
-val_stmt: val ele var_declaration end_of_stmt
-        | val ele var_declaration_default_value end_of_stmt
-        | val ele ID '=' ele expr end_of_stmt
+val_stmt: val ele var_declaration end_of_stmt { $$ = createVarOrValStmtNode(VAL, $3); }
+        | val ele var_declaration_default_value end_of_stmt { $$ = createVarOrValStmtNode(VAL, $3); }
+        | val ele ID '=' ele expr end_of_stmt { $$ = createVarOrValStmtNode(VAL, createVarDeclaration($3, NULL, $6)); }
         ;
 
-var_declaration: ID ele ':' ele nullable_type
+var_declaration: ID ele ':' ele nullable_type { $$ = createVarDeclaration($1, $5, NULL); }
                ;
 
-var_declaration_default_value: ID ele ':' ele nullable_type '=' ele expr
+var_declaration_default_value: ID ele ':' ele nullable_type '=' ele expr { $$ = createVarDeclaration($1, $5, $8); }
 			     ;
 
 var_declaration_list: ID
@@ -213,7 +210,7 @@ var_declaration_list: ID
 		    | var_declaration_list ',' var_declaration
 		    ;
 
-condition_expr: ele '(' expr ')' ele { $$ = $3; }
+condition_expr: ele '(' expr ')' ele { $$ = $3 }
               ;
 
 if_expr: IF condition_expr stmt_block ELSE stmt_block { $$ = createIfNode($2, $3, $5); }
@@ -223,22 +220,22 @@ if_expr: IF condition_expr stmt_block ELSE stmt_block { $$ = createIfNode($2, $3
        | IF condition_expr stmt { $$ = createIfNode($2, $3, nullptr); }
        ;
 
-while_stmt: WHILE condition_expr stmt_block end_of_stmt
-	  | WHILE condition_expr stmt
+while_stmt: WHILE condition_expr stmt_block end_of_stmt { $$ = createCycleNodeFromBlockStmt(WHILE, $2, $3); }
+	  | WHILE condition_expr stmt { $$ = createCycleNodeFromSingleStmt(WHILE, $2, $3); }
           ;
 
-for_stmt: FOR ele '(' ID IN expr ')' ele stmt_block end_of_stmt
-        | FOR ele '(' ID IN expr ')' ele stmt
+for_stmt: FOR ele '(' ID IN expr ')' ele stmt_block end_of_stmt { $$ = createForNodeFromBlockStmt($4, $6, $9); }
+        | FOR ele '(' ID IN expr ')' ele stmt { $$ = createForNodeFromSingleStmt($4, $6, $9); }
 	| FOR ele '(' '(' var_declaration_list ')' IN expr ')' ele stmt_block end_of_stmt
 	| FOR ele '(' '(' var_declaration_list ')' IN expr ')' ele stmt
         ;
 
-do_while_stmt: DO ele stmt_block ele WHILE ele '(' expr ')' end_of_stmt
-	     | DO ele stmt WHILE ele '(' expr ')' end_of_stmt
+do_while_stmt: DO ele stmt_block ele WHILE ele '(' expr ')' end_of_stmt { $$ = createCycleNodeFromBlockStmt(DO_WHILE, $3, $8); }
+	     | DO ele stmt WHILE ele '(' expr ')' end_of_stmt { $$ = createCycleNodeFromSingleStmt(DO_WHILE, $3, $7); }
              ;
 
-return_stmt: RETURN end_of_stmt
-	   | RETURN expr end_of_stmt
+return_stmt: RETURN end_of_stmt { $$ = createReturnNode(NULL); }
+	   | RETURN expr end_of_stmt { $$ = createReturnNode($2); }
 	   ;
 
 enum: PRIVATE_ENUM
@@ -272,8 +269,8 @@ enum_entries: enum_entry
             | enum_entries ',' enum_entry
             ;
 
-argument_list: expr_ws
-             | argument_list ',' expr_ws
+argument_list: expr
+             | argument_list ',' expr
              ;
 
 declaration_argument: var_declaration
@@ -301,21 +298,6 @@ class_allowed_declaration_params: ele
 			        | ele class_declaration_argument_list ele
 			        | ele class_declaration_argument_list ele ',' ele
 			        ;
-
-fun: PRIVATE_FUN
-   | PUBLIC_FUN
-   | PRIVATE_FINAL_FUN
-   | PUBLIC_FINAL_FUN
-   | PROTECTED_FINAL_FUN
-   | PUBLIC_OPEN_FUN
-   | PROTECTED_OPEN_FUN
-   | PUBLIC_FINAL_OVERRIDE_FUN
-   | PROTECTED_FINAL_OVERRIDE_FUN
-   | PUBLIC_OPEN_OVERRIDE_FUN
-   | PROTECTED_OPEN_OVERRIDE_FUN
-   | OPEN_OVERRIDE_FUN
-   | FINAL_OVERRIDE_FUN
-   ;
 
 fun_declaration: fun ele ID ele '(' allowed_declaration_params ')' ele stmt_block
 	       | fun ele ID ele '(' allowed_declaration_params ')' ele ':' nullable_type ele stmt_block
@@ -404,6 +386,21 @@ val: VAL
    | PROTECTED_OPEN_OVERRIDE_VAL
    | OPEN_OVERRIDE_VAL
    | FINAL_OVERRIDE_VAL
+   ;
+
+fun: PRIVATE_FUN
+   | PUBLIC_FUN
+   | PRIVATE_FINAL_FUN
+   | PUBLIC_FINAL_FUN
+   | PROTECTED_FINAL_FUN
+   | PUBLIC_OPEN_FUN
+   | PROTECTED_OPEN_FUN
+   | PUBLIC_FINAL_OVERRIDE_FUN
+   | PROTECTED_FINAL_OVERRIDE_FUN
+   | PUBLIC_OPEN_OVERRIDE_FUN
+   | PROTECTED_OPEN_OVERRIDE_FUN
+   | OPEN_OVERRIDE_FUN
+   | FINAL_OVERRIDE_FUN
    ;
 
 %%

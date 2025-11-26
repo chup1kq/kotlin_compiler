@@ -153,9 +153,6 @@ expr_list: expr
 	 | expr_list ele ',' ele expr
 	 ;
 
-expr_ws: ele expr ele
-       ;
-
 stmt: ';'
     | expr end_of_stmt
     | var_stmt
@@ -272,8 +269,8 @@ enum_entries: enum_entry
             | enum_entries ',' enum_entry
             ;
 
-argument_list: expr_ws
-             | argument_list ',' expr_ws
+argument_list: expr
+             | argument_list ',' expr
              ;
 
 declaration_argument: var_declaration
@@ -301,21 +298,6 @@ class_allowed_declaration_params: ele
 			        | ele class_declaration_argument_list ele
 			        | ele class_declaration_argument_list ele ',' ele
 			        ;
-
-fun: PRIVATE_FUN
-   | PUBLIC_FUN
-   | PRIVATE_FINAL_FUN
-   | PUBLIC_FINAL_FUN
-   | PROTECTED_FINAL_FUN
-   | PUBLIC_OPEN_FUN
-   | PROTECTED_OPEN_FUN
-   | PUBLIC_FINAL_OVERRIDE_FUN
-   | PROTECTED_FINAL_OVERRIDE_FUN
-   | PUBLIC_OPEN_OVERRIDE_FUN
-   | PROTECTED_OPEN_OVERRIDE_FUN
-   | OPEN_OVERRIDE_FUN
-   | FINAL_OVERRIDE_FUN
-   ;
 
 fun_declaration: fun ele ID ele '(' allowed_declaration_params ')' ele stmt_block
 	       | fun ele ID ele '(' allowed_declaration_params ')' ele ':' nullable_type ele stmt_block
@@ -404,6 +386,21 @@ val: VAL
    | PROTECTED_OPEN_OVERRIDE_VAL
    | OPEN_OVERRIDE_VAL
    | FINAL_OVERRIDE_VAL
+   ;
+
+fun: PRIVATE_FUN
+   | PUBLIC_FUN
+   | PRIVATE_FINAL_FUN
+   | PUBLIC_FINAL_FUN
+   | PROTECTED_FINAL_FUN
+   | PUBLIC_OPEN_FUN
+   | PROTECTED_OPEN_FUN
+   | PUBLIC_FINAL_OVERRIDE_FUN
+   | PROTECTED_FINAL_OVERRIDE_FUN
+   | PUBLIC_OPEN_OVERRIDE_FUN
+   | PROTECTED_OPEN_OVERRIDE_FUN
+   | OPEN_OVERRIDE_FUN
+   | FINAL_OVERRIDE_FUN
    ;
 
 %%
