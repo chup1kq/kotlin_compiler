@@ -59,19 +59,28 @@ ExprNode * ExprNode::createIfNode(ExprNode *ifCond, ExprNode *trueB, ExprNode *f
     return node;
 }
 
-ExprNode * ExprNode::createFuncCallExprNode(string name, ExprListNode *params, ExprNode *expr) {
+ExprNode * ExprNode::createMethodAccessExprNode(string name, ExprListNode *params, ExprNode *expr) {
     ExprNode* node = new ExprNode();
-    node->type = FUNC_CALL;
+    node->type = FUNC_ACCESS;
     node->identifierName = name;
     node->params = params;
+    node->left = expr;
     return node;
 }
 
-ExprNode * ExprNode::createAccessExprNode(string name, ExprNode *expr) {
+ExprNode * ExprNode::createFieldAccessExprNode(string name, ExprNode *expr) {
     ExprNode* node = new ExprNode();
     node->type = FIELD_ACCESS;
     node->identifierName = name;
     node->left = expr;
+    return node;
+}
+
+ExprNode * ExprNode::createFunctionCallExprNode(string name, ExprListNode *params) {
+    ExprNode* node = new ExprNode();
+    node->type = FUNC_CALL;
+    node->identifierName = name;
+    node->params = params;
     return node;
 }
 

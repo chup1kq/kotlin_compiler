@@ -52,7 +52,8 @@ enum ExprType {
     DISJUNCTION,
     CONJUNCTION,
     FUNC_CALL,
-    FIELD_ACCESS
+    FIELD_ACCESS,
+    FUNC_ACCESS
 };
 
 enum StmtType {
