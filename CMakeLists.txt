@@ -49,4 +49,6 @@ add_executable(kotlin_parser
         src/nodes/ExprNode.h
         src/nodes/StmtNode.cpp
         src/nodes/StmtNode.h
+        src/nodes/TypeNode.h
+        src/nodes/TypeNode.cpp
 )

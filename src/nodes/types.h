@@ -72,4 +72,14 @@ enum StmtType {
     CONTINUE,
 };
 
+enum Type {
+    _INT,
+    _FLOAT,
+    _DOUBLE,
+    _CHAR,
+    _STRING,
+    _ARRAY,
+    _ID
+};
+
 #endif //KOTLIN_COMPILER_TYPES_H

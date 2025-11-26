@@ -140,12 +140,12 @@ expr: INT_LITERAL { $$ = createIntNode($1); }
     | DECREMENT ele expr { $$ = createPrefExprNode(PREF_DECREMENT, $3); }
     | expr INCREMENT %prec POST_INCREMENT { $$ = createPostExprNode(PREF_INCREMENT, $3); }
     | expr DECREMENT %prec POST_DECREMENT { $$ = createPostExprNode(PREF_DECREMENT, $3); }
-    | ARRAY_OF '(' ')' { $$ = createArrayExprNode(, null); }
-    | ARRAY_OF '(' expr_list ')'
-    | ARRAY_OF '<' ele nullable_type ele '>' '(' ')'
-    | ARRAY_OF '<' ele type ele '>' '(' ')'
-    | ARRAY_OF '<' ele nullable_type ele '>' '(' expr_list ')'
-    | ARRAY_OF '<' ele type ele '>' '(' expr_list ')'
+    | ARRAY_OF '(' ')' { $$ = createArrayExprNode(null, null); }
+    | ARRAY_OF '(' expr_list ')' { $$ = createArrayExprNode(null, $3); }
+    | ARRAY_OF '<' ele nullable_type ele '>' '(' ')' { $$ = createArrayExprNode($4, null); }
+    | ARRAY_OF '<' ele type ele '>' '(' ')' { $$ = createArrayExprNode($4, null); }
+    | ARRAY_OF '<' ele nullable_type ele '>' '(' expr_list ')' { $$ = createArrayExprNode($4, $8); }
+    | ARRAY_OF '<' ele type ele '>' '(' expr_list ')' { $$ = createArrayExprNode($4, $8); }
     | ID '[' expr ']'
     ;
 
@@ -178,17 +178,17 @@ stmt_block: '{' ele '}'
 	  | '{' ele stmt_list expr '}'
 	  ;
 
-type: INT_TYPE
-    | FLOAT_TYPE
-    | DOUBLE_TYPE
-    | STRING_TYPE
-    | CHAR_TYPE
-    | BOOLEAN_TYPE
-    | ID
-    | ARRAY ele '<' ele nullable_type ele '>'
+type: INT_TYPE { $$ = createType(_INT, false); }
+    | FLOAT_TYPE { $$ = createType(_FLOAT, false); }
+    | DOUBLE_TYPE { $$ = createType(_FLOAT, false); }
+    | STRING_TYPE { $$ = createType(_FLOAT, false); }
+    | CHAR_TYPE { $$ = createType(_FLOAT, false); }
+    | BOOLEAN_TYPE { $$ = createType(_FLOAT, false); }
+    | ID { $$ = createType(_FLOAT, false); }
+    | ARRAY ele '<' ele nullable_type ele '>' { $$ = createArrayType(false, $5); }
     ;
 
-nullable_type: type ele '?'
+nullable_type: type ele '?' { $$ = makeNullableType($1) }
              ;
 
 var_stmt: var ele var_declaration end_of_stmt

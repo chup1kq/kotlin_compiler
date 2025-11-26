@@ -153,3 +153,11 @@ ExprNode * ExprNode::createNotExprNode(ExprNode *expr) {
     node->left = expr;
     return node;
 }
+
+ExprNode * ExprNode::createArrayExprNode(TypeNode type, ExprListNode *exprs) {
+    ExprNode* node = new ExprNode();
+    node->type = ARRAY;
+    node->typeElements = type;
+    node->elements = exprs;
+    return node;
+}

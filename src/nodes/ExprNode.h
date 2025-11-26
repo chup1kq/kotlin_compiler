@@ -3,6 +3,7 @@
 #include "Node.h"
 #include "types.h"
 #include "ExprListNode.h"
+#include "TypeNode.h"
 
 
 class ExprNode : public Node {
@@ -20,6 +21,9 @@ public:
     ExprNode *trueExpr, *falseExpr;
     ExprListNode* params;
     string identifierName;
+    bool isNullable;
+    ExprListNode* elements;
+    TypeNode typeElements;
 
     static ExprNode* createIntNode(int value);
     static ExprNode* createFloatNode(float value);
@@ -42,6 +46,7 @@ public:
     static ExprNode* createPostExprNode(ExprType type, ExprNode* expr);
     static ExprNode* createUnaryExprNode(ExprType type, ExprNode* expr);
     static ExprNode* createNotExprNode(ExprNode* expr);
+    static ExprNode* createArrayExprNode(TypeNode type, ExprListNode* exprs);
 };
 
 
