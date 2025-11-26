@@ -59,7 +59,7 @@ ExprNode * ExprNode::createIfNode(ExprNode *ifCond, ExprNode *trueB, ExprNode *f
     return node;
 }
 
-ExprNode * ExprNode::createFuncCallExprNode(string name, ExprListNode *params) {
+ExprNode * ExprNode::createFuncCallExprNode(string name, ExprListNode *params, ExprNode *expr) {
     ExprNode* node = new ExprNode();
     node->type = FUNC_CALL;
     node->identifierName = name;
@@ -90,7 +90,7 @@ ExprNode * ExprNode::createBracketExprNode(ExprNode *expr) {
     return node;
 }
 
-ExprNode * ExprNode::createIDExpressionNode(string name) {
+ExprNode * ExprNode::createIDNode(string name) {
     ExprNode* node = new ExprNode();
     node->type = IDENTIFIER;
     node->identifierName = name;
