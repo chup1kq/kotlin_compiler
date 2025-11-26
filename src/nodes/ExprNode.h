@@ -19,6 +19,7 @@ public:
     string stringValue;
     ExprNode *cond;
     ExprNode *trueExpr, *falseExpr;
+    StmtNode *trueStmt, *falseStmt;
     ExprListNode* params;
     string identifierName;
     bool isNullable;
@@ -32,7 +33,8 @@ public:
     static ExprNode* createStringNode(string value);
     static ExprNode* createBoolNode(bool value);
     static ExprNode* createExprNode(ExprType type, ExprNode* left, ExprNode* right);
-    static ExprNode* createIfNode(ExprNode* ifCond, ExprNode* trueB, ExprNode* falseB);
+    static ExprNode* createIfNode(ExprNode* ifCond, ExprNode* trueB, StmtNode* falseB);
+    static ExprNode* createIfNode(ExprNode* ifCond, StmtNode* trueB, StmtNode* falseB);
     static ExprNode* createMethodAccessExprNode(string name, ExprListNode* params, ExprNode* expr);
     static ExprNode* createFieldAccessExprNode(string name, ExprNode* expr);
     static ExprNode* createFunctionCallExprNode(string name, ExprListNode* params);

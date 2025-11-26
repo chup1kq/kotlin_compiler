@@ -50,12 +50,21 @@ ExprNode * ExprNode::createExprNode(ExprType type, ExprNode *left, ExprNode *rig
     return node;
 }
 
-ExprNode * ExprNode::createIfNode(ExprNode *ifCond, ExprNode *trueB, ExprNode *falseB) {
+ExprNode * ExprNode::createIfNode(ExprNode *ifCond, ExprNode *trueB, StmtNode *falseB) {
     ExprNode* node = new ExprNode();
     node->type = IF_STMT;
     node->cond = ifCond;
     node->trueExpr = trueB;
-    node->falseExpr = falseB;
+    node->falseStmt = falseB;
+    return node;
+}
+
+ExprNode * ExprNode::createIfNode(ExprNode *ifCond, StmtNode *trueB, StmtNode *falseB) {
+    ExprNode* node = new ExprNode();
+    node->type = IF_STMT;
+    node->cond = ifCond;
+    node->trueStmt = trueB;
+    node->falseStmt = falseB;
     return node;
 }
 

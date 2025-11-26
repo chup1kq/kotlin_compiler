@@ -98,7 +98,7 @@ expr: INT_LITERAL { $$ = createIntNode($1); }
     | FALSE_LITERAL { $$ = createBoolNode($1); }
     | NULL_LITERAL { $$ = createNullNode($1); }
     | ID { $$ = createIDNode($1); }
-    | if_expr
+    | if_expr { $$ = $1; }
     | THIS { $$ = createThisExprNode(); }
     | SUPER { $$ = createSuperExprNode(); }
     | expr '.' ele ID { $$ = createFieldAccessExprNode($4, $1); }
@@ -213,14 +213,14 @@ var_declaration_list: ID
 		    | var_declaration_list ',' var_declaration
 		    ;
 
-condition_expr: ele '(' expr ')' ele
+condition_expr: ele '(' expr ')' ele { $$ = $3; }
               ;
 
-if_expr: IF condition_expr stmt_block ELSE stmt_block
-       | IF condition_expr expr ELSE stmt_block
-       | IF condition_expr expr ELSE stmt
-       | IF condition_expr stmt_block
-       | IF condition_expr stmt
+if_expr: IF condition_expr stmt_block ELSE stmt_block { $$ = createIfNode($2, $3, $5); }
+       | IF condition_expr expr ELSE stmt_block { $$ = createIfNode($2, $3, $5); }
+       | IF condition_expr expr ELSE stmt { $$ = createIfNode($2, $3, $5); }
+       | IF condition_expr stmt_block { $$ = createIfNode($2, $3, nullptr); }
+       | IF condition_expr stmt { $$ = createIfNode($2, $3, nullptr); }
        ;
 
 while_stmt: WHILE condition_expr stmt_block end_of_stmt
