@@ -75,26 +75,26 @@ end_of_stmt: ENDL
            | ';'
            ;
 
-expr: INT_LITERAL
-    | FLOAT_LITERAL
-    | DOUBLE_LITERAL
-    | CHAR_LITERAL
-    | STRING_LITERAL
-    | TRUE_LITERAL
-    | FALSE_LITERAL
-    | NULL_LITERAL
-    | ID
+expr: INT_LITERAL { $$ = createIntNode($1); }
+    | FLOAT_LITERAL { $$ = createFloatNode($1); }
+    | DOUBLE_LITERAL { $$ = createDoubleNode($1); }
+    | CHAR_LITERAL { $$ = createCharNode($1); }
+    | STRING_LITERAL { $$ = createStringNode($1); }
+    | TRUE_LITERAL { $$ = createBoolNode($1); }
+    | FALSE_LITERAL { $$ = createBoolNode($1); }
+    | NULL_LITERAL { $$ = createNullNode($1); }
+    | ID { $$ = createIDNode($1); }
     | if_expr
-    | THIS
-    | SUPER
-    | expr '.' ele ID
-    | expr '.' ele ID '(' ')'
-    | expr '.' ele ID '(' expr_list ')'
+    | THIS { $$ = createThisExprNode(); }
+    | SUPER { $$ = createSuperExprNode(); }
+    | expr '.' ele ID { $$ = createFieldAccessExprNode($4, $1); }
+    | expr '.' ele ID '(' ')' { $$ = createMethodAccessExprNode($4, NULL, $1); }
+    | expr '.' ele ID '(' expr_list ')' { $$ = createFuncCallExprNode($4, $6, $1); }
     | expr SAFE_CALL ele ID
     | expr SAFE_CALL ele ID '(' ')'
     | expr SAFE_CALL ele ID '(' expr_list ')'
-    | expr OR ele expr
-    | expr AND ele expr
+    | expr OR ele expr { $$ = createExprNode(OR, $1, $4); }
+    | expr AND ele expr { $$ = createExprNode(AND, $1, $4); }
     | expr RANGE ele expr
     | expr DOWN_TO ele expr
     | expr UNTIL ele expr
@@ -102,30 +102,30 @@ expr: INT_LITERAL
     | '!' expr
     | '-' ele expr %prec UMINUS
     | '+' ele expr %prec UPLUS
-    | '(' expr ')'
-    | ID '(' ')'
-    | ID '(' expr_list ')'
-    | expr '=' ele expr
-    | expr '+' ele expr
-    | expr '-' ele expr
-    | expr '*' ele expr
-    | expr '/' ele expr
-    | expr '%' ele expr
-    | expr '<' ele expr
-    | expr '>' ele expr
-    | expr GREATER_EQUAL ele expr
-    | expr LESS_EQUAL ele expr
-    | expr EQUAL ele expr
-    | expr NOT_EQUAL ele expr
-    | expr PLUS_ASSIGNMENT ele expr
-    | expr MINUS_ASSIGNMENT ele expr
-    | expr MUL_ASSIGNMENT ele expr
-    | expr DIV_ASSIGNMENT ele expr
-    | expr MOD_ASSIGNMENT ele expr
-    | INCREMENT ele expr
-    | DECREMENT ele expr
-    | expr INCREMENT %prec POST_INCREMENT
-    | expr DECREMENT %prec POST_DECREMENT
+    | '(' expr ')' { $$ = createBracketExprNode($2); }
+    | ID '(' ')' { $$ = createFunctionCallExprNode($1, NULL); }
+    | ID '(' expr_list ')' { $$ = createFunctionCallExprNode($1, $3); }
+    | expr '=' ele expr { $$ = createExprNode(EQUAL, $1, $4); }
+    | expr '+' ele expr { $$ = createExprNode(PLUS, $1, $4); }
+    | expr '-' ele expr { $$ = createExprNode(MINUS, $1, $4); }
+    | expr '*' ele expr { $$ = createExprNode(MUL, $1, $4); }
+    | expr '/' ele expr { $$ = createExprNode(DIV, $1, $4); }
+    | expr '%' ele expr { $$ = createExprNode(MOD, $1, $4); }
+    | expr '<' ele expr { $$ = createExprNode(LESS, $1, $4); }
+    | expr '>' ele expr { $$ = createExprNode(GREAT, $1, $4); }
+    | expr GREATER_EQUAL ele expr { $$ = createExprNode(GREAT_EQUAL, $1, $4); }
+    | expr LESS_EQUAL ele expr { $$ = createExprNode(LESS_EQUAL, $1, $4); }
+    | expr EQUAL ele expr { $$ = createExprNode(EQUAL, $1, $4); }
+    | expr NOT_EQUAL ele expr { $$ = createExprNode(NOT_EQUAL, $1, $4); }
+    | expr PLUS_ASSIGNMENT ele expr { $$ = createAssignmentExprNode(PLUS_ASSIGNMENT, $1, $4); }
+    | expr MINUS_ASSIGNMENT ele expr { $$ = createAssignmentExprNode(MINUS_ASSIGNMENT, $1, $4); }
+    | expr MUL_ASSIGNMENT ele expr { $$ = createAssignmentExprNode(MUL_ASSIGNMENT, $1, $4); }
+    | expr DIV_ASSIGNMENT ele expr { $$ = createAssignmentExprNode(DIV_ASSIGNMENT, $1, $4); }
+    | expr MOD_ASSIGNMENT ele expr { $$ = createAssignmentExprNode(MOD_ASSIGNMENT, $1, $4); }
+    | INCREMENT ele expr { $$ = createPrefExprNode(PREF_INCREMENT, $3); }
+    | DECREMENT ele expr { $$ = createPrefExprNode(PREF_DECREMENT, $3); }
+    | expr INCREMENT %prec POST_INCREMENT { $$ = createPostExprNode(PREF_INCREMENT, $3); }
+    | expr DECREMENT %prec POST_DECREMENT { $$ = createPostExprNode(PREF_DECREMENT, $3); }
     | ARRAY_OF '(' ')'
     | ARRAY_OF '(' expr_list ')'
     | ARRAY_OF '<' ele nullable_type ele '>' '(' ')'
