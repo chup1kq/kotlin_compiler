@@ -32,6 +32,20 @@ void yyerror(const char* s);
 %token PUBLIC_OPEN_OVERRIDE_FUN PROTECTED_OPEN_OVERRIDE_FUN
 %token OPEN_OVERRIDE_FUN FINAL_OVERRIDE_FUN
 
+%token PRIVATE_VAR PUBLIC_VAR
+%token PRIVATE_FINAL_VAR PUBLIC_FINAL_VAR PROTECTED_FINAL_VAR
+%token PUBLIC_OPEN_VAR PROTECTED_OPEN_VAR
+%token PUBLIC_FINAL_OVERRIDE_VAR PROTECTED_FINAL_OVERRIDE_VAR
+%token PUBLIC_OPEN_OVERRIDE_VAR PROTECTED_OPEN_OVERRIDE_VAR
+%token OPEN_OVERRIDE_VAR FINAL_OVERRIDE_VAR
+
+%token PRIVATE_VAL PUBLIC_VAL
+%token PRIVATE_FINAL_VAL PUBLIC_FINAL_VAL PROTECTED_FINAL_VAL
+%token PUBLIC_OPEN_VAL PROTECTED_OPEN_VAL
+%token PUBLIC_FINAL_OVERRIDE_VAL PROTECTED_FINAL_OVERRIDE_VAL
+%token PUBLIC_OPEN_OVERRIDE_VAL PROTECTED_OPEN_OVERRIDE_VAL
+%token OPEN_OVERRIDE_VAL FINAL_OVERRIDE_VAL
+
 %token INT_TYPE FLOAT_TYPE DOUBLE_TYPE STRING_TYPE CHAR_TYPE BOOLEAN_TYPE
 
 %token INT_LITERAL FLOAT_LITERAL DOUBLE_LITERAL
@@ -177,27 +191,27 @@ type: INT_TYPE
 nullable_type: type ele '?'
              ;
 
-var_stmt: VAR ele var_declaration end_of_stmt
-        | VAR ele var_declaration '=' ele expr end_of_stmt
-        | VAR ele ID '=' ele expr end_of_stmt
+var_stmt: var ele var_declaration end_of_stmt
+        | var ele var_declaration_default_value end_of_stmt
+        | var ele ID '=' ele expr end_of_stmt
         ;
 
-val_stmt: VAL ele var_declaration end_of_stmt
-        | VAL ele var_declaration '=' ele expr end_of_stmt
-        | VAL ele ID '=' ele expr end_of_stmt
+val_stmt: val ele var_declaration end_of_stmt
+        | val ele var_declaration_default_value end_of_stmt
+        | val ele ID '=' ele expr end_of_stmt
         ;
 
 var_declaration: ID ele ':' ele nullable_type
                ;
+
+var_declaration_default_value: ID ele ':' ele nullable_type '=' ele expr
+			     ;
 
 var_declaration_list: ID
 		    | var_declaration
 		    | var_declaration_list ',' ID
 		    | var_declaration_list ',' var_declaration
 		    ;
-
-var_declaration_default_value: var_declaration '=' ele expr
-			     ;
 
 condition_expr: ele '(' expr ')' ele
               ;
@@ -274,8 +288,9 @@ allowed_declaration_params: declaration_argument_list
 		          | declaration_argument_list ele ','
 		          ;
 
-class_declaration_argument: VAR ele declaration_argument
-			  | VAL ele declaration_argument
+class_declaration_argument: var ele declaration_argument
+			  | val ele declaration_argument
+			  | declaration_argument
 			  ;
 
 class_declaration_argument_list: class_declaration_argument
@@ -283,8 +298,6 @@ class_declaration_argument_list: class_declaration_argument
 		               ;
 
 class_allowed_declaration_params: ele
-			        | ele declaration_argument_list ele
-			        | ele declaration_argument_list ele ',' ele
 			        | ele class_declaration_argument_list ele
 			        | ele class_declaration_argument_list ele ',' ele
 			        ;
@@ -360,6 +373,38 @@ class_member: var_stmt
 
 constructor_declaration: class_constructor '(' allowed_declaration_params ')' ele stmt_block
                        ;
+
+var: VAR
+   | PRIVATE_VAR
+   | PUBLIC_VAR
+   | PRIVATE_FINAL_VAR
+   | PUBLIC_FINAL_VAR
+   | PROTECTED_FINAL_VAR
+   | PUBLIC_OPEN_VAR
+   | PROTECTED_OPEN_VAR
+   | PUBLIC_FINAL_OVERRIDE_VAR
+   | PROTECTED_FINAL_OVERRIDE_VAR
+   | PUBLIC_OPEN_OVERRIDE_VAR
+   | PROTECTED_OPEN_OVERRIDE_VAR
+   | OPEN_OVERRIDE_VAR
+   | FINAL_OVERRIDE_VAR
+   ;
+
+val: VAL
+   | PRIVATE_VAL
+   | PUBLIC_VAL
+   | PRIVATE_FINAL_VAL
+   | PUBLIC_FINAL_VAL
+   | PROTECTED_FINAL_VAL
+   | PUBLIC_OPEN_VAL
+   | PROTECTED_OPEN_VAL
+   | PUBLIC_FINAL_OVERRIDE_VAL
+   | PROTECTED_FINAL_OVERRIDE_VAL
+   | PUBLIC_OPEN_OVERRIDE_VAL
+   | PROTECTED_OPEN_OVERRIDE_VAL
+   | OPEN_OVERRIDE_VAL
+   | FINAL_OVERRIDE_VAL
+   ;
 
 %%
 
