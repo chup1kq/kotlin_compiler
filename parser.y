@@ -217,7 +217,8 @@ for_stmt: FOR ele '(' ID IN expr ')' ele stmt_block end_of_stmt
 	| FOR ele '(' '(' var_declaration_list ')' IN expr ')' ele stmt
         ;
 
-do_while_stmt: DO ele stmt_block ele WHILE ele '(' expr_ws ')' end_of_stmt
+do_while_stmt: DO ele stmt_block ele WHILE ele '(' expr ')' end_of_stmt
+	     | DO ele stmt WHILE ele '(' expr ')' end_of_stmt
              ;
 
 return_stmt: RETURN end_of_stmt
