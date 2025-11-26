@@ -2,7 +2,7 @@
 #define KOTLIN_COMPILER_STMTLISTNODE_H
 #include <list>
 
-#include "Node.h"
+#include "../Node.h"
 
 
 class StmtListNode: public Node {

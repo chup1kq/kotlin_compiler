@@ -41,18 +41,18 @@ add_executable(kotlin_parser
         src/nodes/node.cpp
         src/nodes/node.h
         src/nodes/types.h
-        src/nodes/ExprListNode.cpp
-        src/nodes/ExprListNode.h
-        src/nodes/StmtListNode.cpp
-        src/nodes/StmtListNode.h
-        src/nodes/ExprNode.cpp
-        src/nodes/ExprNode.h
-        src/nodes/StmtNode.cpp
-        src/nodes/StmtNode.h
-        src/nodes/TypeNode.h
-        src/nodes/TypeNode.cpp
-        src/nodes/VarDeclaration.cpp
-        src/nodes/VarDeclaration.h
-        src/nodes/VarDeclarationList.cpp
-        src/nodes/VarDeclarationList.h
+        src/nodes/expr/ExprListNode.cpp
+        src/nodes/expr/ExprListNode.h
+        src/nodes/stmt/StmtListNode.cpp
+        src/nodes/stmt/StmtListNode.h
+        src/nodes/expr/ExprNode.cpp
+        src/nodes/expr/ExprNode.h
+        src/nodes/stmt/StmtNode.cpp
+        src/nodes/stmt/StmtNode.h
+        src/nodes/type/TypeNode.h
+        src/nodes/type/TypeNode.cpp
+        src/nodes/varDeclaration/VarDeclaration.cpp
+        src/nodes/varDeclaration/VarDeclaration.h
+        src/nodes/varDeclaration/VarDeclarationList.cpp
+        src/nodes/varDeclaration/VarDeclarationList.h
 )

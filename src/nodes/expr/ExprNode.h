@@ -1,9 +1,9 @@
 #ifndef KOTLIN_COMPILER_EXPRNODE_H
 #define KOTLIN_COMPILER_EXPRNODE_H
-#include "Node.h"
-#include "types.h"
+#include "../Node.h"
+#include "../types.h"
 #include "ExprListNode.h"
-#include "TypeNode.h"
+#include "../type/TypeNode.h"
 
 
 class ExprNode : public Node {

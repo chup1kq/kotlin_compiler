@@ -2,7 +2,7 @@
 #define KOTLIN_COMPILER_VARDECLRATION_H
 #include <string>
 
-#include "ExprNode.h"
+#include "../expr/ExprNode.h"
 
 
 class VarDeclaration {

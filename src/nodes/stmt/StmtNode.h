@@ -2,10 +2,10 @@
 #define KOTLIN_COMPILER_STMTNODE_H
 #include <list>
 
-#include "Node.h"
+#include "../Node.h"
 #include "StmtListNode.h"
-#include "types.h"
-#include "VarDeclaration.h"
+#include "../types.h"
+#include "../varDeclaration/VarDeclaration.h"
 
 
 class StmtNode : public Node {

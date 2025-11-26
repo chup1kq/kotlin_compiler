@@ -1,7 +1,7 @@
 #ifndef KOTLIN_COMPILER_TYPENODE_H
 #define KOTLIN_COMPILER_TYPENODE_H
-#include "Node.h"
-#include "types.h"
+#include "../Node.h"
+#include "../types.h"
 
 class TypeNode: public Node {
     public:
