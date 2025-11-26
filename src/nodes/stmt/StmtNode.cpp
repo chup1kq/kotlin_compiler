@@ -51,23 +51,43 @@ StmtNode *StmtNode::createVarOrValStmtNode(StmtType type, VarDeclaration *varDec
     return node;
 }
 
-StmtNode * StmtNode::createForNodeFromSingleStmt(string id, ExprNode *range, StmtNode *cycleStmt) {
+StmtNode * StmtNode::createForNodeFromSingleStmt(VarDeclaration* iterator, ExprNode *range, StmtNode *cycleStmt) {
     StmtNode* node = new StmtNode();
     node->type = FOR;
-    node->iteratorId = id;
+    node->forIterator = iterator;
     node->cond = range;
     node->cycleSingleStmt = cycleStmt;
     return node;
 }
 
-StmtNode * StmtNode::createForNodeFromBlockStmt(string id, ExprNode *range, StmtListNode *cycleStmt) {
+StmtNode * StmtNode::createForNodeFromBlockStmt(VarDeclaration* iterator, ExprNode *range, StmtListNode *cycleStmt) {
     StmtNode* node = new StmtNode();
     node->type = FOR;
-    node->iteratorId = id;
+    node->forIterator = iterator;
     node->cond = range;
     node->blockStmts = cycleStmt;
     return node;
 }
+
+StmtNode * StmtNode::createForNodeFromSingleStmtWithSeveralId(VarDeclarationList *list, ExprNode *range, StmtNode *cycleStmt) {
+    StmtNode* node = new StmtNode();
+    node->type = FOR;
+    node->forIteratorList = list;
+    node->cond = range;
+    node->cycleSingleStmt = cycleStmt;
+    return node;
+}
+
+StmtNode *StmtNode::createForNodeFromBlockStmtWithSeveralId(VarDeclarationList *list, ExprNode *range, StmtListNode *cycleStmt) {
+    StmtNode* node = new StmtNode();
+    node->type = FOR;
+    node->forIteratorList = list;
+    node->cond = range;
+    node->blockStmts = cycleStmt;
+    return node;
+}
+
+
 
 StmtNode * StmtNode::createReturnNode(ExprNode *expr) {
     StmtNode* node = new StmtNode();

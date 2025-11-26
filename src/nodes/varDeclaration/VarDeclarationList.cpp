@@ -5,7 +5,7 @@ VarDeclarationList::VarDeclarationList(VarDeclaration *first) {
     decls->push_back(first);
 }
 
-VarDeclarationList* VarDeclarationList::addStmtToList(VarDeclarationList *list, VarDeclaration *varDeclaration) {
+VarDeclarationList* VarDeclarationList::addVarDeclarationToList(VarDeclarationList *list, VarDeclaration *varDeclaration) {
     if (list == nullptr) {
         return new VarDeclarationList(varDeclaration);
     }

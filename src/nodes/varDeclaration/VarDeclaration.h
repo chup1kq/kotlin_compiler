@@ -6,6 +6,7 @@
 
 
 class VarDeclaration {
+public:
     std::string varId;
     TypeNode varType;
     ExprNode* defaultValue;

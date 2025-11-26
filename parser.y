@@ -157,7 +157,7 @@ stmt: ';' { $$ = createEmptyStmt(); }
     | expr end_of_stmt { $$ = createStmtFromExpr($1); }
     | var_stmt { $$ = $1; }
     | val_stmt { $$ = $1; }
-    | for_stmt
+    | for_stmt { $$ = $1; }
     | while_stmt  { $$ = $1; }
     | do_while_stmt { $$ = $1; }
     | return_stmt { $$ = $1; }
@@ -204,13 +204,13 @@ var_declaration: ID ele ':' ele nullable_type { $$ = createVarDeclaration($1, $5
 var_declaration_default_value: ID ele ':' ele nullable_type '=' ele expr { $$ = createVarDeclaration($1, $5, $8); }
 			     ;
 
-var_declaration_list: ID
-		    | var_declaration
-		    | var_declaration_list ',' ID
-		    | var_declaration_list ',' var_declaration
+var_declaration_list: ID { $$ = addVarDeclarationToList(nullptr, createVarDeclaration($1, NULL, NULL)); }
+		    | var_declaration { $$ = addVarDeclarationToList(nullptr, $1); }
+		    | var_declaration_list ',' ID { $$ = addVarDeclarationToList($1, createVarDeclaration($3, NULL, NULL));); }
+		    | var_declaration_list ',' var_declaration { $$ = addVarDeclarationToList($1, $3); }
 		    ;
 
-condition_expr: ele '(' expr ')' ele { $$ = $3 }
+condition_expr: ele '(' expr ')' ele { $$ = $3; }
               ;
 
 if_expr: IF condition_expr stmt_block ELSE stmt_block { $$ = createIfNode($2, $3, $5); }
@@ -224,10 +224,12 @@ while_stmt: WHILE condition_expr stmt_block end_of_stmt { $$ = createCycleNodeFr
 	  | WHILE condition_expr stmt { $$ = createCycleNodeFromSingleStmt(WHILE, $2, $3); }
           ;
 
-for_stmt: FOR ele '(' ID IN expr ')' ele stmt_block end_of_stmt { $$ = createForNodeFromBlockStmt($4, $6, $9); }
-        | FOR ele '(' ID IN expr ')' ele stmt { $$ = createForNodeFromSingleStmt($4, $6, $9); }
-	| FOR ele '(' '(' var_declaration_list ')' IN expr ')' ele stmt_block end_of_stmt
-	| FOR ele '(' '(' var_declaration_list ')' IN expr ')' ele stmt
+for_stmt: FOR ele '(' ID IN expr ')' ele stmt_block end_of_stmt { $$ = createForNodeFromBlockStmt( createVarDeclaration($4, NULL, NULL), $6, $9); }
+        | FOR ele '(' ID IN expr ')' ele stmt { $$ = createForNodeFromSingleStmt( createVarDeclaration($4, NULL, NULL), $6, $9); }
+	| FOR ele '(' var_declaration IN expr ')' ele stmt_block end_of_stmt { $$ = createForNodeFromBlockStmt( $4, $6, $9); }
+        | FOR ele '(' var_declaration IN expr ')' ele stmt { $$ = createForNodeFromSingleStmt( $4, $6, $9); }
+	| FOR ele '(' '(' var_declaration_list ')' IN expr ')' ele stmt_block end_of_stmt { $$ = createForNodeFromBlockStmtWithSeveralId($5, $8, $11); }
+	| FOR ele '(' '(' var_declaration_list ')' IN expr ')' ele stmt { $$ = createForNodeFromSingleStmtWithSeveralId($5, $8, $11); }
         ;
 
 do_while_stmt: DO ele stmt_block ele WHILE ele '(' expr ')' end_of_stmt { $$ = createCycleNodeFromBlockStmt(DO_WHILE, $3, $8); }

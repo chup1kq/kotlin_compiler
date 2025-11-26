@@ -8,6 +8,8 @@
 #include "../varDeclaration/VarDeclaration.h"
 
 
+class VarDeclarationList;
+
 class StmtNode : public Node {
 public:
     StmtType type;
@@ -16,12 +18,15 @@ public:
     StmtListNode *blockStmts;
     ExprNode *expr;
     VarDeclaration *varDeclaration;
-    string iteratorId;
+    VarDeclaration *forIterator;
+    VarDeclarationList *forIteratorList;
 
     static StmtNode* createCycleNodeFromSingleStmt(StmtType type, ExprNode* cycleCond, StmtNode* cycleStmt);
     static StmtNode* createCycleNodeFromBlockStmt(StmtType type, ExprNode* cycleCond, StmtListNode* cycleStmt);
-    static StmtNode* createForNodeFromSingleStmt(string id, ExprNode* range, StmtNode* cycleStmt);
-    static StmtNode* createForNodeFromBlockStmt(string id, ExprNode* range, StmtListNode* cycleStmt);
+    static StmtNode* createForNodeFromSingleStmt(VarDeclaration* iterator, ExprNode* range, StmtNode* cycleStmt);
+    static StmtNode* createForNodeFromBlockStmt(VarDeclaration* iterator, ExprNode* range, StmtListNode* cycleStmt);
+    static StmtNode* createForNodeFromSingleStmtWithSeveralId(VarDeclarationList* list, ExprNode* range, StmtNode* cycleStmt);
+    static StmtNode* createForNodeFromBlockStmtWithSeveralId(VarDeclarationList* list, ExprNode* range, StmtListNode* cycleStmt);
     static StmtNode* createBreakNode();
     static StmtNode* createContinueNode();
     static StmtNode* createEmptyStmt();

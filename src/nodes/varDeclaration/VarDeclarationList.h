@@ -4,11 +4,12 @@
 
 
 class VarDeclarationList {
+public:
     std::list<VarDeclaration*> *decls;
 
     VarDeclarationList(VarDeclaration *first);
 
-    static VarDeclarationList* addStmtToList(VarDeclarationList *list, VarDeclaration *stmt);
+    static VarDeclarationList* addVarDeclarationToList(VarDeclarationList *list, VarDeclaration *stmt);
 
 };
 

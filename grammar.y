@@ -226,6 +226,8 @@ while_stmt: WHILE condition_expr stmt_block end_of_stmt
 
 for_stmt: FOR ele '(' ID IN expr ')' ele stmt_block end_of_stmt
         | FOR ele '(' ID IN expr ')' ele stmt
+	| FOR ele '(' var_declaration IN expr ')' ele stmt_block end_of_stmt
+	| FOR ele '(' var_declaration IN expr ')' ele stmt
 	| FOR ele '(' '(' var_declaration_list ')' IN expr ')' ele stmt_block end_of_stmt
 	| FOR ele '(' '(' var_declaration_list ')' IN expr ')' ele stmt
         ;
