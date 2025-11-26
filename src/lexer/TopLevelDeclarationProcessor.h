@@ -16,7 +16,7 @@ private:
     void foundEnumKeyword();
     yytokentype foundClassKeyword();
     yytokentype foundConstructorKeyword();
-    yytokentype foundFunKeyword();
+    yytokentype foundEndKeyword(const std::string& keyword);
 
     bool has(const std::string& lexem);
     std::string findIncompatibleKeyword(const std::string& lexem);
@@ -25,7 +25,7 @@ private:
 
     yytokentype combineClassLexem();
     yytokentype combineConstructorLexem();
-    yytokentype combineFunLexem();
+    yytokentype combineEndLexem(const std::string& keyword);
 
     bool hasIncompatibleKeywords(const std::string& lexem);
 

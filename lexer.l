@@ -203,8 +203,8 @@ continue    { processor.foundInappropriateLexem(yytext); printStatementKeyword(y
 downTo      { processor.foundInappropriateLexem(yytext); printStatementKeyword(yytext); is_prev_lexem_end_of_stmt = false; }
 step        { processor.foundInappropriateLexem(yytext); printStatementKeyword(yytext); is_prev_lexem_end_of_stmt = false; }
 
-var         { processor.foundInappropriateLexem(yytext); printStatementKeyword(yytext); is_prev_lexem_end_of_stmt = false; }
-val         { processor.foundInappropriateLexem(yytext); printStatementKeyword(yytext); is_prev_lexem_end_of_stmt = false; }
+var         { processor.processAppropriateElement(yytext); is_prev_lexem_end_of_stmt = false; }
+val         { processor.processAppropriateElement(yytext); is_prev_lexem_end_of_stmt = false; }
 
 fun         { processor.processAppropriateElement(yytext); is_prev_lexem_end_of_stmt = false; }
 

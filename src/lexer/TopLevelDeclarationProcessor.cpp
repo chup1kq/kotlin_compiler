@@ -23,8 +23,8 @@ yytokentype TopLevelDeclarationProcessor::processAppropriateElement(const std::s
         this->prevLexems.clear();
         return returnLexem;
     }
-    else if (input == "fun") {
-        yytokentype returnLexem = foundFunKeyword();
+    else if (input == "fun" || input == "var" || input == "val") {
+        yytokentype returnLexem = foundEndKeyword(input);
         this->prevLexems.clear();
         return returnLexem;
     }
@@ -114,7 +114,9 @@ std::string TopLevelDeclarationProcessor::findIncompatibleKeyword(const std::str
         { "final",      { "open", "final" } },
         { "enum",       { "enum", "protected", "open" } },
         { "constructor",{ "override", "open", "final" } },
-        { "fun",        { "enum" } }
+        { "fun",        { "enum" } },
+        { "var",        { "enum" } },
+        { "val",        { "enum" } }
     };
 
     auto it = incompatibleMap.find(lexem);
@@ -161,66 +163,21 @@ yytokentype TopLevelDeclarationProcessor::combineConstructorLexem() {
     return PUBLIC_CONSTRUCTOR;
 }
 
-yytokentype TopLevelDeclarationProcessor::foundFunKeyword() {
-    if (hasIncompatibleKeywords("fun")) {
+yytokentype TopLevelDeclarationProcessor::foundEndKeyword(const std::string& keyword) {
+    if (hasIncompatibleKeywords(keyword)) {
         this->prevLexems.clear();
         return NON;
     }
 
     if (has("private") && has("open")) {
-        std::cerr << "Error in modifier. Modifier 'private' is incompatible with 'open' in function declaration." << std::endl;
+        std::cerr << "Error in modifier. Modifier 'private' is incompatible with 'open' in " << keyword <<" declaration." << std::endl;
 
         this->prevLexems.clear();
         return NON;
     }
 
-    std::cout << currentLexemToString("fun") << std::endl;
-    return combineFunLexem();
-}
-
-yytokentype TopLevelDeclarationProcessor::combineFunLexem() {
-    if (has("override")) {
-        if (has("protected") && has("final")) {
-            return PROTECTED_FINAL_OVERRIDE_FUN;
-        }
-        if (has("protected")) {
-            return PROTECTED_OPEN_OVERRIDE_FUN;
-        }
-
-        if (has("public") && has("final")) {
-            return PUBLIC_FINAL_OVERRIDE_FUN;
-        }
-        if (has("public")) {
-            return PUBLIC_OPEN_OVERRIDE_FUN;
-        }
-        if (has("final")) {
-            return FINAL_OVERRIDE_FUN;
-        }
-        return OPEN_OVERRIDE_FUN;
-    }
-
-    if (has("open")) {
-        if (has("protected")) {
-            return PROTECTED_OPEN_FUN;
-        }
-        return PUBLIC_OPEN_FUN;
-    }
-
-    if (has("final")) {
-        if (has("private")) {
-            return PRIVATE_FINAL_FUN;
-        }
-        if (has("protected")) {
-            return PROTECTED_FINAL_FUN;
-        }
-        return PUBLIC_FINAL_FUN;
-    }
-
-    if (has("private")) {
-        return PRIVATE_FUN;
-    }
-
-    return PUBLIC_FUN;
+    std::cout << currentLexemToString(keyword) << std::endl;
+    return combineEndLexem(keyword);
 }
 
 std::string TopLevelDeclarationProcessor::currentLexemToString(const std::string& lexem) {
@@ -232,6 +189,88 @@ std::string TopLevelDeclarationProcessor::currentLexemToString(const std::string
 
     toPrint += lexem;
     return toPrint;
+}
+
+yytokentype TopLevelDeclarationProcessor::combineEndLexem(const std::string& keyword) {
+    if (keyword == "var" && prevLexems.empty()) {
+        return VAR;
+    }
+
+    if (keyword == "val" && prevLexems.empty()) {
+        return VAR;
+    }
+
+    if (has("override")) {
+        if (has("protected") && has("final")) {
+            if (keyword == "var") return PROTECTED_FINAL_OVERRIDE_VAR;
+            if (keyword == "val") return PROTECTED_FINAL_OVERRIDE_VAL;
+            return PROTECTED_FINAL_OVERRIDE_FUN;
+        }
+        if (has("protected")) {
+            if (keyword == "var") return PROTECTED_OPEN_OVERRIDE_VAR;
+            if (keyword == "val") return PROTECTED_OPEN_OVERRIDE_VAL;
+            return PROTECTED_OPEN_OVERRIDE_FUN;
+        }
+
+        if (has("public") && has("final")) {
+            if (keyword == "var") return PUBLIC_FINAL_OVERRIDE_VAR;
+            if (keyword == "val") return PUBLIC_FINAL_OVERRIDE_VAL;
+            return PUBLIC_FINAL_OVERRIDE_FUN;
+        }
+        if (has("public")) {
+            if (keyword == "var") return PUBLIC_OPEN_OVERRIDE_VAR;
+            if (keyword == "val") return PUBLIC_OPEN_OVERRIDE_VAL;
+            return PUBLIC_OPEN_OVERRIDE_FUN;
+        }
+        if (has("final")) {
+            if (keyword == "var") return FINAL_OVERRIDE_VAR;
+            if (keyword == "val") return FINAL_OVERRIDE_VAL;
+            return FINAL_OVERRIDE_FUN;
+        }
+
+        if (keyword == "var") return OPEN_OVERRIDE_VAR;
+        if (keyword == "val") return OPEN_OVERRIDE_VAL;
+        return OPEN_OVERRIDE_FUN;
+    }
+
+    if (has("open")) {
+        if (has("protected")) {
+            if (keyword == "var") return PROTECTED_OPEN_VAR;
+            if (keyword == "val") return PROTECTED_OPEN_VAL;
+            return PROTECTED_OPEN_FUN;
+        }
+
+        if (keyword == "var") return PUBLIC_OPEN_VAR;
+        if (keyword == "val") return PUBLIC_OPEN_VAL;
+        return PUBLIC_OPEN_FUN;
+    }
+
+    if (has("final")) {
+        if (has("private")) {
+            if (keyword == "var") return PRIVATE_FINAL_VAR;
+            if (keyword == "val") return PRIVATE_FINAL_VAL;
+            return PRIVATE_FINAL_FUN;
+        }
+        if (has("protected")) {
+            if (keyword == "var") return PROTECTED_FINAL_VAR;
+            if (keyword == "val") return PROTECTED_FINAL_VAL;
+            return PROTECTED_FINAL_FUN;
+        }
+
+        if (keyword == "var") return PUBLIC_FINAL_VAR;
+        if (keyword == "val") return PUBLIC_FINAL_VAL;
+        return PUBLIC_FINAL_FUN;
+    }
+
+    if (has("private")) {
+        if (keyword == "var") return PRIVATE_VAR;
+        if (keyword == "val") return PRIVATE_VAL;
+        return PRIVATE_FUN;
+    }
+
+    if (keyword == "var") return PUBLIC_VAR;
+    if (keyword == "val") return PUBLIC_VAL;
+    return PUBLIC_FUN;
 }
 
 bool TopLevelDeclarationProcessor::hasIncompatibleKeywords(const std::string &lexem) {
