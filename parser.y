@@ -95,15 +95,15 @@ expr: INT_LITERAL { $$ = createIntNode($1); }
     | expr SAFE_CALL ele ID '(' expr_list ')'
     | expr OR ele expr { $$ = createExprNode(OR, $1, $4); }
     | expr AND ele expr { $$ = createExprNode(AND, $1, $4); }
-    | expr RANGE ele expr
-    | expr DOWN_TO ele expr
-    | expr UNTIL ele expr
-    | expr STEP ele expr
-    | '!' expr
-    | '-' ele expr %prec UMINUS
-    | '+' ele expr %prec UPLUS
+    | expr RANGE ele expr { $$ = createRangeExprNode($1, $4); }
+    | expr DOWN_TO ele expr { $$ = createRangeExprNode($1, $4); }
+    | expr UNTIL ele expr { $$ = createExprNode(UNTIL, $1, $4); }
+    | expr STEP ele expr { $$ = createExprNode(STEP, $1, $4); }
+    | '!' expr { $$ = createNoteExprNode($2); }
+    | '-' ele expr %prec UMINUS { $$ = createUnaryExprNode(UNARY_MINUS, $1); }
+    | '+' ele expr %prec UPLUS { $$ = createUnaryExprNode(UNARY_PLUS, $1); }
     | '(' expr ')' { $$ = createBracketExprNode($2); }
-    | ID '(' ')' { $$ = createFunctionCallExprNode($1, NULL); }
+    | ID '(' ')' { $$ = createFunctionCallExprNode($1, null); }
     | ID '(' expr_list ')' { $$ = createFunctionCallExprNode($1, $3); }
     | expr '=' ele expr { $$ = createExprNode(EQUAL, $1, $4); }
     | expr '+' ele expr { $$ = createExprNode(PLUS, $1, $4); }
@@ -126,10 +126,12 @@ expr: INT_LITERAL { $$ = createIntNode($1); }
     | DECREMENT ele expr { $$ = createPrefExprNode(PREF_DECREMENT, $3); }
     | expr INCREMENT %prec POST_INCREMENT { $$ = createPostExprNode(PREF_INCREMENT, $3); }
     | expr DECREMENT %prec POST_DECREMENT { $$ = createPostExprNode(PREF_DECREMENT, $3); }
-    | ARRAY_OF '(' ')'
+    | ARRAY_OF '(' ')' { $$ = createArrayExprNode(, null); }
     | ARRAY_OF '(' expr_list ')'
     | ARRAY_OF '<' ele nullable_type ele '>' '(' ')'
+    | ARRAY_OF '<' ele type ele '>' '(' ')'
     | ARRAY_OF '<' ele nullable_type ele '>' '(' expr_list ')'
+    | ARRAY_OF '<' ele type ele '>' '(' expr_list ')'
     | ID '[' expr ']'
     ;
 

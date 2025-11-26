@@ -42,6 +42,8 @@ enum ExprType {
     THIS,
     SUPER,
     RANGE,
+    UNTIL,
+    STEP,
     PREF_INCREMENT,
     PREF_DECREMENT,
     POST_INCREMENT,
@@ -53,7 +55,8 @@ enum ExprType {
     CONJUNCTION,
     FUNC_CALL,
     FIELD_ACCESS,
-    FUNC_ACCESS
+    FUNC_ACCESS,
+    ARRAY
 };
 
 enum StmtType {

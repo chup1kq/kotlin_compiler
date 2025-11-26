@@ -129,7 +129,9 @@ expr: INT_LITERAL
     | ARRAY_OF '(' ')'
     | ARRAY_OF '(' expr_list ')'
     | ARRAY_OF '<' ele nullable_type ele '>' '(' ')'
+    | ARRAY_OF '<' ele type ele '>' '(' ')'
     | ARRAY_OF '<' ele nullable_type ele '>' '(' expr_list ')'
+    | ARRAY_OF '<' ele type ele '>' '(' expr_list ')'
     | ID '[' expr ']'
     ;
 
