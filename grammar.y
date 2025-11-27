@@ -146,7 +146,7 @@ expr: INT_LITERAL
     | ARRAY_OF '<' ele type ele '>' '(' ')'
     | ARRAY_OF '<' ele nullable_type ele '>' '(' expr_list ')'
     | ARRAY_OF '<' ele type ele '>' '(' expr_list ')'
-    | ID '[' expr ']'
+    | expr '[' expr ']'
     ;
 
 expr_list: expr
@@ -155,12 +155,12 @@ expr_list: expr
 
 stmt: ';'
     | expr end_of_stmt
-    | var_stmt
-    | val_stmt
+    | var_body end_of_stmt
+    | val_body end_of_stmt
     | for_stmt
     | while_stmt
     | do_while_stmt
-    | return_stmt
+    | return_body end_of_stmt
     | BREAK end_of_stmt
     | CONTINUE end_of_stmt
     ;
@@ -173,6 +173,16 @@ stmt_block: '{' ele '}'
 	  | '{' ele stmt_list '}'
 	  | '{' ele expr '}'
 	  | '{' ele stmt_list expr '}'
+	  | '{' ele return_body '}'
+	  | '{' ele stmt_list return_body '}'
+	  | '{' ele BREAK '}'
+	  | '{' ele stmt_list BREAK '}'
+	  | '{' ele CONTINUE '}'
+	  | '{' ele stmt_list CONTINUE '}'
+	  | '{' ele var_body '}'
+	  | '{' ele stmt_list var_body '}'
+	  | '{' ele val_body '}'
+	  | '{' ele stmt_list val_body '}'
 	  ;
 
 type: INT_TYPE
@@ -188,14 +198,14 @@ type: INT_TYPE
 nullable_type: type ele '?'
              ;
 
-var_stmt: var ele var_declaration end_of_stmt
-        | var ele var_declaration_default_value end_of_stmt
-        | var ele ID '=' ele expr end_of_stmt
+var_body: var ele var_declaration
+        | var ele var_declaration_default_value
+        | var ele ID '=' ele expr
         ;
 
-val_stmt: val ele var_declaration end_of_stmt
-        | val ele var_declaration_default_value end_of_stmt
-        | val ele ID '=' ele expr end_of_stmt
+val_body: val ele var_declaration
+        | val ele var_declaration_default_value
+        | val ele ID '=' ele expr
         ;
 
 var_declaration: ID ele ':' ele nullable_type
@@ -236,8 +246,8 @@ do_while_stmt: DO ele stmt_block ele WHILE ele '(' expr ')' end_of_stmt
 	     | DO ele stmt WHILE ele '(' expr ')' end_of_stmt
              ;
 
-return_stmt: RETURN end_of_stmt
-	   | RETURN expr end_of_stmt
+return_body: RETURN
+	   | RETURN expr
 	   ;
 
 enum: PRIVATE_ENUM
@@ -349,8 +359,8 @@ class_member_list: class_member
                  | class_member_list ele class_member
                  ;
 
-class_member: var_stmt
-            | val_stmt
+class_member: var_body end_of_stmt
+            | val_body end_of_stmt
             | fun_declaration
             | constructor_declaration
             ;

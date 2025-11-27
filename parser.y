@@ -196,7 +196,7 @@ expr: INT_LITERAL { $$ = ExprNode::createIntNode($1); }
     | ARRAY_OF '<' ele type ele '>' '(' ')' { $$ = ExprNode::createArrayExprNode($4, NULL); }
     | ARRAY_OF '<' ele nullable_type ele '>' '(' expr_list ')' { $$ = ExprNode::createArrayExprNode($4, $8); }
     | ARRAY_OF '<' ele type ele '>' '(' expr_list ')' { $$ = ExprNode::createArrayExprNode($4, $8); }
-    | ID '[' expr ']'
+    | expr '[' expr ']'
     ;
 
 expr_list: expr
