@@ -103,7 +103,7 @@
 %type <expression> expr if_expr condition_expr
 %type <exprList> expr_list
 
-%type <statement> stmt var_stmt val_stmt while_stmt do_while_stmt return_stmt for_stmt
+%type <statement> stmt var_body val_body while_stmt do_while_stmt return_body for_stmt
 
 %type <stmtList> stmt_list stmt_block
 
@@ -205,12 +205,12 @@ expr_list: expr
 
 stmt: ';' { $$ = StmtNode::createEmptyStmt(); }
     | expr end_of_stmt { $$ = StmtNode::createStmtFromExpr($1); }
-    | var_stmt { $$ = $1; }
-    | val_stmt { $$ = $1; }
+    | var_body end_of_stmt { $$ = $1; }
+    | val_body end_of_stmt { $$ = $1; }
     | for_stmt { $$ = $1; }
     | while_stmt  { $$ = $1; }
     | do_while_stmt { $$ = $1; }
-    | return_stmt { $$ = $1; }
+    | return_body end_of_stmt { $$ = $1; }
     | BREAK end_of_stmt { $$ = StmtNode::createBreakNode(); }
     | CONTINUE end_of_stmt { $$ = StmtNode::createContinueNode(); }
     ;
@@ -223,6 +223,16 @@ stmt_block: '{' ele '}'
 	  | '{' ele stmt_list '}'
 	  | '{' ele expr '}'
 	  | '{' ele stmt_list expr '}'
+	  | '{' ele return_body '}'
+	  | '{' ele stmt_list return_body '}'
+	  | '{' ele BREAK '}'
+	  | '{' ele stmt_list BREAK '}'
+	  | '{' ele CONTINUE '}'
+	  | '{' ele stmt_list CONTINUE '}'
+	  | '{' ele var_body '}'
+	  | '{' ele stmt_list var_body '}'
+	  | '{' ele val_body '}'
+	  | '{' ele stmt_list val_body '}'
 	  ;
 
 type: INT_TYPE { $$ = TypeNode::createType(_INT, false); }
@@ -238,14 +248,14 @@ type: INT_TYPE { $$ = TypeNode::createType(_INT, false); }
 nullable_type: type ele '?' { $$ = TypeNode::makeNullableType($1); }
              ;
 
-var_stmt: var ele var_declaration end_of_stmt { $$ = StmtNode::createVarOrValStmtNode(_VAR, $3); }
-        | var ele var_declaration_default_value end_of_stmt { $$ = StmtNode::createVarOrValStmtNode(_VAR, $3); }
-        | var ele ID '=' ele expr end_of_stmt { $$ = StmtNode::createVarOrValStmtNode(_VAR, VarDeclaration::createVarDeclaration($3, NULL, $6)); }
+var_body: var ele var_declaration { $$ = StmtNode::createVarOrValStmtNode(_VAR, $3); }
+        | var ele var_declaration_default_value { $$ = StmtNode::createVarOrValStmtNode(_VAR, $3); }
+        | var ele ID '=' ele expr { $$ = StmtNode::createVarOrValStmtNode(_VAR, VarDeclaration::createVarDeclaration($3, NULL, $6)); }
         ;
 
-val_stmt: val ele var_declaration end_of_stmt { $$ = StmtNode::createVarOrValStmtNode(_VAL, $3); }
-        | val ele var_declaration_default_value end_of_stmt { $$ = StmtNode::createVarOrValStmtNode(_VAL, $3); }
-        | val ele ID '=' ele expr end_of_stmt { $$ = StmtNode::createVarOrValStmtNode(_VAL, VarDeclaration::createVarDeclaration($3, NULL, $6)); }
+val_body: val ele var_declaration { $$ = StmtNode::createVarOrValStmtNode(_VAL, $3); }
+        | val ele var_declaration_default_value { $$ = StmtNode::createVarOrValStmtNode(_VAL, $3); }
+        | val ele ID '=' ele expr { $$ = StmtNode::createVarOrValStmtNode(_VAL, VarDeclaration::createVarDeclaration($3, NULL, $6)); }
         ;
 
 var_declaration: ID ele ':' ele nullable_type { $$ = VarDeclaration::createVarDeclaration($1, $5, NULL); }
@@ -286,8 +296,8 @@ do_while_stmt: DO ele stmt_block ele WHILE ele '(' expr ')' end_of_stmt { $$ = S
 	     | DO ele stmt WHILE ele '(' expr ')' end_of_stmt { $$ = StmtNode::createCycleNodeFromSingleStmt(_DO_WHILE, $3, $7); }
              ;
 
-return_stmt: RETURN end_of_stmt { $$ = StmtNode::createReturnNode(NULL); }
-	   | RETURN expr end_of_stmt { $$ = StmtNode::createReturnNode($2); }
+return_body: RETURN { $$ = StmtNode::createReturnNode(NULL); }
+	   | RETURN expr { $$ = StmtNode::createReturnNode($2); }
 	   ;
 
 enum: PRIVATE_ENUM
@@ -399,8 +409,8 @@ class_member_list: class_member
                  | class_member_list ele class_member
                  ;
 
-class_member: var_stmt
-            | val_stmt
+class_member: var_body end_of_stmt
+            | val_body end_of_stmt
             | fun_declaration
             | constructor_declaration
             ;
