@@ -9,6 +9,7 @@ class ExprListNode: public Node {
 public:
     std::list<ExprNode*> *exprs;
 
+    ExprListNode();
     ExprListNode(ExprNode* expr);
 
     static ExprListNode* addExprToList(ExprListNode *list, ExprNode *expr);

@@ -62,4 +62,10 @@ add_executable(kotlin_parser
         src/nodes/varDeclaration/VarDeclaration.h
         src/nodes/varDeclaration/VarDeclarationList.cpp
         src/nodes/varDeclaration/VarDeclarationList.h
+        src/nodes/fun/FunNode.cpp
+        src/nodes/fun/FunNode.h
+        src/nodes/class/ClassNode.cpp
+        src/nodes/class/ClassNode.h
+        src/nodes/class/ClassBodyNode.cpp
+        src/nodes/class/ClassBodyNode.h
 )

@@ -9,6 +9,7 @@ class StmtListNode: public Node {
 public:
     std::list<StmtNode*> *stmts;
 
+    StmtListNode();
     StmtListNode(StmtNode *first);
 
     static StmtListNode* addStmtToList(StmtListNode *list, StmtNode *stmt);

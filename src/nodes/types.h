@@ -82,6 +82,7 @@ enum Type {
     _ARRAY,
     _ID,
     _UNDEFINED,
+    _VOID
 };
 
 #endif //KOTLIN_COMPILER_TYPES_H
