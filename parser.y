@@ -243,9 +243,10 @@ type: INT_TYPE { $$ = TypeNode::createType(_INT, false); }
     | BOOLEAN_TYPE { $$ = TypeNode::createType(_BOOLEAN, false); }
     | ID { $$ = TypeNode::createType(_ID, false); }
     | ARRAY ele '<' ele nullable_type ele '>' { $$ = TypeNode::createArrayType(false, $5); }
+    | ARRAY ele '<' ele type ele '>' { $$ = TypeNode::createArrayType(true, $5); }
     ;
 
-nullable_type: type ele '?' { $$ = TypeNode::makeNullableType($1); }
+nullable_type: type '?' { $$ = TypeNode::makeNullableType($1); }
              ;
 
 var_body: var ele var_declaration { $$ = StmtNode::createVarOrValStmtNode(_VAR, $3); }
@@ -259,9 +260,11 @@ val_body: val ele var_declaration { $$ = StmtNode::createVarOrValStmtNode(_VAL, 
         ;
 
 var_declaration: ID ele ':' ele nullable_type { $$ = VarDeclaration::createVarDeclaration($1, $5, NULL); }
+	       | ID ele ':' ele type { $$ = VarDeclaration::createVarDeclaration($1, $5, NULL); }
                ;
 
 var_declaration_default_value: ID ele ':' ele nullable_type '=' ele expr { $$ = VarDeclaration::createVarDeclaration($1, $5, $8); }
+			     | ID ele ':' ele type '=' ele expr { $$ = VarDeclaration::createVarDeclaration($1, $5, $8); }
 			     ;
 
 var_declaration_list: ID { $$ = VarDeclarationList::addVarDeclarationToList(nullptr, VarDeclaration::createVarDeclaration($1, NULL, NULL)); }
@@ -363,8 +366,10 @@ class_allowed_declaration_params: ele
 
 fun_declaration: fun ele ID ele '(' allowed_declaration_params ')' ele stmt_block
 	       | fun ele ID ele '(' allowed_declaration_params ')' ele ':' nullable_type ele stmt_block
+	       | fun ele ID ele '(' allowed_declaration_params ')' ele ':' type ele stmt_block
 	       | fun ele ID ele '(' allowed_declaration_params ')' ele '=' ele expr end_of_stmt
 	       | fun ele ID ele '(' allowed_declaration_params ')' ele ':' nullable_type ele '=' ele expr end_of_stmt
+	       | fun ele ID ele '(' allowed_declaration_params ')' ele ':' type ele '=' ele expr end_of_stmt
 	       ;
 
 fun_declaration_list: fun_declaration

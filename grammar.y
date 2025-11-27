@@ -193,9 +193,10 @@ type: INT_TYPE
     | BOOLEAN_TYPE
     | ID
     | ARRAY ele '<' ele nullable_type ele '>'
+    | ARRAY ele '<' ele type ele '>'
     ;
 
-nullable_type: type ele '?'
+nullable_type: type '?'
              ;
 
 var_body: var ele var_declaration
@@ -209,9 +210,11 @@ val_body: val ele var_declaration
         ;
 
 var_declaration: ID ele ':' ele nullable_type
+	       | ID ele ':' ele type
                ;
 
 var_declaration_default_value: ID ele ':' ele nullable_type '=' ele expr
+			     | ID ele ':' ele type '=' ele expr
 			     ;
 
 var_declaration_list: ID
@@ -313,8 +316,10 @@ class_allowed_declaration_params: ele
 
 fun_declaration: fun ele ID ele '(' allowed_declaration_params ')' ele stmt_block
 	       | fun ele ID ele '(' allowed_declaration_params ')' ele ':' nullable_type ele stmt_block
+	       | fun ele ID ele '(' allowed_declaration_params ')' ele ':' type ele stmt_block
 	       | fun ele ID ele '(' allowed_declaration_params ')' ele '=' ele expr end_of_stmt
 	       | fun ele ID ele '(' allowed_declaration_params ')' ele ':' nullable_type ele '=' ele expr end_of_stmt
+	       | fun ele ID ele '(' allowed_declaration_params ')' ele ':' type ele '=' ele expr end_of_stmt
 	       ;
 
 fun_declaration_list: fun_declaration
