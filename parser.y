@@ -274,10 +274,10 @@ condition_expr: ele '(' expr ')' ele { $$ = $3; }
               ;
 
 if_expr: IF condition_expr stmt_block ELSE stmt_block { $$ = ExprNode::createIfNode($2, $3, $5); }
-       | IF condition_expr expr ELSE stmt_block { $$ = ExprNode::createIfNode($2, $3, $5); }
-       | IF condition_expr expr ELSE stmt { $$ = ExprNode::createIfNode($2, $3, $5); }
+       | IF condition_expr expr ELSE stmt_block { $$ = ExprNode::createIfNode($2, StmtListNode::addExprToStmtList(nullptr, $3), $5); }
+       | IF condition_expr expr ELSE stmt { $$ = ExprNode::createIfNode($2, StmtListNode::addExprToStmtList(nullptr, $3), StmtListNode::addStmtToList(nullptr, $5)); }
        | IF condition_expr stmt_block { $$ = ExprNode::createIfNode($2, $3, nullptr); }
-       | IF condition_expr stmt { $$ = ExprNode::createIfNode($2, $3, nullptr); }
+       | IF condition_expr stmt { $$ = ExprNode::createIfNode($2, StmtListNode::addStmtToList(nullptr, $3), nullptr); }
        ;
 
 while_stmt: WHILE condition_expr stmt_block end_of_stmt { $$ = StmtNode::createCycleNodeFromBlockStmt(_WHILE, $2, $3); }

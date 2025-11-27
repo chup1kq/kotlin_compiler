@@ -56,23 +56,41 @@ ExprNode * ExprNode::createExprNode(ExprType type, ExprNode *left, ExprNode *rig
     return node;
 }
 
-ExprNode * ExprNode::createIfNode(ExprNode *ifCond, ExprNode *trueB, StmtNode *falseB) {
+ExprNode * ExprNode::createIfNode(ExprNode *ifCond, StmtListNode *trueB, StmtListNode *falseB) {
     ExprNode* node = new ExprNode();
     node->type = _IF_STMT;
     node->cond = ifCond;
-    node->trueExpr = trueB;
-    node->falseStmt = falseB;
+    node->trueStmtList = trueB;
+    node->falseStmtList = falseB;
     return node;
 }
 
-ExprNode * ExprNode::createIfNode(ExprNode *ifCond, StmtNode *trueB, StmtNode *falseB) {
-    ExprNode* node = new ExprNode();
-    node->type = _IF_STMT;
-    node->cond = ifCond;
-    node->trueStmt = trueB;
-    node->falseStmt = falseB;
-    return node;
-}
+// ExprNode * ExprNode::createIfNode(ExprNode *ifCond, StmtListNode *trueB, StmtNode *falseB) {
+// }
+//
+// ExprNode * ExprNode::createIfNode(ExprNode *ifCond, ExprNode *trueB, StmtListNode *falseB) {
+// }
+//
+// ExprNode * ExprNode::createIfNode(ExprNode *ifCond, StmtNode *trueB, StmtListNode *falseB) {
+// }
+
+// ExprNode * ExprNode::createIfNode(ExprNode *ifCond, ExprNode *trueB, StmtNode *falseB) {
+//     ExprNode* node = new ExprNode();
+//     node->type = _IF_STMT;
+//     node->cond = ifCond;
+//     node->trueExpr = trueB;
+//     node->falseStmt = falseB;
+//     return node;
+// }
+//
+// ExprNode * ExprNode::createIfNode(ExprNode *ifCond, StmtNode *trueB, StmtNode *falseB) {
+//     ExprNode* node = new ExprNode();
+//     node->type = _IF_STMT;
+//     node->cond = ifCond;
+//     node->trueStmt = trueB;
+//     node->falseStmt = falseB;
+//     return node;
+// }
 
 ExprNode * ExprNode::createMethodAccessExprNode(string name, ExprListNode *params, ExprNode *expr) {
     ExprNode* node = new ExprNode();
