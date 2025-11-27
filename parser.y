@@ -292,8 +292,8 @@ for_stmt: FOR ele '(' ID IN expr ')' ele stmt_block end_of_stmt { $$ = StmtNode:
 	| FOR ele '(' '(' var_declaration_list ')' IN expr ')' ele stmt { $$ = StmtNode::createForNodeFromSingleStmtWithSeveralId($5, $8, $11); }
         ;
 
-do_while_stmt: DO ele stmt_block ele WHILE ele '(' expr ')' end_of_stmt { $$ = StmtNode::createCycleNodeFromBlockStmt(_DO_WHILE, $3, $8); }
-	     | DO ele stmt WHILE ele '(' expr ')' end_of_stmt { $$ = StmtNode::createCycleNodeFromSingleStmt(_DO_WHILE, $3, $7); }
+do_while_stmt: DO ele stmt_block ele WHILE ele '(' expr ')' end_of_stmt { $$ = StmtNode::createCycleNodeFromBlockStmt(_DO_WHILE, $8, $3); }
+	     | DO ele stmt WHILE ele '(' expr ')' end_of_stmt { $$ = StmtNode::createCycleNodeFromSingleStmt(_DO_WHILE, $7, $3); }
              ;
 
 return_body: RETURN { $$ = StmtNode::createReturnNode(NULL); }
