@@ -101,7 +101,7 @@
 %left POST_INCREMENT POST_DECREMENT '.' SAFE_CALL '?' '[' ']' '(' ')'
 
 %type <expression> expr if_expr condition_expr
-%type <exprList> expr_list
+%type <exprList> expr_list argument_list
 
 %type <statement> stmt var_body val_body while_stmt do_while_stmt return_body for_stmt
 
@@ -112,7 +112,7 @@
 %type <varDecl> var_declaration var_declaration_default_value
 %type <varDeclList> var_declaration_list
 
-%type <varDeclList> class_declaration_argument_list declaration_argument_list argument_list
+%type <varDeclList> class_declaration_argument_list declaration_argument_list allowed_declaration_params
 %type <varDecl> declaration_argument class_declaration_argument
 
 %start kotlin_file
@@ -334,20 +334,20 @@ enum_entries: enum_entry
             | enum_entries ',' enum_entry
             ;
 
-argument_list: expr
-             | argument_list ',' expr
+argument_list: expr { $$ = ExprListNode::addExprToList(nullptr, $1); }
+             | argument_list ',' expr { $$ = ExprListNode::addExprToList($1, $3); }
              ;
 
-declaration_argument: var_declaration
-		    | var_declaration_default_value
+declaration_argument: var_declaration { $$ = $1; }
+		    | var_declaration_default_value { $$ = $1; }
 		    ;
 
-declaration_argument_list: declaration_argument
-		         | declaration_argument_list ele ',' ele declaration_argument
+declaration_argument_list: declaration_argument { $$ = VarDeclarationList::addVarDeclarationToList(nullptr, $1); }
+		         | declaration_argument_list ele ',' ele declaration_argument { $$ = VarDeclarationList::addVarDeclarationToList($1, $5); }
 		         ;
 
-allowed_declaration_params: declaration_argument_list
-		          | declaration_argument_list ele ','
+allowed_declaration_params: declaration_argument_list { $$ = $1; }
+		          | declaration_argument_list ele ',' { $$ = $1; }
 		          ;
 
 class_declaration_argument: var ele declaration_argument
