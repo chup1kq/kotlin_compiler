@@ -20,8 +20,6 @@ public:
     char charValue;
     string stringValue;
     ExprNode *cond;
-    ExprNode *trueExpr, *falseExpr;
-    StmtNode *trueStmt, *falseStmt;
     StmtListNode *trueStmtList, *falseStmtList;
     ExprListNode* params;
     string identifierName;
