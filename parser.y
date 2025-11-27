@@ -1,10 +1,41 @@
-%{
-#include <iostream>
-using namespace std;
+%code requires {
+    #include "../src/nodes/Node.h"
+    #include "../src/nodes/types.h"
+    #include "../src/nodes/expr/ExprListNode.h"
+    #include "../src/nodes/expr/ExprNode.h"
+    #include "../src/nodes/stmt/StmtListNode.h"
+    #include "../src/nodes/stmt/StmtNode.h"
+    #include "../src/nodes/type/TypeNode.h"
+    #include "../src/nodes/varDeclaration/VarDeclaration.h"
+    #include "../src/nodes/varDeclaration/VarDeclarationList.h"
+}
 
-int yylex();
-void yyerror(const char* s);
-%}
+%code {
+    #include <iostream>
+    using namespace std;
+
+    int yylex();
+    void yyerror(const char* s);
+}
+
+
+%union {
+    int intLiteral;
+    char charLiteral;
+    float floatLiteral;
+    double doubleLiteral;
+    char* stringLiteral;
+    bool boolLiteral;
+    char* identifier;
+
+    ExprNode* expression;
+    ExprListNode* exprList;
+    StmtNode* statement;
+    StmtListNode* stmtList;
+    TypeNode* typeNode;
+    VarDeclaration* varDecl;
+    VarDeclarationList* varDeclList;
+}
 
 %token NON
 
@@ -15,7 +46,7 @@ void yyerror(const char* s);
 %token THIS SUPER
 %token ARRAY ARRAY_OF
 %token ENDL
-%token ID
+%token <identifier>ID
 %token IN
 
 %token PRIVATE_FINAL_CLASS PUBLIC_FINAL_CLASS
@@ -48,9 +79,13 @@ void yyerror(const char* s);
 
 %token INT_TYPE FLOAT_TYPE DOUBLE_TYPE STRING_TYPE CHAR_TYPE BOOLEAN_TYPE
 
-%token INT_LITERAL FLOAT_LITERAL DOUBLE_LITERAL
-%token CHAR_LITERAL STRING_LITERAL
-%token TRUE_LITERAL FALSE_LITERAL
+%token <intLiteral>INT_LITERAL
+%token <floatLiteral>FLOAT_LITERAL
+%token <doubleLiteral>DOUBLE_LITERAL
+%token <charLiteral>CHAR_LITERAL
+%token <stringLiteral>STRING_LITERAL
+%token <boolLiteral>TRUE_LITERAL
+%token <boolLiteral>FALSE_LITERAL
 %token NULL_LITERAL
 
 %right '=' PLUS_ASSIGNMENT MINUS_ASSIGNMENT MUL_ASSIGNMENT DIV_ASSIGNMENT MOD_ASSIGNMENT
@@ -64,6 +99,21 @@ void yyerror(const char* s);
 %nonassoc ':'
 %right UMINUS UPLUS INCREMENT DECREMENT '!'
 %left POST_INCREMENT POST_DECREMENT '.' SAFE_CALL '?' '[' ']' '(' ')'
+
+%type <expression> expr if_expr condition_expr
+%type <exprList> expr_list
+
+%type <statement> stmt var_stmt val_stmt while_stmt do_while_stmt return_stmt for_stmt
+
+%type <stmtList> stmt_list stmt_block
+
+%type <typeNode> type nullable_type
+
+%type <varDecl> var_declaration var_declaration_default_value
+%type <varDeclList> var_declaration_list
+
+%type <varDeclList> class_declaration_argument_list declaration_argument_list argument_list
+%type <varDecl> declaration_argument class_declaration_argument
 
 %start kotlin_file
 
@@ -89,63 +139,63 @@ end_of_stmt: ENDL
            | ';'
            ;
 
-expr: INT_LITERAL { $$ = createIntNode($1); }
-    | FLOAT_LITERAL { $$ = createFloatNode($1); }
-    | DOUBLE_LITERAL { $$ = createDoubleNode($1); }
-    | CHAR_LITERAL { $$ = createCharNode($1); }
-    | STRING_LITERAL { $$ = createStringNode($1); }
-    | TRUE_LITERAL { $$ = createBoolNode($1); }
-    | FALSE_LITERAL { $$ = createBoolNode($1); }
-    | NULL_LITERAL { $$ = createNullNode($1); }
-    | ID { $$ = createIDNode($1); }
+expr: INT_LITERAL { $$ = ExprNode::createIntNode($1); }
+    | FLOAT_LITERAL { $$ = ExprNode::createFloatNode($1); }
+    | DOUBLE_LITERAL { $$ = ExprNode::createDoubleNode($1); }
+    | CHAR_LITERAL { $$ = ExprNode::createCharNode($1); }
+    | STRING_LITERAL { $$ = ExprNode::createStringNode($1); }
+    | TRUE_LITERAL { $$ = ExprNode::createBoolNode($1); }
+    | FALSE_LITERAL { $$ = ExprNode::createBoolNode($1); }
+    | NULL_LITERAL { $$ = ExprNode::createNullNode(); }
+    | ID { $$ = ExprNode::createIDNode($1); }
     | if_expr { $$ = $1; }
-    | THIS { $$ = createThisExprNode(); }
-    | SUPER { $$ = createSuperExprNode(); }
-    | expr '.' ele ID { $$ = createFieldAccessExprNode($4, $1); }
-    | expr '.' ele ID '(' ')' { $$ = createMethodAccessExprNode($4, NULL, $1); }
-    | expr '.' ele ID '(' expr_list ')' { $$ = createFuncCallExprNode($4, $6, $1); }
+    | THIS { $$ = ExprNode::createThisExprNode(); }
+    | SUPER { $$ = ExprNode::createSuperExprNode(); }
+    | expr '.' ele ID { $$ = ExprNode::createFieldAccessExprNode($4, $1); }
+    | expr '.' ele ID '(' ')' { $$ = ExprNode::createMethodAccessExprNode($4, NULL, $1); }
+    | expr '.' ele ID '(' expr_list ')' { $$ = ExprNode::createMethodAccessExprNode($4, $6, $1); }
     | expr SAFE_CALL ele ID
     | expr SAFE_CALL ele ID '(' ')'
     | expr SAFE_CALL ele ID '(' expr_list ')'
-    | expr OR ele expr { $$ = createExprNode(OR, $1, $4); }
-    | expr AND ele expr { $$ = createExprNode(AND, $1, $4); }
-    | expr RANGE ele expr { $$ = createRangeExprNode($1, $4); }
-    | expr DOWN_TO ele expr { $$ = createRangeExprNode($1, $4); }
-    | expr UNTIL ele expr { $$ = createExprNode(UNTIL, $1, $4); }
-    | expr STEP ele expr { $$ = createExprNode(STEP, $1, $4); }
-    | '!' expr { $$ = createNoteExprNode($2); }
-    | '-' ele expr %prec UMINUS { $$ = createUnaryExprNode(UNARY_MINUS, $1); }
-    | '+' ele expr %prec UPLUS { $$ = createUnaryExprNode(UNARY_PLUS, $1); }
-    | '(' expr ')' { $$ = createBracketExprNode($2); }
-    | ID '(' ')' { $$ = createFunctionCallExprNode($1, null); }
-    | ID '(' expr_list ')' { $$ = createFunctionCallExprNode($1, $3); }
-    | expr '=' ele expr { $$ = createExprNode(EQUAL, $1, $4); }
-    | expr '+' ele expr { $$ = createExprNode(PLUS, $1, $4); }
-    | expr '-' ele expr { $$ = createExprNode(MINUS, $1, $4); }
-    | expr '*' ele expr { $$ = createExprNode(MUL, $1, $4); }
-    | expr '/' ele expr { $$ = createExprNode(DIV, $1, $4); }
-    | expr '%' ele expr { $$ = createExprNode(MOD, $1, $4); }
-    | expr '<' ele expr { $$ = createExprNode(LESS, $1, $4); }
-    | expr '>' ele expr { $$ = createExprNode(GREAT, $1, $4); }
-    | expr GREATER_EQUAL ele expr { $$ = createExprNode(GREAT_EQUAL, $1, $4); }
-    | expr LESS_EQUAL ele expr { $$ = createExprNode(LESS_EQUAL, $1, $4); }
-    | expr EQUAL ele expr { $$ = createExprNode(EQUAL, $1, $4); }
-    | expr NOT_EQUAL ele expr { $$ = createExprNode(NOT_EQUAL, $1, $4); }
-    | expr PLUS_ASSIGNMENT ele expr { $$ = createAssignmentExprNode(PLUS_ASSIGNMENT, $1, $4); }
-    | expr MINUS_ASSIGNMENT ele expr { $$ = createAssignmentExprNode(MINUS_ASSIGNMENT, $1, $4); }
-    | expr MUL_ASSIGNMENT ele expr { $$ = createAssignmentExprNode(MUL_ASSIGNMENT, $1, $4); }
-    | expr DIV_ASSIGNMENT ele expr { $$ = createAssignmentExprNode(DIV_ASSIGNMENT, $1, $4); }
-    | expr MOD_ASSIGNMENT ele expr { $$ = createAssignmentExprNode(MOD_ASSIGNMENT, $1, $4); }
-    | INCREMENT ele expr { $$ = createPrefExprNode(PREF_INCREMENT, $3); }
-    | DECREMENT ele expr { $$ = createPrefExprNode(PREF_DECREMENT, $3); }
-    | expr INCREMENT %prec POST_INCREMENT { $$ = createPostExprNode(PREF_INCREMENT, $3); }
-    | expr DECREMENT %prec POST_DECREMENT { $$ = createPostExprNode(PREF_DECREMENT, $3); }
-    | ARRAY_OF '(' ')' { $$ = createArrayExprNode(null, null); }
-    | ARRAY_OF '(' expr_list ')' { $$ = createArrayExprNode(null, $3); }
-    | ARRAY_OF '<' ele nullable_type ele '>' '(' ')' { $$ = createArrayExprNode($4, null); }
-    | ARRAY_OF '<' ele type ele '>' '(' ')' { $$ = createArrayExprNode($4, null); }
-    | ARRAY_OF '<' ele nullable_type ele '>' '(' expr_list ')' { $$ = createArrayExprNode($4, $8); }
-    | ARRAY_OF '<' ele type ele '>' '(' expr_list ')' { $$ = createArrayExprNode($4, $8); }
+    | expr OR ele expr { $$ = ExprNode::createExprNode(_DISJUNCTION, $1, $4); }
+    | expr AND ele expr { $$ = ExprNode::createExprNode(_CONJUNCTION, $1, $4); }
+    | expr RANGE ele expr { $$ = ExprNode::createRangeExprNode($1, $4); }
+    | expr DOWN_TO ele expr { $$ = ExprNode::createRangeExprNode($1, $4); }
+    | expr UNTIL ele expr { $$ = ExprNode::createExprNode(_UNTIL, $1, $4); }
+    | expr STEP ele expr { $$ = ExprNode::createExprNode(_STEP, $1, $4); }
+    | '!' expr { $$ = ExprNode::createNotExprNode($2); }
+    | '-' ele expr %prec UMINUS { $$ = ExprNode::createUnaryExprNode(_UNARY_MINUS, $3); }
+    | '+' ele expr %prec UPLUS { $$ = ExprNode::createUnaryExprNode(_UNARY_PLUS, $3); }
+    | '(' expr ')' { $$ = ExprNode::createBracketExprNode($2); }
+    | ID '(' ')' { $$ = ExprNode::createFunctionCallExprNode($1, NULL); }
+    | ID '(' expr_list ')' { $$ = ExprNode::createFunctionCallExprNode($1, $3); }
+    | expr '=' ele expr { $$ = ExprNode::createExprNode(_EQUAL, $1, $4); }
+    | expr '+' ele expr { $$ = ExprNode::createExprNode(_PLUS, $1, $4); }
+    | expr '-' ele expr { $$ = ExprNode::createExprNode(_MINUS, $1, $4); }
+    | expr '*' ele expr { $$ = ExprNode::createExprNode(_MUL, $1, $4); }
+    | expr '/' ele expr { $$ = ExprNode::createExprNode(_DIV, $1, $4); }
+    | expr '%' ele expr { $$ = ExprNode::createExprNode(_MOD, $1, $4); }
+    | expr '<' ele expr { $$ = ExprNode::createExprNode(_LESS, $1, $4); }
+    | expr '>' ele expr { $$ = ExprNode::createExprNode(_GREAT, $1, $4); }
+    | expr GREATER_EQUAL ele expr { $$ = ExprNode::createExprNode(_GREAT_EQUAL, $1, $4); }
+    | expr LESS_EQUAL ele expr { $$ = ExprNode::createExprNode(_LESS_EQUAL, $1, $4); }
+    | expr EQUAL ele expr { $$ = ExprNode::createExprNode(_EQUAL, $1, $4); }
+    | expr NOT_EQUAL ele expr { $$ = ExprNode::createExprNode(_NOT_EQUAL, $1, $4); }
+    | expr PLUS_ASSIGNMENT ele expr { $$ = ExprNode::createAssignmentExprNode(_PLUS_ASSIGNMENT, $1, $4); }
+    | expr MINUS_ASSIGNMENT ele expr { $$ = ExprNode::createAssignmentExprNode(_MINUS_ASSIGNMENT, $1, $4); }
+    | expr MUL_ASSIGNMENT ele expr { $$ = ExprNode::createAssignmentExprNode(_MUL_ASSIGNMENT, $1, $4); }
+    | expr DIV_ASSIGNMENT ele expr { $$ = ExprNode::createAssignmentExprNode(_DIV_ASSIGNMENT, $1, $4); }
+    | expr MOD_ASSIGNMENT ele expr { $$ = ExprNode::createAssignmentExprNode(_MOD_ASSIGNMENT, $1, $4); }
+    | INCREMENT ele expr { $$ = ExprNode::createPrefExprNode(_PREF_INCREMENT, $3); }
+    | DECREMENT ele expr { $$ = ExprNode::createPrefExprNode(_PREF_DECREMENT, $3); }
+    | expr INCREMENT %prec POST_INCREMENT { $$ = ExprNode::createPostExprNode(_PREF_INCREMENT, $1); }
+    | expr DECREMENT %prec POST_DECREMENT { $$ = ExprNode::createPostExprNode(_PREF_DECREMENT, $1); }
+    | ARRAY_OF '(' ')' { $$ = ExprNode::createArrayExprNode(NULL, NULL); }
+    | ARRAY_OF '(' expr_list ')' { $$ = ExprNode::createArrayExprNode(NULL, $3); }
+    | ARRAY_OF '<' ele nullable_type ele '>' '(' ')' { $$ = ExprNode::createArrayExprNode($4, NULL); }
+    | ARRAY_OF '<' ele type ele '>' '(' ')' { $$ = ExprNode::createArrayExprNode($4, NULL); }
+    | ARRAY_OF '<' ele nullable_type ele '>' '(' expr_list ')' { $$ = ExprNode::createArrayExprNode($4, $8); }
+    | ARRAY_OF '<' ele type ele '>' '(' expr_list ')' { $$ = ExprNode::createArrayExprNode($4, $8); }
     | ID '[' expr ']'
     ;
 
@@ -153,16 +203,16 @@ expr_list: expr
 	 | expr_list ele ',' ele expr
 	 ;
 
-stmt: ';' { $$ = createEmptyStmt(); }
-    | expr end_of_stmt { $$ = createStmtFromExpr($1); }
+stmt: ';' { $$ = StmtNode::createEmptyStmt(); }
+    | expr end_of_stmt { $$ = StmtNode::createStmtFromExpr($1); }
     | var_stmt { $$ = $1; }
     | val_stmt { $$ = $1; }
     | for_stmt { $$ = $1; }
     | while_stmt  { $$ = $1; }
     | do_while_stmt { $$ = $1; }
     | return_stmt { $$ = $1; }
-    | BREAK end_of_stmt { $$ = createBreakNode(); }
-    | CONTINUE end_of_stmt { $$ = createContinueNode(); }
+    | BREAK end_of_stmt { $$ = StmtNode::createBreakNode(); }
+    | CONTINUE end_of_stmt { $$ = StmtNode::createContinueNode(); }
     ;
 
 stmt_list: stmt
@@ -175,69 +225,69 @@ stmt_block: '{' ele '}'
 	  | '{' ele stmt_list expr '}'
 	  ;
 
-type: INT_TYPE { $$ = createType(_INT, false); }
-    | FLOAT_TYPE { $$ = createType(_FLOAT, false); }
-    | DOUBLE_TYPE { $$ = createType(_FLOAT, false); }
-    | STRING_TYPE { $$ = createType(_FLOAT, false); }
-    | CHAR_TYPE { $$ = createType(_FLOAT, false); }
-    | BOOLEAN_TYPE { $$ = createType(_FLOAT, false); }
-    | ID { $$ = createType(_FLOAT, false); }
-    | ARRAY ele '<' ele nullable_type ele '>' { $$ = createArrayType(false, $5); }
+type: INT_TYPE { $$ = TypeNode::createType(_INT, false); }
+    | FLOAT_TYPE { $$ = TypeNode::createType(_FLOAT, false); }
+    | DOUBLE_TYPE { $$ = TypeNode::createType(_DOUBLE, false); }
+    | STRING_TYPE { $$ = TypeNode::createType(_STRING, false); }
+    | CHAR_TYPE { $$ = TypeNode::createType(_CHAR, false); }
+    | BOOLEAN_TYPE { $$ = TypeNode::createType(_BOOLEAN, false); }
+    | ID { $$ = TypeNode::createType(_ID, false); }
+    | ARRAY ele '<' ele nullable_type ele '>' { $$ = TypeNode::createArrayType(false, $5); }
     ;
 
-nullable_type: type ele '?' { $$ = makeNullableType($1) }
+nullable_type: type ele '?' { $$ = TypeNode::makeNullableType($1); }
              ;
 
-var_stmt: var ele var_declaration end_of_stmt { $$ = createVarOrValStmtNode(VAR, $3); }
-        | var ele var_declaration_default_value end_of_stmt { $$ = createVarOrValStmtNode(VAR, $3); }
-        | var ele ID '=' ele expr end_of_stmt { $$ = createVarOrValStmtNode(VAR, createVarDeclaration($3, NULL, $6)); }
+var_stmt: var ele var_declaration end_of_stmt { $$ = StmtNode::createVarOrValStmtNode(_VAR, $3); }
+        | var ele var_declaration_default_value end_of_stmt { $$ = StmtNode::createVarOrValStmtNode(_VAR, $3); }
+        | var ele ID '=' ele expr end_of_stmt { $$ = StmtNode::createVarOrValStmtNode(_VAR, VarDeclaration::createVarDeclaration($3, NULL, $6)); }
         ;
 
-val_stmt: val ele var_declaration end_of_stmt { $$ = createVarOrValStmtNode(VAL, $3); }
-        | val ele var_declaration_default_value end_of_stmt { $$ = createVarOrValStmtNode(VAL, $3); }
-        | val ele ID '=' ele expr end_of_stmt { $$ = createVarOrValStmtNode(VAL, createVarDeclaration($3, NULL, $6)); }
+val_stmt: val ele var_declaration end_of_stmt { $$ = StmtNode::createVarOrValStmtNode(_VAL, $3); }
+        | val ele var_declaration_default_value end_of_stmt { $$ = StmtNode::createVarOrValStmtNode(_VAL, $3); }
+        | val ele ID '=' ele expr end_of_stmt { $$ = StmtNode::createVarOrValStmtNode(_VAL, VarDeclaration::createVarDeclaration($3, NULL, $6)); }
         ;
 
-var_declaration: ID ele ':' ele nullable_type { $$ = createVarDeclaration($1, $5, NULL); }
+var_declaration: ID ele ':' ele nullable_type { $$ = VarDeclaration::createVarDeclaration($1, $5, NULL); }
                ;
 
-var_declaration_default_value: ID ele ':' ele nullable_type '=' ele expr { $$ = createVarDeclaration($1, $5, $8); }
+var_declaration_default_value: ID ele ':' ele nullable_type '=' ele expr { $$ = VarDeclaration::createVarDeclaration($1, $5, $8); }
 			     ;
 
-var_declaration_list: ID { $$ = addVarDeclarationToList(nullptr, createVarDeclaration($1, NULL, NULL)); }
-		    | var_declaration { $$ = addVarDeclarationToList(nullptr, $1); }
-		    | var_declaration_list ',' ID { $$ = addVarDeclarationToList($1, createVarDeclaration($3, NULL, NULL));); }
-		    | var_declaration_list ',' var_declaration { $$ = addVarDeclarationToList($1, $3); }
+var_declaration_list: ID { $$ = VarDeclarationList::addVarDeclarationToList(nullptr, VarDeclaration::createVarDeclaration($1, NULL, NULL)); }
+		    | var_declaration { $$ = VarDeclarationList::addVarDeclarationToList(nullptr, $1); }
+		    | var_declaration_list ',' ID { $$ = VarDeclarationList::addVarDeclarationToList($1, VarDeclaration::createVarDeclaration($3, NULL, NULL)); }
+		    | var_declaration_list ',' var_declaration { $$ = VarDeclarationList::addVarDeclarationToList($1, $3); }
 		    ;
 
 condition_expr: ele '(' expr ')' ele { $$ = $3; }
               ;
 
-if_expr: IF condition_expr stmt_block ELSE stmt_block { $$ = createIfNode($2, $3, $5); }
-       | IF condition_expr expr ELSE stmt_block { $$ = createIfNode($2, $3, $5); }
-       | IF condition_expr expr ELSE stmt { $$ = createIfNode($2, $3, $5); }
-       | IF condition_expr stmt_block { $$ = createIfNode($2, $3, nullptr); }
-       | IF condition_expr stmt { $$ = createIfNode($2, $3, nullptr); }
+if_expr: IF condition_expr stmt_block ELSE stmt_block { $$ = ExprNode::createIfNode($2, $3, $5); }
+       | IF condition_expr expr ELSE stmt_block { $$ = ExprNode::createIfNode($2, $3, $5); }
+       | IF condition_expr expr ELSE stmt { $$ = ExprNode::createIfNode($2, $3, $5); }
+       | IF condition_expr stmt_block { $$ = ExprNode::createIfNode($2, $3, nullptr); }
+       | IF condition_expr stmt { $$ = ExprNode::createIfNode($2, $3, nullptr); }
        ;
 
-while_stmt: WHILE condition_expr stmt_block end_of_stmt { $$ = createCycleNodeFromBlockStmt(WHILE, $2, $3); }
-	  | WHILE condition_expr stmt { $$ = createCycleNodeFromSingleStmt(WHILE, $2, $3); }
+while_stmt: WHILE condition_expr stmt_block end_of_stmt { $$ = StmtNode::createCycleNodeFromBlockStmt(_WHILE, $2, $3); }
+	  | WHILE condition_expr stmt { $$ = StmtNode::createCycleNodeFromSingleStmt(_WHILE, $2, $3); }
           ;
 
-for_stmt: FOR ele '(' ID IN expr ')' ele stmt_block end_of_stmt { $$ = createForNodeFromBlockStmt( createVarDeclaration($4, NULL, NULL), $6, $9); }
-        | FOR ele '(' ID IN expr ')' ele stmt { $$ = createForNodeFromSingleStmt( createVarDeclaration($4, NULL, NULL), $6, $9); }
-	| FOR ele '(' var_declaration IN expr ')' ele stmt_block end_of_stmt { $$ = createForNodeFromBlockStmt( $4, $6, $9); }
-        | FOR ele '(' var_declaration IN expr ')' ele stmt { $$ = createForNodeFromSingleStmt( $4, $6, $9); }
-	| FOR ele '(' '(' var_declaration_list ')' IN expr ')' ele stmt_block end_of_stmt { $$ = createForNodeFromBlockStmtWithSeveralId($5, $8, $11); }
-	| FOR ele '(' '(' var_declaration_list ')' IN expr ')' ele stmt { $$ = createForNodeFromSingleStmtWithSeveralId($5, $8, $11); }
+for_stmt: FOR ele '(' ID IN expr ')' ele stmt_block end_of_stmt { $$ = StmtNode::createForNodeFromBlockStmt(VarDeclaration::createVarDeclaration($4, NULL, NULL), $6, $9); }
+        | FOR ele '(' ID IN expr ')' ele stmt { $$ = StmtNode::createForNodeFromSingleStmt(VarDeclaration::createVarDeclaration($4, NULL, NULL), $6, $9); }
+	| FOR ele '(' var_declaration IN expr ')' ele stmt_block end_of_stmt { $$ = StmtNode::createForNodeFromBlockStmt( $4, $6, $9); }
+        | FOR ele '(' var_declaration IN expr ')' ele stmt { $$ = StmtNode::createForNodeFromSingleStmt( $4, $6, $9); }
+	| FOR ele '(' '(' var_declaration_list ')' IN expr ')' ele stmt_block end_of_stmt { $$ = StmtNode::createForNodeFromBlockStmtWithSeveralId($5, $8, $11); }
+	| FOR ele '(' '(' var_declaration_list ')' IN expr ')' ele stmt { $$ = StmtNode::createForNodeFromSingleStmtWithSeveralId($5, $8, $11); }
         ;
 
-do_while_stmt: DO ele stmt_block ele WHILE ele '(' expr ')' end_of_stmt { $$ = createCycleNodeFromBlockStmt(DO_WHILE, $3, $8); }
-	     | DO ele stmt WHILE ele '(' expr ')' end_of_stmt { $$ = createCycleNodeFromSingleStmt(DO_WHILE, $3, $7); }
+do_while_stmt: DO ele stmt_block ele WHILE ele '(' expr ')' end_of_stmt { $$ = StmtNode::createCycleNodeFromBlockStmt(_DO_WHILE, $3, $8); }
+	     | DO ele stmt WHILE ele '(' expr ')' end_of_stmt { $$ = StmtNode::createCycleNodeFromSingleStmt(_DO_WHILE, $3, $7); }
              ;
 
-return_stmt: RETURN end_of_stmt { $$ = createReturnNode(NULL); }
-	   | RETURN expr end_of_stmt { $$ = createReturnNode($2); }
+return_stmt: RETURN end_of_stmt { $$ = StmtNode::createReturnNode(NULL); }
+	   | RETURN expr end_of_stmt { $$ = StmtNode::createReturnNode($2); }
 	   ;
 
 enum: PRIVATE_ENUM

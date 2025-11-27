@@ -6,6 +6,8 @@
 #include "../type/TypeNode.h"
 
 
+class StmtListNode;
+
 class ExprNode : public Node {
 public:
     ExprType type;
@@ -24,7 +26,7 @@ public:
     string identifierName;
     bool isNullable;
     ExprListNode* elements;
-    TypeNode typeElements;
+    TypeNode* typeElements;
 
     static ExprNode* createIntNode(int value);
     static ExprNode* createFloatNode(float value);
@@ -32,6 +34,7 @@ public:
     static ExprNode* createCharNode(char value);
     static ExprNode* createStringNode(string value);
     static ExprNode* createBoolNode(bool value);
+    static ExprNode* createNullNode();
     static ExprNode* createExprNode(ExprType type, ExprNode* left, ExprNode* right);
     static ExprNode* createIfNode(ExprNode* ifCond, ExprNode* trueB, StmtNode* falseB);
     static ExprNode* createIfNode(ExprNode* ifCond, StmtNode* trueB, StmtNode* falseB);
@@ -48,7 +51,7 @@ public:
     static ExprNode* createPostExprNode(ExprType type, ExprNode* expr);
     static ExprNode* createUnaryExprNode(ExprType type, ExprNode* expr);
     static ExprNode* createNotExprNode(ExprNode* expr);
-    static ExprNode* createArrayExprNode(TypeNode type, ExprListNode* exprs);
+    static ExprNode* createArrayExprNode(TypeNode* type, ExprListNode* exprs);
 };
 
 

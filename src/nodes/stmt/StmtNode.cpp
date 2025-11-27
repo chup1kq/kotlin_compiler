@@ -20,26 +20,26 @@ StmtNode * StmtNode::createCycleNodeFromBlockStmt(StmtType type, ExprNode *cycle
 
 StmtNode * StmtNode::createBreakNode() {
     StmtNode* node = new StmtNode();
-    node->type = BREAK;
+    node->type = _BREAK;
     return node;
 }
 
 StmtNode * StmtNode::createContinueNode() {
     StmtNode* node = new StmtNode();
-    node->type = CONTINUE;
+    node->type = _CONTINUE;
     return node;
 }
 
 StmtNode * StmtNode::createEmptyStmt() {
     StmtNode* node = new StmtNode();
-    node->type = EMPTY;
+    node->type = _EMPTY;
     return node;
 }
 
 // создать stmt на основе expr (когда добавляется перевод строки или ';')
 StmtNode * StmtNode::createStmtFromExpr(ExprNode* expr) {
     StmtNode* node = new StmtNode();
-    node->type = EXPRESSION;
+    node->type = _EXPRESSION;
     node->expr = expr;
     return node;
 }
@@ -53,7 +53,7 @@ StmtNode *StmtNode::createVarOrValStmtNode(StmtType type, VarDeclaration *varDec
 
 StmtNode * StmtNode::createForNodeFromSingleStmt(VarDeclaration* iterator, ExprNode *range, StmtNode *cycleStmt) {
     StmtNode* node = new StmtNode();
-    node->type = FOR;
+    node->type = _FOR;
     node->forIterator = iterator;
     node->cond = range;
     node->cycleSingleStmt = cycleStmt;
@@ -62,7 +62,7 @@ StmtNode * StmtNode::createForNodeFromSingleStmt(VarDeclaration* iterator, ExprN
 
 StmtNode * StmtNode::createForNodeFromBlockStmt(VarDeclaration* iterator, ExprNode *range, StmtListNode *cycleStmt) {
     StmtNode* node = new StmtNode();
-    node->type = FOR;
+    node->type = _FOR;
     node->forIterator = iterator;
     node->cond = range;
     node->blockStmts = cycleStmt;
@@ -71,7 +71,7 @@ StmtNode * StmtNode::createForNodeFromBlockStmt(VarDeclaration* iterator, ExprNo
 
 StmtNode * StmtNode::createForNodeFromSingleStmtWithSeveralId(VarDeclarationList *list, ExprNode *range, StmtNode *cycleStmt) {
     StmtNode* node = new StmtNode();
-    node->type = FOR;
+    node->type = _FOR;
     node->forIteratorList = list;
     node->cond = range;
     node->cycleSingleStmt = cycleStmt;
@@ -80,7 +80,7 @@ StmtNode * StmtNode::createForNodeFromSingleStmtWithSeveralId(VarDeclarationList
 
 StmtNode *StmtNode::createForNodeFromBlockStmtWithSeveralId(VarDeclarationList *list, ExprNode *range, StmtListNode *cycleStmt) {
     StmtNode* node = new StmtNode();
-    node->type = FOR;
+    node->type = _FOR;
     node->forIteratorList = list;
     node->cond = range;
     node->blockStmts = cycleStmt;
@@ -91,7 +91,7 @@ StmtNode *StmtNode::createForNodeFromBlockStmtWithSeveralId(VarDeclarationList *
 
 StmtNode * StmtNode::createReturnNode(ExprNode *expr) {
     StmtNode* node = new StmtNode();
-    node->type = RETURN;
+    node->type = _RETURN;
     node->expr = expr;
     return node;
 }

@@ -20,7 +20,7 @@ FLEX_TARGET(Lexer
 )
 
 BISON_TARGET(Parser
-        ${CMAKE_SOURCE_DIR}/grammar.y
+        ${CMAKE_SOURCE_DIR}/parser.y
         ${PARSER_CPP}
         DEFINES_FILE ${PARSER_H}
         COMPILE_FLAGS "--report=all --verbose"
@@ -30,7 +30,14 @@ ADD_FLEX_BISON_DEPENDENCY(Lexer Parser)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BUILD_DIR})
 
-include_directories(${CMAKE_SOURCE_DIR}/src/lexer)
+include_directories(
+        ${CMAKE_SOURCE_DIR}/src/lexer
+        ${CMAKE_SOURCE_DIR}/src/nodes
+        ${CMAKE_SOURCE_DIR}/src/nodes/expr
+        ${CMAKE_SOURCE_DIR}/src/nodes/stmt
+        ${CMAKE_SOURCE_DIR}/src/nodes/type
+        ${CMAKE_SOURCE_DIR}/src/nodes/varDeclaration
+)
 
 add_executable(kotlin_parser
         ${CMAKE_SOURCE_DIR}/main.cpp

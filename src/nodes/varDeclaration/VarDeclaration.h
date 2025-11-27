@@ -8,10 +8,10 @@
 class VarDeclaration {
 public:
     std::string varId;
-    TypeNode varType;
+    TypeNode* varType;
     ExprNode* defaultValue;
 
-    VarDeclaration * createVarDeclaration(std::string varId, TypeNode varType, ExprNode* defaultValue);
+    static VarDeclaration * createVarDeclaration(std::string varId, TypeNode* varType, ExprNode* defaultValue);
 };
 
 
