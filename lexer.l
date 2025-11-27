@@ -255,6 +255,8 @@ false       { processor.foundInappropriateLexem(yytext); printConstantKeyword(yy
 "&&"        { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; }
 "||"        { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; }
 
+"?"         { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; }
+
 "."         { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; }
 "?."        { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; }
 "->"        { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; }
@@ -335,10 +337,16 @@ false       { processor.foundInappropriateLexem(yytext); printConstantKeyword(yy
             unput(c_next);
             unput(c);
         }
+        else {
+            unput(c);
+        }
     } else if (c == '|') {
         c_next = yyinput();
         if (c_next == '|') {
             unput(c_next);
+            unput(c);
+        }
+        else {
             unput(c);
         }
     } else if (c == '!'){
@@ -349,6 +357,9 @@ false       { processor.foundInappropriateLexem(yytext); printConstantKeyword(yy
         c_next = yyinput();
         if (c_next == '.') {
             unput(c_next);
+            unput(c);
+        }
+        else {
             unput(c);
         }
     } else {

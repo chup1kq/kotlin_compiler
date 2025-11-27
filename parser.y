@@ -199,8 +199,8 @@ expr: INT_LITERAL { $$ = ExprNode::createIntNode($1); }
     | expr '[' expr ']'
     ;
 
-expr_list: expr
-	 | expr_list ele ',' ele expr
+expr_list: expr { $$ = ExprListNode::addExprToList(nullptr, $1); }
+	 | expr_list ele ',' ele expr { $$ = ExprListNode::addExprToList($1, $5); }
 	 ;
 
 stmt: ';' { $$ = StmtNode::createEmptyStmt(); }
@@ -215,24 +215,24 @@ stmt: ';' { $$ = StmtNode::createEmptyStmt(); }
     | CONTINUE end_of_stmt { $$ = StmtNode::createContinueNode(); }
     ;
 
-stmt_list: stmt
-	 | stmt_list stmt
+stmt_list: stmt { $$ = StmtListNode::addStmtToList(nullptr, $1); }
+	 | stmt_list stmt { $$ = StmtListNode::addStmtToList($1, $2); }
 	 ;
 
-stmt_block: '{' ele '}'
-	  | '{' ele stmt_list '}'
-	  | '{' ele expr '}'
-	  | '{' ele stmt_list expr '}'
-	  | '{' ele return_body '}'
-	  | '{' ele stmt_list return_body '}'
-	  | '{' ele BREAK '}'
-	  | '{' ele stmt_list BREAK '}'
-	  | '{' ele CONTINUE '}'
-	  | '{' ele stmt_list CONTINUE '}'
-	  | '{' ele var_body '}'
-	  | '{' ele stmt_list var_body '}'
-	  | '{' ele val_body '}'
-	  | '{' ele stmt_list val_body '}'
+stmt_block: '{' ele '}' { $$ = StmtListNode::addStmtToList(nullptr, nullptr); }
+	  | '{' ele stmt_list '}' { $$ = $3; }
+	  | '{' ele expr '}' { $$ = StmtListNode::addExprToStmtList(nullptr, $3); }
+	  | '{' ele stmt_list expr '}' { $$ = StmtListNode::addExprToStmtList($3, $4); }
+	  | '{' ele return_body '}' { $$ = StmtListNode::addStmtToList(nullptr, $3); }
+	  | '{' ele stmt_list return_body '}' { $$ = StmtListNode::addStmtToList($3, $4); }
+	  | '{' ele BREAK '}' { $$ = StmtListNode::addStmtToList(nullptr, StmtNode::createBreakNode()); }
+	  | '{' ele stmt_list BREAK '}' { $$ = StmtListNode::addStmtToList($3, StmtNode::createBreakNode()); }
+	  | '{' ele CONTINUE '}' { $$ = StmtListNode::addStmtToList(nullptr, StmtNode::createContinueNode()); }
+	  | '{' ele stmt_list CONTINUE '}' { $$ = StmtListNode::addStmtToList($3, StmtNode::createContinueNode()); }
+	  | '{' ele var_body '}' { $$ = StmtListNode::addStmtToList(nullptr, $3); }
+	  | '{' ele stmt_list var_body '}' { $$ = StmtListNode::addStmtToList($3, $4); }
+	  | '{' ele val_body '}' { $$ = StmtListNode::addStmtToList(nullptr, $3); }
+	  | '{' ele stmt_list val_body '}' { $$ = StmtListNode::addStmtToList($3, $4); }
 	  ;
 
 type: INT_TYPE { $$ = TypeNode::createType(_INT, false); }
