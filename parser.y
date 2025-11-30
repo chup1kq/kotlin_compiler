@@ -27,6 +27,7 @@
     char* stringLiteral;
     bool boolLiteral;
     char* identifier;
+    int modifier;
 
     ExprNode* expression;
     ExprListNode* exprList;
@@ -41,7 +42,7 @@
 
 %token IF ELSE
 %token FOR WHILE DO
-%token VAL VAR
+%token <modifier> VAL VAR
 %token RETURN BREAK CONTINUE
 %token THIS SUPER
 %token ARRAY ARRAY_OF
@@ -49,33 +50,33 @@
 %token <identifier>ID
 %token IN
 
-%token PRIVATE_FINAL_CLASS PUBLIC_FINAL_CLASS
-%token PRIVATE_OPEN_CLASS PUBLIC_OPEN_CLASS
+%token <modifier> PRIVATE_FINAL_CLASS PUBLIC_FINAL_CLASS
+%token <modifier> PRIVATE_OPEN_CLASS PUBLIC_OPEN_CLASS
 
-%token PRIVATE_ENUM PUBLIC_ENUM
+%token <modifier> PRIVATE_ENUM PUBLIC_ENUM
 
-%token PRIVATE_CONSTRUCTOR PUBLIC_CONSTRUCTOR PROTECTED_CONSTRUCTOR
+%token <modifier> PRIVATE_CONSTRUCTOR PUBLIC_CONSTRUCTOR PROTECTED_CONSTRUCTOR
 
-%token PRIVATE_FUN PUBLIC_FUN
-%token PRIVATE_FINAL_FUN PUBLIC_FINAL_FUN PROTECTED_FINAL_FUN
-%token PUBLIC_OPEN_FUN PROTECTED_OPEN_FUN
-%token PUBLIC_FINAL_OVERRIDE_FUN PROTECTED_FINAL_OVERRIDE_FUN
-%token PUBLIC_OPEN_OVERRIDE_FUN PROTECTED_OPEN_OVERRIDE_FUN
-%token OPEN_OVERRIDE_FUN FINAL_OVERRIDE_FUN
+%token <modifier> PRIVATE_FUN PUBLIC_FUN
+%token <modifier> PRIVATE_FINAL_FUN PUBLIC_FINAL_FUN PROTECTED_FINAL_FUN
+%token <modifier> PUBLIC_OPEN_FUN PROTECTED_OPEN_FUN
+%token <modifier> PUBLIC_FINAL_OVERRIDE_FUN PROTECTED_FINAL_OVERRIDE_FUN
+%token <modifier> PUBLIC_OPEN_OVERRIDE_FUN PROTECTED_OPEN_OVERRIDE_FUN
+%token <modifier> OPEN_OVERRIDE_FUN FINAL_OVERRIDE_FUN
 
-%token PRIVATE_VAR PUBLIC_VAR
-%token PRIVATE_FINAL_VAR PUBLIC_FINAL_VAR PROTECTED_FINAL_VAR
-%token PUBLIC_OPEN_VAR PROTECTED_OPEN_VAR
-%token PUBLIC_FINAL_OVERRIDE_VAR PROTECTED_FINAL_OVERRIDE_VAR
-%token PUBLIC_OPEN_OVERRIDE_VAR PROTECTED_OPEN_OVERRIDE_VAR
-%token OPEN_OVERRIDE_VAR FINAL_OVERRIDE_VAR
+%token <modifier> PRIVATE_VAR PUBLIC_VAR
+%token <modifier> PRIVATE_FINAL_VAR PUBLIC_FINAL_VAR PROTECTED_FINAL_VAR
+%token <modifier> PUBLIC_OPEN_VAR PROTECTED_OPEN_VAR
+%token <modifier> PUBLIC_FINAL_OVERRIDE_VAR PROTECTED_FINAL_OVERRIDE_VAR
+%token <modifier> PUBLIC_OPEN_OVERRIDE_VAR PROTECTED_OPEN_OVERRIDE_VAR
+%token <modifier> OPEN_OVERRIDE_VAR FINAL_OVERRIDE_VAR
 
-%token PRIVATE_VAL PUBLIC_VAL
-%token PRIVATE_FINAL_VAL PUBLIC_FINAL_VAL PROTECTED_FINAL_VAL
-%token PUBLIC_OPEN_VAL PROTECTED_OPEN_VAL
-%token PUBLIC_FINAL_OVERRIDE_VAL PROTECTED_FINAL_OVERRIDE_VAL
-%token PUBLIC_OPEN_OVERRIDE_VAL PROTECTED_OPEN_OVERRIDE_VAL
-%token OPEN_OVERRIDE_VAL FINAL_OVERRIDE_VAL
+%token <modifier> PRIVATE_VAL PUBLIC_VAL
+%token <modifier> PRIVATE_FINAL_VAL PUBLIC_FINAL_VAL PROTECTED_FINAL_VAL
+%token <modifier> PUBLIC_OPEN_VAL PROTECTED_OPEN_VAL
+%token <modifier> PUBLIC_FINAL_OVERRIDE_VAL PROTECTED_FINAL_OVERRIDE_VAL
+%token <modifier> PUBLIC_OPEN_OVERRIDE_VAL PROTECTED_OPEN_OVERRIDE_VAL
+%token <modifier> OPEN_OVERRIDE_VAL FINAL_OVERRIDE_VAL
 
 %token INT_TYPE FLOAT_TYPE DOUBLE_TYPE STRING_TYPE CHAR_TYPE BOOLEAN_TYPE
 
@@ -102,6 +103,8 @@
 
 %type <expression> expr if_expr condition_expr
 %type <exprList> expr_list argument_list
+
+%type <modifier> var val fun class class_constructor enum
 
 %type <statement> stmt var_body val_body while_stmt do_while_stmt return_body for_stmt
 
@@ -376,17 +379,6 @@ fun_declaration_list: fun_declaration
 		    | fun_declaration_list ele fun_declaration
 		    ;
 
-class_constructor: PRIVATE_CONSTRUCTOR
-		 | PUBLIC_CONSTRUCTOR
-		 | PROTECTED_CONSTRUCTOR
-		 ;
-
-class: PRIVATE_FINAL_CLASS
-     | PUBLIC_FINAL_CLASS
-     | PRIVATE_OPEN_CLASS
-     | PUBLIC_OPEN_CLASS
-     ;
-
 class_declaration: class ele ID ele
 		 | class ele ID ele class_body ele
 		 | class ele ID ele '(' class_allowed_declaration_params ')' ele
@@ -423,52 +415,63 @@ class_member: var_body end_of_stmt
 constructor_declaration: class_constructor '(' allowed_declaration_params ')' ele stmt_block
                        ;
 
-var: VAR
-   | PRIVATE_VAR
-   | PUBLIC_VAR
-   | PRIVATE_FINAL_VAR
-   | PUBLIC_FINAL_VAR
-   | PROTECTED_FINAL_VAR
-   | PUBLIC_OPEN_VAR
-   | PROTECTED_OPEN_VAR
-   | PUBLIC_FINAL_OVERRIDE_VAR
-   | PROTECTED_FINAL_OVERRIDE_VAR
-   | PUBLIC_OPEN_OVERRIDE_VAR
-   | PROTECTED_OPEN_OVERRIDE_VAR
-   | OPEN_OVERRIDE_VAR
-   | FINAL_OVERRIDE_VAR
+var: VAR { $$ = $1; }
+   | PRIVATE_VAR { $$ = $1; }
+   | PUBLIC_VAR { $$ = $1; }
+   | PRIVATE_FINAL_VAR { $$ = $1; }
+   | PUBLIC_FINAL_VAR { $$ = $1; }
+   | PROTECTED_FINAL_VAR { $$ = $1; }
+   | PUBLIC_OPEN_VAR { $$ = $1; }
+   | PROTECTED_OPEN_VAR { $$ = $1; }
+   | PUBLIC_FINAL_OVERRIDE_VAR { $$ = $1; }
+   | PROTECTED_FINAL_OVERRIDE_VAR { $$ = $1; }
+   | PUBLIC_OPEN_OVERRIDE_VAR { $$ = $1; }
+   | PROTECTED_OPEN_OVERRIDE_VAR { $$ = $1; }
+   | OPEN_OVERRIDE_VAR { $$ = $1; }
+   | FINAL_OVERRIDE_VAR { $$ = $1; }
    ;
 
-val: VAL
-   | PRIVATE_VAL
-   | PUBLIC_VAL
-   | PRIVATE_FINAL_VAL
-   | PUBLIC_FINAL_VAL
-   | PROTECTED_FINAL_VAL
-   | PUBLIC_OPEN_VAL
-   | PROTECTED_OPEN_VAL
-   | PUBLIC_FINAL_OVERRIDE_VAL
-   | PROTECTED_FINAL_OVERRIDE_VAL
-   | PUBLIC_OPEN_OVERRIDE_VAL
-   | PROTECTED_OPEN_OVERRIDE_VAL
-   | OPEN_OVERRIDE_VAL
-   | FINAL_OVERRIDE_VAL
+val: VAL { $$ = $1; }
+   | PRIVATE_VAL { $$ = $1; }
+   | PUBLIC_VAL { $$ = $1; }
+   | PRIVATE_FINAL_VAL { $$ = $1; }
+   | PUBLIC_FINAL_VAL { $$ = $1; }
+   | PROTECTED_FINAL_VAL { $$ = $1; }
+   | PUBLIC_OPEN_VAL { $$ = $1; }
+   | PROTECTED_OPEN_VAL { $$ = $1; }
+   | PUBLIC_FINAL_OVERRIDE_VAL { $$ = $1; }
+   | PROTECTED_FINAL_OVERRIDE_VAL { $$ = $1; }
+   | PUBLIC_OPEN_OVERRIDE_VAL { $$ = $1; }
+   | PROTECTED_OPEN_OVERRIDE_VAL { $$ = $1; }
+   | OPEN_OVERRIDE_VAL { $$ = $1; }
+   | FINAL_OVERRIDE_VAL { $$ = $1; }
    ;
 
-fun: PRIVATE_FUN
-   | PUBLIC_FUN
-   | PRIVATE_FINAL_FUN
-   | PUBLIC_FINAL_FUN
-   | PROTECTED_FINAL_FUN
-   | PUBLIC_OPEN_FUN
-   | PROTECTED_OPEN_FUN
-   | PUBLIC_FINAL_OVERRIDE_FUN
-   | PROTECTED_FINAL_OVERRIDE_FUN
-   | PUBLIC_OPEN_OVERRIDE_FUN
-   | PROTECTED_OPEN_OVERRIDE_FUN
-   | OPEN_OVERRIDE_FUN
-   | FINAL_OVERRIDE_FUN
+fun: PRIVATE_FUN { $$ = $1; }
+   | PUBLIC_FUN { $$ = $1; }
+   | PRIVATE_FINAL_FUN { $$ = $1; }
+   | PUBLIC_FINAL_FUN { $$ = $1; }
+   | PROTECTED_FINAL_FUN { $$ = $1; }
+   | PUBLIC_OPEN_FUN { $$ = $1; }
+   | PROTECTED_OPEN_FUN { $$ = $1; }
+   | PUBLIC_FINAL_OVERRIDE_FUN { $$ = $1; }
+   | PROTECTED_FINAL_OVERRIDE_FUN { $$ = $1; }
+   | PUBLIC_OPEN_OVERRIDE_FUN { $$ = $1; }
+   | PROTECTED_OPEN_OVERRIDE_FUN { $$ = $1; }
+   | OPEN_OVERRIDE_FUN { $$ = $1; }
+   | FINAL_OVERRIDE_FUN { $$ = $1; }
    ;
+
+class_constructor: PRIVATE_CONSTRUCTOR { $$ = $1; }
+		 | PUBLIC_CONSTRUCTOR { $$ = $1; }
+		 | PROTECTED_CONSTRUCTOR { $$ = $1; }
+		 ;
+
+class: PRIVATE_FINAL_CLASS { $$ = $1; }
+     | PUBLIC_FINAL_CLASS { $$ = $1; }
+     | PRIVATE_OPEN_CLASS { $$ = $1; }
+     | PUBLIC_OPEN_CLASS { $$ = $1; }
+     ;
 
 %%
 
