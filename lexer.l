@@ -255,11 +255,13 @@ false       { processor.foundInappropriateLexem(yytext); printConstantKeyword(yy
 "&&"        { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; }
 "||"        { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; }
 
-"?"         { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; }
-
 "."         { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; }
 "?."        { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; }
 "->"        { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; }
+
+"!"         { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; }
+"?"         { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; }
+":"         { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; }
 
 ".."        { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; }
 "..<"       { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; }
@@ -353,6 +355,10 @@ false       { processor.foundInappropriateLexem(yytext); printConstantKeyword(yy
         unput(c);
     } else if (c == '='){
         unput(c);
+    } else if (c == ':'){
+        unput(c);
+    } else if (c == '?'){
+        unput(c);
     } else if (c == '?') {
         c_next = yyinput();
         if (c_next == '.') {
@@ -373,7 +379,8 @@ false       { processor.foundInappropriateLexem(yytext); printConstantKeyword(yy
 }
 
 [ \t]+                  { ; }
-.                       { ; }
+
+.                       { std::cout << "Error: Found inappropriate lexem: " << yytext << std::endl; }
 
 ";;"                    { std::cout << "Unexpected sequence: " << yytext << std::endl; }
 
