@@ -8,6 +8,8 @@
     #include "../src/nodes/type/TypeNode.h"
     #include "../src/nodes/varDeclaration/VarDeclaration.h"
     #include "../src/nodes/varDeclaration/VarDeclarationList.h"
+    #include "../src/nodes/fun/FunNode.h"
+    #include "../src/nodes/modifier/ModifierMap.h"
 }
 
 %code {
@@ -27,7 +29,6 @@
     char* stringLiteral;
     bool boolLiteral;
     char* identifier;
-    int modifier;
 
     ExprNode* expression;
     ExprListNode* exprList;
@@ -36,13 +37,15 @@
     TypeNode* typeNode;
     VarDeclaration* varDecl;
     VarDeclarationList* varDeclList;
+    FunNode* function;
+    ModifierMap* modifiers;
 }
 
 %token NON
 
 %token IF ELSE
 %token FOR WHILE DO
-%token <modifier> VAL VAR
+%token <modifiers> VAL VAR
 %token RETURN BREAK CONTINUE
 %token THIS SUPER
 %token ARRAY ARRAY_OF
@@ -50,33 +53,33 @@
 %token <identifier>ID
 %token IN
 
-%token <modifier> PRIVATE_FINAL_CLASS PUBLIC_FINAL_CLASS
-%token <modifier> PRIVATE_OPEN_CLASS PUBLIC_OPEN_CLASS
+%token <modifiers> PRIVATE_FINAL_CLASS PUBLIC_FINAL_CLASS
+%token <modifiers> PRIVATE_OPEN_CLASS PUBLIC_OPEN_CLASS
 
-%token <modifier> PRIVATE_ENUM PUBLIC_ENUM
+%token <modifiers> PRIVATE_ENUM PUBLIC_ENUM
 
-%token <modifier> PRIVATE_CONSTRUCTOR PUBLIC_CONSTRUCTOR PROTECTED_CONSTRUCTOR
+%token <modifiers> PRIVATE_CONSTRUCTOR PUBLIC_CONSTRUCTOR PROTECTED_CONSTRUCTOR
 
-%token <modifier> PRIVATE_FUN PUBLIC_FUN
-%token <modifier> PRIVATE_FINAL_FUN PUBLIC_FINAL_FUN PROTECTED_FINAL_FUN
-%token <modifier> PUBLIC_OPEN_FUN PROTECTED_OPEN_FUN
-%token <modifier> PUBLIC_FINAL_OVERRIDE_FUN PROTECTED_FINAL_OVERRIDE_FUN
-%token <modifier> PUBLIC_OPEN_OVERRIDE_FUN PROTECTED_OPEN_OVERRIDE_FUN
-%token <modifier> OPEN_OVERRIDE_FUN FINAL_OVERRIDE_FUN
+%token <modifiers> PRIVATE_FUN PUBLIC_FUN
+%token <modifiers> PRIVATE_FINAL_FUN PUBLIC_FINAL_FUN PROTECTED_FINAL_FUN
+%token <modifiers> PUBLIC_OPEN_FUN PROTECTED_OPEN_FUN
+%token <modifiers> PUBLIC_FINAL_OVERRIDE_FUN PROTECTED_FINAL_OVERRIDE_FUN
+%token <modifiers> PUBLIC_OPEN_OVERRIDE_FUN PROTECTED_OPEN_OVERRIDE_FUN
+%token <modifiers> OPEN_OVERRIDE_FUN FINAL_OVERRIDE_FUN
 
-%token <modifier> PRIVATE_VAR PUBLIC_VAR
-%token <modifier> PRIVATE_FINAL_VAR PUBLIC_FINAL_VAR PROTECTED_FINAL_VAR
-%token <modifier> PUBLIC_OPEN_VAR PROTECTED_OPEN_VAR
-%token <modifier> PUBLIC_FINAL_OVERRIDE_VAR PROTECTED_FINAL_OVERRIDE_VAR
-%token <modifier> PUBLIC_OPEN_OVERRIDE_VAR PROTECTED_OPEN_OVERRIDE_VAR
-%token <modifier> OPEN_OVERRIDE_VAR FINAL_OVERRIDE_VAR
+%token <modifiers> PRIVATE_VAR PUBLIC_VAR
+%token <modifiers> PRIVATE_FINAL_VAR PUBLIC_FINAL_VAR PROTECTED_FINAL_VAR
+%token <modifiers> PUBLIC_OPEN_VAR PROTECTED_OPEN_VAR
+%token <modifiers> PUBLIC_FINAL_OVERRIDE_VAR PROTECTED_FINAL_OVERRIDE_VAR
+%token <modifiers> PUBLIC_OPEN_OVERRIDE_VAR PROTECTED_OPEN_OVERRIDE_VAR
+%token <modifiers> OPEN_OVERRIDE_VAR FINAL_OVERRIDE_VAR
 
-%token <modifier> PRIVATE_VAL PUBLIC_VAL
-%token <modifier> PRIVATE_FINAL_VAL PUBLIC_FINAL_VAL PROTECTED_FINAL_VAL
-%token <modifier> PUBLIC_OPEN_VAL PROTECTED_OPEN_VAL
-%token <modifier> PUBLIC_FINAL_OVERRIDE_VAL PROTECTED_FINAL_OVERRIDE_VAL
-%token <modifier> PUBLIC_OPEN_OVERRIDE_VAL PROTECTED_OPEN_OVERRIDE_VAL
-%token <modifier> OPEN_OVERRIDE_VAL FINAL_OVERRIDE_VAL
+%token <modifiers> PRIVATE_VAL PUBLIC_VAL
+%token <modifiers> PRIVATE_FINAL_VAL PUBLIC_FINAL_VAL PROTECTED_FINAL_VAL
+%token <modifiers> PUBLIC_OPEN_VAL PROTECTED_OPEN_VAL
+%token <modifiers> PUBLIC_FINAL_OVERRIDE_VAL PROTECTED_FINAL_OVERRIDE_VAL
+%token <modifiers> PUBLIC_OPEN_OVERRIDE_VAL PROTECTED_OPEN_OVERRIDE_VAL
+%token <modifiers> OPEN_OVERRIDE_VAL FINAL_OVERRIDE_VAL
 
 %token INT_TYPE FLOAT_TYPE DOUBLE_TYPE STRING_TYPE CHAR_TYPE BOOLEAN_TYPE
 
@@ -104,7 +107,7 @@
 %type <expression> expr if_expr condition_expr
 %type <exprList> expr_list argument_list
 
-%type <modifier> var val fun class class_constructor enum
+%type <modifiers> var val fun class class_constructor enum enum_constructor
 
 %type <statement> stmt var_body val_body while_stmt do_while_stmt return_body for_stmt
 
@@ -117,6 +120,8 @@
 
 %type <varDeclList> class_declaration_argument_list declaration_argument_list allowed_declaration_params
 %type <varDecl> declaration_argument class_declaration_argument
+
+%type <function> fun_declaration
 
 %start kotlin_file
 
@@ -306,13 +311,6 @@ return_body: RETURN { $$ = StmtNode::createReturnNode(NULL); }
 	   | RETURN expr { $$ = StmtNode::createReturnNode($2); }
 	   ;
 
-enum: PRIVATE_ENUM
-    | PUBLIC_ENUM
-    ;
-
-enum_constructor: PRIVATE_CONSTRUCTOR
-		;
-
 enum_declaration: enum ele ID ele
 		| enum ele ID ele enum_body ele
 		| enum ele ID ele '(' class_allowed_declaration_params ')' ele
@@ -367,12 +365,12 @@ class_allowed_declaration_params: ele
 			        | ele class_declaration_argument_list ele ',' ele
 			        ;
 
-fun_declaration: fun ele ID ele '(' allowed_declaration_params ')' ele stmt_block
-	       | fun ele ID ele '(' allowed_declaration_params ')' ele ':' nullable_type ele stmt_block
-	       | fun ele ID ele '(' allowed_declaration_params ')' ele ':' type ele stmt_block
-	       | fun ele ID ele '(' allowed_declaration_params ')' ele '=' ele expr end_of_stmt
-	       | fun ele ID ele '(' allowed_declaration_params ')' ele ':' nullable_type ele '=' ele expr end_of_stmt
-	       | fun ele ID ele '(' allowed_declaration_params ')' ele ':' type ele '=' ele expr end_of_stmt
+fun_declaration: fun ele ID ele '(' allowed_declaration_params ')' ele stmt_block { $$ = FunNode::createFunNode(TypeNode::createType(_VOID, false), $1, $3, $6, $9); }
+	       | fun ele ID ele '(' allowed_declaration_params ')' ele ':' nullable_type ele stmt_block { $$ = FunNode::createFunNode($10, $1, $3, $6, $12); }
+	       | fun ele ID ele '(' allowed_declaration_params ')' ele ':' type ele stmt_block { $$ = FunNode::createFunNode($10, $1, $3, $6, $12); }
+	       | fun ele ID ele '(' allowed_declaration_params ')' ele '=' ele expr end_of_stmt { $$ = FunNode::createFunNodeFromExpr(TypeNode::createType(_VOID, false), $1, $3, $6, $11); }
+	       | fun ele ID ele '(' allowed_declaration_params ')' ele ':' nullable_type ele '=' ele expr end_of_stmt { $$ = FunNode::createFunNodeFromExpr($10, $1, $3, $6, $14); }
+	       | fun ele ID ele '(' allowed_declaration_params ')' ele ':' type ele '=' ele expr end_of_stmt { $$ = FunNode::createFunNodeFromExpr($10, $1, $3, $6, $14); }
 	       ;
 
 fun_declaration_list: fun_declaration
@@ -415,63 +413,71 @@ class_member: var_body end_of_stmt
 constructor_declaration: class_constructor '(' allowed_declaration_params ')' ele stmt_block
                        ;
 
-var: VAR { $$ = $1; }
-   | PRIVATE_VAR { $$ = $1; }
-   | PUBLIC_VAR { $$ = $1; }
-   | PRIVATE_FINAL_VAR { $$ = $1; }
-   | PUBLIC_FINAL_VAR { $$ = $1; }
-   | PROTECTED_FINAL_VAR { $$ = $1; }
-   | PUBLIC_OPEN_VAR { $$ = $1; }
-   | PROTECTED_OPEN_VAR { $$ = $1; }
-   | PUBLIC_FINAL_OVERRIDE_VAR { $$ = $1; }
-   | PROTECTED_FINAL_OVERRIDE_VAR { $$ = $1; }
-   | PUBLIC_OPEN_OVERRIDE_VAR { $$ = $1; }
-   | PROTECTED_OPEN_OVERRIDE_VAR { $$ = $1; }
-   | OPEN_OVERRIDE_VAR { $$ = $1; }
-   | FINAL_OVERRIDE_VAR { $$ = $1; }
+var: VAR { $$ = ModifierMap::createFunOrVarModifiers(NONE, NONE, NONE); }
+   | PRIVATE_VAR { $$ = ModifierMap::createFunOrVarModifiers(PRIVATE, NONE, NONE); }
+   | PUBLIC_VAR { $$ = ModifierMap::createFunOrVarModifiers(PUBLIC, NONE, NONE); }
+   | PRIVATE_FINAL_VAR { $$ = ModifierMap::createFunOrVarModifiers(PRIVATE, FINAL, NONE); }
+   | PUBLIC_FINAL_VAR { $$ = ModifierMap::createFunOrVarModifiers(PUBLIC, FINAL, NONE); }
+   | PROTECTED_FINAL_VAR { $$ = ModifierMap::createFunOrVarModifiers(PROTECTED, FINAL, NONE); }
+   | PUBLIC_OPEN_VAR { $$ = ModifierMap::createFunOrVarModifiers(PUBLIC, OPEN, NONE); }
+   | PROTECTED_OPEN_VAR { $$ = ModifierMap::createFunOrVarModifiers(PROTECTED, OPEN, NONE); }
+   | PUBLIC_FINAL_OVERRIDE_VAR { $$ = ModifierMap::createFunOrVarModifiers(PUBLIC, FINAL, OVERRIDE); }
+   | PROTECTED_FINAL_OVERRIDE_VAR { $$ = ModifierMap::createFunOrVarModifiers(PROTECTED, FINAL, OVERRIDE); }
+   | PUBLIC_OPEN_OVERRIDE_VAR { $$ = ModifierMap::createFunOrVarModifiers(PUBLIC, OPEN, OVERRIDE); }
+   | PROTECTED_OPEN_OVERRIDE_VAR { $$ = ModifierMap::createFunOrVarModifiers(PROTECTED, OPEN, OVERRIDE); }
+   | OPEN_OVERRIDE_VAR { $$ = ModifierMap::createFunOrVarModifiers(NONE, OPEN, OVERRIDE); }
+   | FINAL_OVERRIDE_VAR { $$ = ModifierMap::createFunOrVarModifiers(NONE, FINAL, OVERRIDE); }
    ;
 
-val: VAL { $$ = $1; }
-   | PRIVATE_VAL { $$ = $1; }
-   | PUBLIC_VAL { $$ = $1; }
-   | PRIVATE_FINAL_VAL { $$ = $1; }
-   | PUBLIC_FINAL_VAL { $$ = $1; }
-   | PROTECTED_FINAL_VAL { $$ = $1; }
-   | PUBLIC_OPEN_VAL { $$ = $1; }
-   | PROTECTED_OPEN_VAL { $$ = $1; }
-   | PUBLIC_FINAL_OVERRIDE_VAL { $$ = $1; }
-   | PROTECTED_FINAL_OVERRIDE_VAL { $$ = $1; }
-   | PUBLIC_OPEN_OVERRIDE_VAL { $$ = $1; }
-   | PROTECTED_OPEN_OVERRIDE_VAL { $$ = $1; }
-   | OPEN_OVERRIDE_VAL { $$ = $1; }
-   | FINAL_OVERRIDE_VAL { $$ = $1; }
+val: VAL { $$ = ModifierMap::createFunOrVarModifiers(NONE, NONE, NONE); }
+   | PRIVATE_VAL { $$ = ModifierMap::createFunOrVarModifiers(PRIVATE, NONE, NONE); }
+   | PUBLIC_VAL { $$ = ModifierMap::createFunOrVarModifiers(PUBLIC, NONE, NONE); }
+   | PRIVATE_FINAL_VAL { $$ = ModifierMap::createFunOrVarModifiers(PRIVATE, FINAL, NONE); }
+   | PUBLIC_FINAL_VAL { $$ = ModifierMap::createFunOrVarModifiers(PUBLIC, FINAL, NONE); }
+   | PROTECTED_FINAL_VAL { $$ = ModifierMap::createFunOrVarModifiers(PROTECTED, FINAL, NONE); }
+   | PUBLIC_OPEN_VAL { $$ = ModifierMap::createFunOrVarModifiers(PUBLIC, OPEN, NONE); }
+   | PROTECTED_OPEN_VAL { $$ = ModifierMap::createFunOrVarModifiers(PROTECTED, OPEN, NONE); }
+   | PUBLIC_FINAL_OVERRIDE_VAL { $$ = ModifierMap::createFunOrVarModifiers(PUBLIC, FINAL, OVERRIDE); }
+   | PROTECTED_FINAL_OVERRIDE_VAL { $$ = ModifierMap::createFunOrVarModifiers(PROTECTED, FINAL, OVERRIDE); }
+   | PUBLIC_OPEN_OVERRIDE_VAL { $$ = ModifierMap::createFunOrVarModifiers(PUBLIC, OPEN, OVERRIDE); }
+   | PROTECTED_OPEN_OVERRIDE_VAL { $$ = ModifierMap::createFunOrVarModifiers(PROTECTED, OPEN, OVERRIDE); }
+   | OPEN_OVERRIDE_VAL { $$ = ModifierMap::createFunOrVarModifiers(NONE, OPEN, OVERRIDE); }
+   | FINAL_OVERRIDE_VAL { $$ = ModifierMap::createFunOrVarModifiers(NONE, FINAL, OVERRIDE); }
    ;
 
-fun: PRIVATE_FUN { $$ = $1; }
-   | PUBLIC_FUN { $$ = $1; }
-   | PRIVATE_FINAL_FUN { $$ = $1; }
-   | PUBLIC_FINAL_FUN { $$ = $1; }
-   | PROTECTED_FINAL_FUN { $$ = $1; }
-   | PUBLIC_OPEN_FUN { $$ = $1; }
-   | PROTECTED_OPEN_FUN { $$ = $1; }
-   | PUBLIC_FINAL_OVERRIDE_FUN { $$ = $1; }
-   | PROTECTED_FINAL_OVERRIDE_FUN { $$ = $1; }
-   | PUBLIC_OPEN_OVERRIDE_FUN { $$ = $1; }
-   | PROTECTED_OPEN_OVERRIDE_FUN { $$ = $1; }
-   | OPEN_OVERRIDE_FUN { $$ = $1; }
-   | FINAL_OVERRIDE_FUN { $$ = $1; }
+
+fun: PRIVATE_FUN { $$ = ModifierMap::createFunOrVarModifiers(PRIVATE, NONE, NONE); }
+   | PUBLIC_FUN { $$ = ModifierMap::createFunOrVarModifiers(PUBLIC, NONE, NONE); }
+   | PRIVATE_FINAL_FUN { $$ = ModifierMap::createFunOrVarModifiers(PRIVATE, FINAL, NONE); }
+   | PUBLIC_FINAL_FUN { $$ = ModifierMap::createFunOrVarModifiers(PUBLIC, FINAL, NONE); }
+   | PROTECTED_FINAL_FUN { $$ = ModifierMap::createFunOrVarModifiers(PROTECTED, FINAL, NONE); }
+   | PUBLIC_OPEN_FUN { $$ = ModifierMap::createFunOrVarModifiers(PUBLIC, OPEN, NONE); }
+   | PROTECTED_OPEN_FUN { $$ = ModifierMap::createFunOrVarModifiers(PROTECTED, OPEN, NONE); }
+   | PUBLIC_FINAL_OVERRIDE_FUN { $$ = ModifierMap::createFunOrVarModifiers(PUBLIC, FINAL, OVERRIDE); }
+   | PROTECTED_FINAL_OVERRIDE_FUN { $$ = ModifierMap::createFunOrVarModifiers(PROTECTED, FINAL, OVERRIDE); }
+   | PUBLIC_OPEN_OVERRIDE_FUN { $$ = ModifierMap::createFunOrVarModifiers(PUBLIC, OPEN, OVERRIDE); }
+   | PROTECTED_OPEN_OVERRIDE_FUN { $$ = ModifierMap::createFunOrVarModifiers(PROTECTED, OPEN, OVERRIDE); }
+   | OPEN_OVERRIDE_FUN { $$ = ModifierMap::createFunOrVarModifiers(NONE, OPEN, OVERRIDE); }
+   | FINAL_OVERRIDE_FUN { $$ = ModifierMap::createFunOrVarModifiers(NONE, FINAL, OVERRIDE); }
    ;
 
-class_constructor: PRIVATE_CONSTRUCTOR { $$ = $1; }
-		 | PUBLIC_CONSTRUCTOR { $$ = $1; }
-		 | PROTECTED_CONSTRUCTOR { $$ = $1; }
+class_constructor: PRIVATE_CONSTRUCTOR { $$ = ModifierMap::createClassConstructorModifiers(PRIVATE); }
+		 | PUBLIC_CONSTRUCTOR { $$ = ModifierMap::createClassConstructorModifiers(PUBLIC); }
+		 | PROTECTED_CONSTRUCTOR { $$ = ModifierMap::createClassConstructorModifiers(PROTECTED); }
 		 ;
 
-class: PRIVATE_FINAL_CLASS { $$ = $1; }
-     | PUBLIC_FINAL_CLASS { $$ = $1; }
-     | PRIVATE_OPEN_CLASS { $$ = $1; }
-     | PUBLIC_OPEN_CLASS { $$ = $1; }
+class: PRIVATE_FINAL_CLASS { $$ = ModifierMap::createClassModifiers(PRIVATE, FINAL); }
+     | PUBLIC_FINAL_CLASS { $$ = ModifierMap::createClassModifiers(PUBLIC, FINAL); }
+     | PRIVATE_OPEN_CLASS { $$ = ModifierMap::createClassModifiers(PRIVATE, OPEN); }
+     | PUBLIC_OPEN_CLASS { $$ = ModifierMap::createClassModifiers(PUBLIC, OPEN); }
      ;
+
+enum_constructor: PRIVATE_CONSTRUCTOR { $$ = ModifierMap::createEnumConstructorModifiers(PRIVATE); }
+		;
+
+enum: PRIVATE_ENUM { $$ = ModifierMap::createEnumModifiers(PRIVATE); }
+    | PUBLIC_ENUM { $$ = ModifierMap::createEnumModifiers(PUBLIC); }
+    ;
 
 %%
 

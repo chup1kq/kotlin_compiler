@@ -8,6 +8,7 @@ enum ModifierType {
     OPEN,
     FINAL,
     OVERRIDE,
+    NONE
 };
 
 enum ExprType {

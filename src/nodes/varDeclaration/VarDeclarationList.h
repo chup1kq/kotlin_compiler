@@ -9,7 +9,7 @@ public:
 
     VarDeclarationList(VarDeclaration *first);
 
-    static VarDeclarationList* addVarDeclarationToList(VarDeclarationList *list, VarDeclaration *stmt);
+    static VarDeclarationList* addVarDeclarationToList(VarDeclarationList *list, VarDeclaration *varDeclaration);
 
 };
 

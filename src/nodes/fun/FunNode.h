@@ -1,20 +1,20 @@
 #ifndef KOTLIN_COMPILER_FUNNODE_H
 #define KOTLIN_COMPILER_FUNNODE_H
-#include "ExprListNode.h"
-#include "Node.h"
-#include "StmtListNode.h"
-#include "types.h"
-
+#include "VarDeclarationList.h"
+#include "../Node.h"
+#include "modifier/ModifierMap.h"
 
 class FunNode : public Node {
 public:
-    Type type;
-    ModifierType modifier;
+    TypeNode* type;
+    ModifierMap* modifiers;
     string name;
-    ExprListNode args;
-    StmtListNode body;
+    VarDeclarationList* args;
+    StmtListNode* body;
+    ExprNode* singleExpr;
 
-    static FunNode* createFunNode(Type type, ModifierType modifier, string name, ExprListNode args, StmtListNode body);
+    static FunNode * createFunNode(TypeNode* returnType, ModifierMap* modifiers, string name, VarDeclarationList* args, StmtListNode* body);
+    static FunNode * createFunNodeFromExpr(TypeNode* returnType, ModifierMap* modifiers, string name, VarDeclarationList* args, ExprNode* single);
 };
 
 
