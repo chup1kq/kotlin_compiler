@@ -11,7 +11,7 @@ int main() {
     if (root != nullptr) {
         std::cout << "AST создан" << std::endl;
     } else {
-        std::cout << "Ошибка: root == nullptr" << std::endl;
+        std::cout << "Error: root == nullptr" << std::endl;
     }
 
     return 0;
