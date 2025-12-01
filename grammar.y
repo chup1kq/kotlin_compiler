@@ -296,7 +296,8 @@ declaration_argument_list: declaration_argument
 		         | declaration_argument_list ele ',' ele declaration_argument
 		         ;
 
-allowed_declaration_params: declaration_argument_list
+allowed_declaration_params: ele
+			  | declaration_argument_list
 		          | declaration_argument_list ele ','
 		          ;
 
@@ -372,7 +373,9 @@ class_member: var_body end_of_stmt
             ;
 
 constructor_declaration: class_constructor ele '(' allowed_declaration_params ')' ele stmt_block
-                       ;
+		       | class_constructor ele '(' allowed_declaration_params ')' ':' ele THIS ele '(' allowed_declaration_params ')' ele stmt_block
+		       | class_constructor ele '(' allowed_declaration_params ')' ':' ele SUPER ele '(' allowed_declaration_params ')' ele stmt_block
+		       ;
 
 var: VAR
    | PRIVATE_VAR

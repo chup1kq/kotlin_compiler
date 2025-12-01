@@ -347,7 +347,8 @@ declaration_argument_list: declaration_argument { $$ = VarDeclarationList::addVa
 		         | declaration_argument_list ele ',' ele declaration_argument { $$ = VarDeclarationList::addVarDeclarationToList($1, $5); }
 		         ;
 
-allowed_declaration_params: declaration_argument_list { $$ = $1; }
+allowed_declaration_params: ele { $$ = VarDeclarationList::addVarDeclarationToList(nullptr, nullptr);  }
+			  | declaration_argument_list { $$ = $1; }
 		          | declaration_argument_list ele ',' { $$ = $1; }
 		          ;
 
@@ -412,7 +413,9 @@ class_member: var_body end_of_stmt
             ;
 
 constructor_declaration: class_constructor ele '(' allowed_declaration_params ')' ele stmt_block
-                       ;
+		       | class_constructor ele '(' allowed_declaration_params ')' ':' ele THIS ele '(' allowed_declaration_params ')' ele stmt_block
+		       | class_constructor ele '(' allowed_declaration_params ')' ':' ele SUPER ele '(' allowed_declaration_params ')' ele stmt_block
+		       ;
 
 var: VAR { $$ = ModifierMap::createFunOrVarModifiers(NONE, NONE, NONE); }
    | PRIVATE_VAR { $$ = ModifierMap::createFunOrVarModifiers(PRIVATE, NONE, NONE); }
