@@ -335,12 +335,12 @@ enum_body: '{' ele '}'
          | '{' enum_entries '}'
          | '{' enum_entries ',' ele '}'
          | '{' enum_entries ';' ele '}'
-         | '{' enum_entries ';' ele fun_declaration_list ele '}'
+         | '{' enum_entries ';' ele class_member_list ele '}'
          ;
 
 enum_entry: ele ID ele
           | ele ID ele '(' argument_list ')' ele
-          | ele ID ele '(' argument_list ',' ele ')' ele
+          | ele ID ele '(' argument_list ',' ')' ele
           ;
 
 enum_entries: enum_entry
@@ -385,10 +385,6 @@ fun_declaration: fun ele ID ele '(' allowed_declaration_params ')' ele stmt_bloc
 	       | fun ele ID ele '(' allowed_declaration_params ')' ele ':' nullable_type ele '=' ele expr end_of_stmt { $$ = FunNode::createFunNodeFromExpr($10, $1, $3, $6, $14); }
 	       | fun ele ID ele '(' allowed_declaration_params ')' ele ':' type ele '=' ele expr end_of_stmt { $$ = FunNode::createFunNodeFromExpr($10, $1, $3, $6, $14); }
 	       ;
-
-fun_declaration_list: fun_declaration
-		    | fun_declaration_list ele fun_declaration
-		    ;
 
 class_declaration: class ele ID ele { $$ = ClassNode::createClassNode($1, $3, nullptr, nullptr, nullptr); }
 		 | class ele ID ele class_body ele { $$ = ClassNode::createClassNode($1, $3, nullptr, nullptr, $5); }

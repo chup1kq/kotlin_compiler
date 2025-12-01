@@ -272,12 +272,12 @@ enum_body: '{' ele '}'
          | '{' enum_entries '}'
          | '{' enum_entries ',' ele '}'
          | '{' enum_entries ';' ele '}'
-         | '{' enum_entries ';' ele fun_declaration_list ele '}'
+         | '{' enum_entries ';' ele class_member_list ele '}'
          ;
 
 enum_entry: ele ID ele
           | ele ID ele '(' argument_list ')' ele
-          | ele ID ele '(' argument_list ',' ele ')' ele
+          | ele ID ele '(' argument_list ',' ')' ele
           ;
 
 enum_entries: enum_entry
@@ -323,10 +323,6 @@ fun_declaration: fun ele ID ele '(' allowed_declaration_params ')' ele stmt_bloc
 	       | fun ele ID ele '(' allowed_declaration_params ')' ele ':' type ele '=' ele expr end_of_stmt
 	       ;
 
-fun_declaration_list: fun_declaration
-		    | fun_declaration_list ele fun_declaration
-		    ;
-
 class_constructor: PRIVATE_CONSTRUCTOR
 		 | PUBLIC_CONSTRUCTOR
 		 | PROTECTED_CONSTRUCTOR
@@ -362,15 +358,15 @@ class_body: '{' ele '}'
           | '{' ele class_member_list ele '}'
           ;
 
-class_member_list: class_member
-                 | class_member_list ele class_member
+class_member_list: var_body end_of_stmt
+                 | val_body end_of_stmt
+                 | fun_declaration
+                 | constructor_declaration
+                 | class_member_list ele var_body end_of_stmt
+                 | class_member_list ele val_body end_of_stmt
+                 | class_member_list ele fun_declaration
+                 | class_member_list ele constructor_declaration
                  ;
-
-class_member: var_body end_of_stmt
-            | val_body end_of_stmt
-            | fun_declaration
-            | constructor_declaration
-            ;
 
 constructor_declaration: class_constructor ele '(' allowed_declaration_params ')' ele stmt_block
 		       | class_constructor ele '(' allowed_declaration_params ')' ':' ele THIS ele '(' allowed_declaration_params ')' ele stmt_block
