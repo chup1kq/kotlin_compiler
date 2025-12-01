@@ -383,17 +383,18 @@ class_declaration: class ele ID ele
 		 | class ele ID ele '(' class_allowed_declaration_params ')' ele class_body ele
 		 | class ele ID ele class_constructor ele '(' class_allowed_declaration_params ')' ele
 		 | class ele ID ele class_constructor ele '(' class_allowed_declaration_params ')' ele class_body ele
-		 | class ele ID ele inheritance ele
-		 | class ele ID ele inheritance ele class_body ele
-		 | class ele ID ele '(' class_allowed_declaration_params ')' ele inheritance ele
-		 | class ele ID ele '(' class_allowed_declaration_params ')' ele inheritance ele class_body ele
-		 | class ele ID ele class_constructor ele '(' class_allowed_declaration_params ')' ele inheritance ele
-		 | class ele ID ele class_constructor ele '(' class_allowed_declaration_params ')' ele inheritance ele class_body ele
+		 | class ele ID inheritance
+		 | class ele ID inheritance class_body ele
+		 | class ele ID ele '(' class_allowed_declaration_params ')' inheritance
+		 | class ele ID ele '(' class_allowed_declaration_params ')' inheritance class_body ele
+		 | class ele ID ele class_constructor ele '(' class_allowed_declaration_params ')' inheritance
+		 | class ele ID ele class_constructor ele '(' class_allowed_declaration_params ')' inheritance class_body ele
 		 ;
 
-inheritance: ID ele '(' ele ')'
-	   | ID ele '(' ele expr_list ele ')'
-	   | ID ele '(' ele expr_list ele ',' ele ')'
+inheritance: ':' ele ID ele
+	   | ':' ele ID ele '(' ele ')' ele
+	   | ':' ele ID ele '(' ele expr_list ele ')' ele
+	   | ':' ele ID ele '(' ele expr_list ele ',' ele ')' ele
 	   ;
 
 class_body: '{' ele '}'
@@ -410,7 +411,7 @@ class_member: var_body end_of_stmt
             | constructor_declaration
             ;
 
-constructor_declaration: class_constructor '(' allowed_declaration_params ')' ele stmt_block
+constructor_declaration: class_constructor ele '(' allowed_declaration_params ')' ele stmt_block
                        ;
 
 var: VAR { $$ = ModifierMap::createFunOrVarModifiers(NONE, NONE, NONE); }
