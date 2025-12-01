@@ -81,4 +81,8 @@ add_executable(kotlin_parser
         src/nodes/class/members/enumEntry/EnumEntry.h
         src/nodes/class/members/enumEntry/EnumEntryList.cpp
         src/nodes/class/members/enumEntry/EnumEntryList.h
+        src/nodes/topLevel/KotlinFileNode.cpp
+        src/nodes/topLevel/KotlinFileNode.h
+        src/nodes/topLevel/KotlinElementList.cpp
+        src/nodes/topLevel/KotlinElementList.h
 )

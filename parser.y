@@ -16,6 +16,8 @@
     #include "../src/nodes/class/members/Constructor.h"
     #include "../src/nodes/class/members/enumEntry/EnumEntry.h"
     #include "../src/nodes/class/members/enumEntry/EnumEntryList.h"
+    #include "../src/nodes/topLevel/KotlinFileNode.h"
+    #include "../src/nodes/topLevel/KotlinElementList.h"
 }
 
 %code {
@@ -23,9 +25,10 @@
     using namespace std;
 
     int yylex();
-    void yyerror(const char* s);
+    void yyerror(KotlinFileNode** out_root, const char* s);
 }
 
+%parse-param { KotlinFileNode** out_root }
 
 %union {
     int intLiteral;
@@ -51,6 +54,8 @@
     Inheritance* inher;
     EnumEntry* enumEntry;
     EnumEntryList* enumEntryList;
+    KotlinFileNode* kotlinFile;
+    KotlinElementList* kotlinElementList;
 
 }
 
@@ -142,21 +147,24 @@
 %type <enumEntry> enum_entry
 %type <enumEntryList> enum_entries
 
+%type <kotlinElementList> top_level_declaration_list
+%type <kotlinFile> kotlin_file
+
 %start kotlin_file
 
 %%
 
-kotlin_file: top_level_declaration_list
+kotlin_file: top_level_declaration_list { *out_root = new KotlinFileNode($1); }
 
-top_level_declaration_list: top_level_declaration
-			  | top_level_declaration_list top_level_declaration
+top_level_declaration_list: class_declaration { $$ = KotlinElementList::addElement(nullptr, $1); }
+			  | fun_declaration { $$ = KotlinElementList::addElement(nullptr, $1); }
+			  | enum_declaration { $$ = KotlinElementList::addElement(nullptr, $1); }
+			  | ';' { $$ = new KotlinElementList(); }
+			  | top_level_declaration_list class_declaration { $$ = KotlinElementList::addElement($1, $2); }
+			  | top_level_declaration_list fun_declaration { $$ = KotlinElementList::addElement($1, $2); }
+			  | top_level_declaration_list enum_declaration { $$ = KotlinElementList::addElement($1, $2); }
+			  | top_level_declaration_list ';' { $$ = $1; }
 			  ;
-
-top_level_declaration: class_declaration
-		     | fun_declaration
-		     | enum_declaration
-		     | ';'
-		     ;
 
 ele: /* empty */
    | ENDL
@@ -500,6 +508,6 @@ enum: PRIVATE_ENUM { $$ = ModifierMap::createEnumModifiers(PRIVATE); }
 
 %%
 
-void yyerror(const char* s) {
-    cerr << "Parser error: " << s << endl;
+void yyerror(KotlinFileNode** out_root, const char* s) {
+    std::cerr << "Parser error: " << s << std::endl;
 }

@@ -1,6 +1,18 @@
-extern int yyparse();
+#include <iostream>
+
+#include "lexer-build/parser.hpp"
+#include "src/nodes/topLevel/KotlinFileNode.h"
 
 int main() {
-    yyparse();
+    KotlinFileNode* root = nullptr;
+
+    yyparse(&root);
+
+    if (root != nullptr) {
+        std::cout << "AST создан" << std::endl;
+    } else {
+        std::cout << "Ошибка: root == nullptr" << std::endl;
+    }
+
     return 0;
 }
