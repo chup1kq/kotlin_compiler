@@ -51,6 +51,14 @@ StmtNode *StmtNode::createVarOrValStmtNode(StmtType type, VarDeclaration *varDec
     return node;
 }
 
+StmtNode *StmtNode::createVarOrValStmtNode(ModifierMap* modifiers, StmtType type, VarDeclaration *varDeclaration) {
+    StmtNode* node = new StmtNode();
+    node->varModifiers = modifiers;
+    node->type = type;
+    node->varDeclaration = varDeclaration;
+    return node;
+}
+
 StmtNode * StmtNode::createForNodeFromSingleStmt(VarDeclaration* iterator, ExprNode *range, StmtNode *cycleStmt) {
     StmtNode* node = new StmtNode();
     node->type = _FOR;

@@ -39,6 +39,7 @@ include_directories(
         ${CMAKE_SOURCE_DIR}/src/nodes/varDeclaration
         ${CMAKE_SOURCE_DIR}/src/nodes/fun
         ${CMAKE_SOURCE_DIR}/src/nodes/modifier
+        ${CMAKE_SOURCE_DIR}/src/nodes/class
 )
 
 add_executable(kotlin_parser
@@ -68,8 +69,12 @@ add_executable(kotlin_parser
         src/nodes/fun/FunNode.h
         src/nodes/class/ClassNode.cpp
         src/nodes/class/ClassNode.h
-        src/nodes/class/ClassBodyNode.cpp
-        src/nodes/class/ClassBodyNode.h
+        src/nodes/class/members/ClassBodyNode.cpp
+        src/nodes/class/members/ClassBodyNode.h
         src/nodes/modifier/ModifierMap.cpp
         src/nodes/modifier/ModifierMap.h
+        src/nodes/class/Inheritance.cpp
+        src/nodes/class/Inheritance.h
+        src/nodes/class/members/Constructor.cpp
+        src/nodes/class/members/Constructor.h
 )

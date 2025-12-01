@@ -2,6 +2,7 @@
 #define KOTLIN_COMPILER_STMTNODE_H
 #include <list>
 
+#include "ModifierMap.h"
 #include "../Node.h"
 #include "StmtListNode.h"
 #include "../types.h"
@@ -20,6 +21,7 @@ public:
     VarDeclaration *varDeclaration;
     VarDeclaration *forIterator;
     VarDeclarationList *forIteratorList;
+    ModifierMap* varModifiers;
 
     static StmtNode* createCycleNodeFromSingleStmt(StmtType type, ExprNode* cycleCond, StmtNode* cycleStmt);
     static StmtNode* createCycleNodeFromBlockStmt(StmtType type, ExprNode* cycleCond, StmtListNode* cycleStmt);
@@ -32,6 +34,7 @@ public:
     static StmtNode* createEmptyStmt();
     static StmtNode* createStmtFromExpr(ExprNode* expr);
     static StmtNode* createVarOrValStmtNode(StmtType type, VarDeclaration* varDeclaration);
+    static StmtNode* createVarOrValStmtNode(ModifierMap* modifiers, StmtType type, VarDeclaration* varDeclaration);
     static StmtNode * createReturnNode(ExprNode* expr);
 
 };

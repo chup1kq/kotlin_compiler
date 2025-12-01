@@ -1,0 +1,23 @@
+#ifndef KOTLIN_COMPILER_CONSTRUCTOR_H
+#define KOTLIN_COMPILER_CONSTRUCTOR_H
+#include "ModifierMap.h"
+#include "Node.h"
+#include "StmtListNode.h"
+
+class VarDeclarationList;
+
+class Constructor : public Node {
+public:
+    ModifierMap* modifiers;
+    VarDeclarationList* args;
+    StmtListNode* stmts;
+    string prevConstructor;
+    VarDeclarationList* prevConstructorArgs;
+
+    static Constructor* createPrimaryConstructor(ModifierMap* modifiers, VarDeclarationList* args, StmtListNode* stmts);
+    static Constructor* createSecondaryConstructor(ModifierMap* modifiers, VarDeclarationList* args, StmtListNode* stmts, string prevConstructor, VarDeclarationList* prevConstructorArgs);
+
+};
+
+
+#endif //KOTLIN_COMPILER_CONSTRUCTOR_H

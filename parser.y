@@ -10,6 +10,10 @@
     #include "../src/nodes/varDeclaration/VarDeclarationList.h"
     #include "../src/nodes/fun/FunNode.h"
     #include "../src/nodes/modifier/ModifierMap.h"
+    #include "../src/nodes/class/ClassNode.h"
+    #include "../src/nodes/class/Inheritance.h"
+    #include "../src/nodes/class/members/ClassBodyNode.h"
+    #include "../src/nodes/class/members/Constructor.h"
 }
 
 %code {
@@ -39,6 +43,10 @@
     VarDeclarationList* varDeclList;
     FunNode* function;
     ModifierMap* modifiers;
+    ClassNode* classDeclaration;
+    Constructor* contruct;
+    ClassBodyNode* classBody;
+    Inheritance* inher;
 }
 
 %token NON
@@ -47,7 +55,7 @@
 %token FOR WHILE DO
 %token <modifiers> VAL VAR
 %token RETURN BREAK CONTINUE
-%token THIS SUPER
+%token <stringLiteral> THIS SUPER
 %token ARRAY ARRAY_OF
 %token ENDL
 %token <identifier>ID
@@ -118,10 +126,14 @@
 %type <varDecl> var_declaration var_declaration_default_value
 %type <varDeclList> var_declaration_list
 
-%type <varDeclList> class_declaration_argument_list declaration_argument_list allowed_declaration_params
+%type <varDeclList> class_declaration_argument_list declaration_argument_list allowed_declaration_params class_allowed_declaration_params
 %type <varDecl> declaration_argument class_declaration_argument
 
 %type <function> fun_declaration
+%type <classDeclaration> class_declaration enum_declaration
+%type <contruct> constructor_declaration
+%type <classBody> class_body
+%type <inher> inheritance
 
 %start kotlin_file
 
@@ -352,18 +364,18 @@ allowed_declaration_params: ele { $$ = VarDeclarationList::addVarDeclarationToLi
 		          | declaration_argument_list ele ',' { $$ = $1; }
 		          ;
 
-class_declaration_argument: var ele declaration_argument
-			  | val ele declaration_argument
-			  | declaration_argument
+class_declaration_argument: var ele declaration_argument { $$ = $3; }
+			  | val ele declaration_argument { $$ = $3; }
+			  | declaration_argument { $$ = $1; }
 			  ;
 
-class_declaration_argument_list: class_declaration_argument
-		               | class_declaration_argument_list ele ',' ele class_declaration_argument
+class_declaration_argument_list: class_declaration_argument { $$ = VarDeclarationList::addVarDeclarationToList(nullptr, $1); }
+		               | class_declaration_argument_list ele ',' ele class_declaration_argument { $$ = VarDeclarationList::addVarDeclarationToList($1, $5); }
 		               ;
 
-class_allowed_declaration_params: ele
-			        | ele class_declaration_argument_list ele
-			        | ele class_declaration_argument_list ele ',' ele
+class_allowed_declaration_params: ele { $$ = VarDeclarationList::addVarDeclarationToList(nullptr, nullptr); }
+			        | ele class_declaration_argument_list ele { $$ = $2; }
+			        | ele class_declaration_argument_list ele ',' ele { $$ = $2; }
 			        ;
 
 fun_declaration: fun ele ID ele '(' allowed_declaration_params ')' ele stmt_block { $$ = FunNode::createFunNode(TypeNode::createType(_VOID, false), $1, $3, $6, $9); }
@@ -378,24 +390,24 @@ fun_declaration_list: fun_declaration
 		    | fun_declaration_list ele fun_declaration
 		    ;
 
-class_declaration: class ele ID ele
-		 | class ele ID ele class_body ele
-		 | class ele ID ele '(' class_allowed_declaration_params ')' ele
-		 | class ele ID ele '(' class_allowed_declaration_params ')' ele class_body ele
-		 | class ele ID ele class_constructor ele '(' class_allowed_declaration_params ')' ele
-		 | class ele ID ele class_constructor ele '(' class_allowed_declaration_params ')' ele class_body ele
-		 | class ele ID inheritance
-		 | class ele ID inheritance class_body ele
-		 | class ele ID ele '(' class_allowed_declaration_params ')' inheritance
-		 | class ele ID ele '(' class_allowed_declaration_params ')' inheritance class_body ele
-		 | class ele ID ele class_constructor ele '(' class_allowed_declaration_params ')' inheritance
-		 | class ele ID ele class_constructor ele '(' class_allowed_declaration_params ')' inheritance class_body ele
+class_declaration: class ele ID ele { $$ = ClassNode::createClassNode($1, $3, nullptr, nullptr, nullptr); }
+		 | class ele ID ele class_body ele { $$ = ClassNode::createClassNode($1, $3, nullptr, nullptr, $5); }
+		 | class ele ID ele '(' class_allowed_declaration_params ')' ele { $$ = ClassNode::createClassNode($1, $3, Constructor::createPrimaryConstructor(ModifierMap::createClassConstructorModifiers(NONE), $6, nullptr), nullptr, nullptr); }
+		 | class ele ID ele '(' class_allowed_declaration_params ')' ele class_body ele { $$ = ClassNode::createClassNode($1, $3, Constructor::createPrimaryConstructor(ModifierMap::createClassConstructorModifiers(NONE), $6, nullptr), nullptr, $9); }
+		 | class ele ID ele class_constructor ele '(' class_allowed_declaration_params ')' ele { $$ = ClassNode::createClassNode($1, $3, Constructor::createPrimaryConstructor($5, $8, nullptr), nullptr, nullptr); }
+		 | class ele ID ele class_constructor ele '(' class_allowed_declaration_params ')' ele class_body ele { $$ = ClassNode::createClassNode($1, $3, Constructor::createPrimaryConstructor($5, $8, nullptr), nullptr, $11); }
+		 | class ele ID inheritance { $$ = ClassNode::createClassNode($1, $3, nullptr, $4, nullptr); }
+		 | class ele ID inheritance class_body ele { $$ = ClassNode::createClassNode($1, $3, nullptr, $4, $5); }
+		 | class ele ID ele '(' class_allowed_declaration_params ')' inheritance { $$ = ClassNode::createClassNode($1, $3, Constructor::createPrimaryConstructor(ModifierMap::createClassConstructorModifiers(NONE), $6, nullptr), $8, nullptr); }
+		 | class ele ID ele '(' class_allowed_declaration_params ')' inheritance class_body ele { $$ = ClassNode::createClassNode($1, $3, Constructor::createPrimaryConstructor(ModifierMap::createClassConstructorModifiers(NONE), $6, nullptr), $8, $9); }
+		 | class ele ID ele class_constructor ele '(' class_allowed_declaration_params ')' inheritance { $$ = ClassNode::createClassNode($1, $3, Constructor::createPrimaryConstructor($5, $8, nullptr), $10, nullptr); }
+		 | class ele ID ele class_constructor ele '(' class_allowed_declaration_params ')' inheritance class_body ele { $$ = ClassNode::createClassNode($1, $3, Constructor::createPrimaryConstructor($5, $8, nullptr), $10, $11); }
 		 ;
 
-inheritance: ':' ele ID ele
-	   | ':' ele ID ele '(' ele ')' ele
-	   | ':' ele ID ele '(' ele expr_list ele ')' ele
-	   | ':' ele ID ele '(' ele expr_list ele ',' ele ')' ele
+inheritance: ':' ele ID ele { $$ = Inheritance::createInheritance($3, nullptr); }
+	   | ':' ele ID ele '(' ele ')' ele { $$ = Inheritance::createInheritance($3, nullptr); }
+	   | ':' ele ID ele '(' ele expr_list ele ')' ele { $$ = Inheritance::createInheritance($3, $7); }
+	   | ':' ele ID ele '(' ele expr_list ele ',' ele ')' ele { $$ = Inheritance::createInheritance($3, $7); }
 	   ;
 
 class_body: '{' ele '}'
@@ -412,9 +424,9 @@ class_member: var_body end_of_stmt
             | constructor_declaration
             ;
 
-constructor_declaration: class_constructor ele '(' allowed_declaration_params ')' ele stmt_block
-		       | class_constructor ele '(' allowed_declaration_params ')' ':' ele THIS ele '(' allowed_declaration_params ')' ele stmt_block
-		       | class_constructor ele '(' allowed_declaration_params ')' ':' ele SUPER ele '(' allowed_declaration_params ')' ele stmt_block
+constructor_declaration: class_constructor ele '(' allowed_declaration_params ')' ele stmt_block { $$ = Constructor::createPrimaryConstructor($1, $4, $7); }
+		       | class_constructor ele '(' allowed_declaration_params ')' ':' ele THIS ele '(' allowed_declaration_params ')' ele stmt_block { $$ = Constructor::createSecondaryConstructor($1, $4, $14, $8, $11); }
+		       | class_constructor ele '(' allowed_declaration_params ')' ':' ele SUPER ele '(' allowed_declaration_params ')' ele stmt_block { $$ = Constructor::createSecondaryConstructor($1, $4, $14, $8, $11); }
 		       ;
 
 var: VAR { $$ = ModifierMap::createFunOrVarModifiers(NONE, NONE, NONE); }
