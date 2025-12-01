@@ -3,10 +3,11 @@
 #include <map>
 #include <string>
 
+#include "Node.h"
 #include "types.h"
 
 
-class ModifierMap {
+class ModifierMap : public Node  {
 public:
     std::map<std::string, ModifierType> *modifiers;
 

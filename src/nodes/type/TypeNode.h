@@ -3,7 +3,7 @@
 #include "../Node.h"
 #include "../types.h"
 
-class TypeNode: public Node {
+class TypeNode : public Node {
     public:
         Type type;
         bool isNull;

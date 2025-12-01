@@ -5,7 +5,7 @@
 #include "EnumEntry.h"
 
 
-class EnumEntryList {
+class EnumEntryList : public Node {
 public:
     std::list<EnumEntry*> *enumEntries;
 

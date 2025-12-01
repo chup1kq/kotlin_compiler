@@ -5,7 +5,7 @@
 #include "../Node.h"
 
 
-class StmtListNode: public Node {
+class StmtListNode : public Node {
 public:
     std::list<StmtNode*> *stmts;
 

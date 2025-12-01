@@ -3,7 +3,7 @@
 #include "VarDeclaration.h"
 
 
-class VarDeclarationList {
+class VarDeclarationList : public Node  {
 public:
     std::list<VarDeclaration*> *decls;
 

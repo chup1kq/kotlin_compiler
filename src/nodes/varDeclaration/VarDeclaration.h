@@ -5,7 +5,7 @@
 #include "../expr/ExprNode.h"
 
 
-class VarDeclaration {
+class VarDeclaration : public Node  {
 public:
     std::string varId;
     TypeNode* varType;

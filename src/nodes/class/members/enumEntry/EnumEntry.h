@@ -5,7 +5,7 @@
 #include "ExprListNode.h"
 
 
-class EnumEntry {
+class EnumEntry : public Node {
 public:
     std::string name;
     ExprListNode* params;
