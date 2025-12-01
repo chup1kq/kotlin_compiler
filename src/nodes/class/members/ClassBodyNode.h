@@ -6,6 +6,8 @@
 #include "FunNode.h"
 #include "StmtListNode.h"
 
+#include "enumEntry/EnumEntryList.h"
+
 class ClassBodyNode : public Node {
 public:
     std::list<Constructor*> constructors;
@@ -15,6 +17,11 @@ public:
     static ClassBodyNode* addMember(ClassBodyNode* body, Constructor* constructor);
     static ClassBodyNode* addMember(ClassBodyNode* body, StmtNode* field);
     static ClassBodyNode* addMember(ClassBodyNode* body, FunNode* method);
+
+    EnumEntryList* enumEntries;
+
+    static ClassBodyNode* addEnumEntries(ClassBodyNode* body, EnumEntryList* entries);
+
 
 };
 

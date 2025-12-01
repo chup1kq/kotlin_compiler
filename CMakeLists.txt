@@ -77,4 +77,8 @@ add_executable(kotlin_parser
         src/nodes/class/Inheritance.h
         src/nodes/class/members/Constructor.cpp
         src/nodes/class/members/Constructor.h
+        src/nodes/class/members/enumEntry/EnumEntry.cpp
+        src/nodes/class/members/enumEntry/EnumEntry.h
+        src/nodes/class/members/enumEntry/EnumEntryList.cpp
+        src/nodes/class/members/enumEntry/EnumEntryList.h
 )

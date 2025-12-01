@@ -26,3 +26,12 @@ ClassBodyNode* ClassBodyNode::addMember(ClassBodyNode* body, FunNode* method) {
     body->methods.push_back(method);
     return body;
 }
+
+ClassBodyNode* ClassBodyNode::addEnumEntries(ClassBodyNode* body, EnumEntryList* entries) {
+    if (!body) {
+        body = new ClassBodyNode();
+    }
+
+    body->enumEntries = entries;
+    return body;
+}

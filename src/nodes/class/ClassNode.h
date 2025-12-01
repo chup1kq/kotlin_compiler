@@ -10,6 +10,7 @@
 
 class ClassNode : public Node {
 public:
+    bool isEnum;
     std::string name;
     ModifierMap* modifiers;
     Inheritance* inheritance;
@@ -18,6 +19,8 @@ public:
     ClassBodyNode* body;
 
     static ClassNode* createClassNode(ModifierMap* modifiers, std::string name, Constructor* primaryConstructor, Inheritance* inheritance, ClassBodyNode* body);
+
+    static ClassNode* createEnumNode(ModifierMap* modifiers, std::string name, Constructor* primaryConstructor, ClassBodyNode* body);
 
 };
 

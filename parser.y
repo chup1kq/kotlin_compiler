@@ -14,6 +14,8 @@
     #include "../src/nodes/class/Inheritance.h"
     #include "../src/nodes/class/members/ClassBodyNode.h"
     #include "../src/nodes/class/members/Constructor.h"
+    #include "../src/nodes/class/members/enumEntry/EnumEntry.h"
+    #include "../src/nodes/class/members/enumEntry/EnumEntryList.h"
 }
 
 %code {
@@ -47,6 +49,9 @@
     Constructor* contruct;
     ClassBodyNode* classBody;
     Inheritance* inher;
+    EnumEntry* enumEntry;
+    EnumEntryList* enumEntryList;
+
 }
 
 %token NON
@@ -132,8 +137,10 @@
 %type <function> fun_declaration
 %type <classDeclaration> class_declaration enum_declaration
 %type <contruct> constructor_declaration
-%type <classBody> class_body class_member_list
+%type <classBody> class_body class_member_list enum_body
 %type <inher> inheritance
+%type <enumEntry> enum_entry
+%type <enumEntryList> enum_entries
 
 %start kotlin_file
 
@@ -323,28 +330,28 @@ return_body: RETURN { $$ = StmtNode::createReturnNode(NULL); }
 	   | RETURN expr { $$ = StmtNode::createReturnNode($2); }
 	   ;
 
-enum_declaration: enum ele ID ele
-		| enum ele ID ele enum_body ele
-		| enum ele ID ele '(' class_allowed_declaration_params ')' ele
-		| enum ele ID ele '(' class_allowed_declaration_params ')' enum_body ele
-		| enum ele ID ele enum_constructor ele '(' class_allowed_declaration_params ')' ele
-		| enum ele ID ele enum_constructor ele '(' class_allowed_declaration_params ')' enum_body ele
+enum_declaration: enum ele ID ele { $$ = ClassNode::createEnumNode($1, $3, nullptr, nullptr); }
+		| enum ele ID ele enum_body ele { $$ = ClassNode::createEnumNode($1, $3, nullptr, $5); }
+		| enum ele ID ele '(' class_allowed_declaration_params ')' ele { $$ = ClassNode::createEnumNode($1, $3, Constructor::createPrimaryConstructor(ModifierMap::createClassConstructorModifiers(NONE), $6, nullptr), nullptr); }
+		| enum ele ID ele '(' class_allowed_declaration_params ')' enum_body ele { $$ = ClassNode::createEnumNode($1, $3, Constructor::createPrimaryConstructor(ModifierMap::createClassConstructorModifiers(NONE), $6, nullptr), $8); }
+		| enum ele ID ele enum_constructor ele '(' class_allowed_declaration_params ')' ele { $$ = ClassNode::createEnumNode($1, $3, Constructor::createPrimaryConstructor($5, $8, nullptr), nullptr); }
+		| enum ele ID ele enum_constructor ele '(' class_allowed_declaration_params ')' enum_body ele { $$ = ClassNode::createEnumNode($1, $3, Constructor::createPrimaryConstructor($5, $8, nullptr), $10); }
 	        ;
 
-enum_body: '{' ele '}'
-         | '{' enum_entries '}'
-         | '{' enum_entries ',' ele '}'
-         | '{' enum_entries ';' ele '}'
-         | '{' enum_entries ';' ele class_member_list ele '}'
+enum_body: '{' ele '}' { $$ = new ClassBodyNode(); }
+         | '{' enum_entries '}' { $$ = ClassBodyNode::addEnumEntries(nullptr, $2); }
+         | '{' enum_entries ',' ele '}' { $$ = ClassBodyNode::addEnumEntries(nullptr, $2); }
+         | '{' enum_entries ';' ele '}' { $$ = ClassBodyNode::addEnumEntries(nullptr, $2); }
+         | '{' enum_entries ';' ele class_member_list ele '}' { $$ = ClassBodyNode::addEnumEntries($5, $2); }
          ;
 
-enum_entry: ele ID ele
-          | ele ID ele '(' argument_list ')' ele
-          | ele ID ele '(' argument_list ',' ')' ele
+enum_entry: ele ID ele { $$ = EnumEntry::createEnumEntry($2, nullptr); }
+          | ele ID ele '(' argument_list ')' ele { $$ = EnumEntry::createEnumEntry($2, $5); }
+          | ele ID ele '(' argument_list ',' ')' ele { $$ = EnumEntry::createEnumEntry($2, $5); }
           ;
 
-enum_entries: enum_entry
-            | enum_entries ',' enum_entry
+enum_entries: enum_entry { $$ = new EnumEntryList($1); }
+            | enum_entries ',' enum_entry { $$ = EnumEntryList::addEnumEntry($1, $3); }
             ;
 
 argument_list: expr { $$ = ExprListNode::addExprToList(nullptr, $1); }
