@@ -132,7 +132,7 @@
 %type <function> fun_declaration
 %type <classDeclaration> class_declaration enum_declaration
 %type <contruct> constructor_declaration
-%type <classBody> class_body
+%type <classBody> class_body class_member_list
 %type <inher> inheritance
 
 %start kotlin_file
@@ -410,19 +410,19 @@ inheritance: ':' ele ID ele { $$ = Inheritance::createInheritance($3, nullptr); 
 	   | ':' ele ID ele '(' ele expr_list ele ',' ele ')' ele { $$ = Inheritance::createInheritance($3, $7); }
 	   ;
 
-class_body: '{' ele '}'
-          | '{' ele class_member_list ele '}'
+class_body: '{' ele '}' { $$ = new ClassBodyNode(); }
+          | '{' ele class_member_list ele '}' { $$ = $3; }
           ;
 
-class_member_list: class_member
-                 | class_member_list ele class_member
+class_member_list: var_body end_of_stmt { $$ = ClassBodyNode::addMember(nullptr, $1); }
+                 | val_body end_of_stmt { $$ = ClassBodyNode::addMember(nullptr, $1); }
+                 | fun_declaration { $$ = ClassBodyNode::addMember(nullptr, $1); }
+                 | constructor_declaration { $$ = ClassBodyNode::addMember(nullptr, $1); }
+                 | class_member_list ele var_body end_of_stmt { $$ = ClassBodyNode::addMember($1, $3); }
+                 | class_member_list ele val_body end_of_stmt { $$ = ClassBodyNode::addMember($1, $3); }
+                 | class_member_list ele fun_declaration { $$ = ClassBodyNode::addMember($1, $3); }
+                 | class_member_list ele constructor_declaration { $$ = ClassBodyNode::addMember($1, $3); }
                  ;
-
-class_member: var_body end_of_stmt
-            | val_body end_of_stmt
-            | fun_declaration
-            | constructor_declaration
-            ;
 
 constructor_declaration: class_constructor ele '(' allowed_declaration_params ')' ele stmt_block { $$ = Constructor::createPrimaryConstructor($1, $4, $7); }
 		       | class_constructor ele '(' allowed_declaration_params ')' ':' ele THIS ele '(' allowed_declaration_params ')' ele stmt_block { $$ = Constructor::createSecondaryConstructor($1, $4, $14, $8, $11); }
