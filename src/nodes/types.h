@@ -56,8 +56,11 @@ enum ExprType {
     _CONJUNCTION,
     _FUNC_CALL,
     _FIELD_ACCESS,
+    _SAFE_FIELD_ACCESS,
     _FUNC_ACCESS,
+    _SAFE_FUNC_ACCESS,
     _ARRAY_EXPR,
+    _ARRAY_ACCESS,
 };
 
 enum StmtType {

@@ -101,7 +101,24 @@ ExprNode * ExprNode::createMethodAccessExprNode(string name, ExprListNode *param
     return node;
 }
 
+ExprNode * ExprNode::createSafeMethodAccessExprNode(string name, ExprListNode *params, ExprNode *expr) {
+    ExprNode* node = new ExprNode();
+    node->type = _SAFE_FUNC_ACCESS;
+    node->identifierName = name;
+    node->params = params;
+    node->left = expr;
+    return node;
+}
+
 ExprNode * ExprNode::createFieldAccessExprNode(string name, ExprNode *expr) {
+    ExprNode* node = new ExprNode();
+    node->type = _FIELD_ACCESS;
+    node->identifierName = name;
+    node->left = expr;
+    return node;
+}
+
+ExprNode * ExprNode::createSafeFieldAccessExprNode(string name, ExprNode *expr) {
     ExprNode* node = new ExprNode();
     node->type = _FIELD_ACCESS;
     node->identifierName = name;
@@ -192,5 +209,13 @@ ExprNode * ExprNode::createArrayExprNode(TypeNode* type, ExprListNode *exprs) {
     node->type = _ARRAY_EXPR;
     node->typeElements = type;
     node->elements = exprs;
+    return node;
+}
+
+ExprNode * ExprNode::createArrayAccessNode(ExprNode* arrayName, ExprNode* id) {
+    ExprNode* node = new ExprNode();
+    node->type = _ARRAY_ACCESS;
+    node->left = arrayName;
+    node->right = id;
     return node;
 }

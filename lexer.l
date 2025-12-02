@@ -206,7 +206,7 @@ step        { processor.foundInappropriateLexem(yytext); printStatementKeyword(y
 var         { processor.processAppropriateElement(yytext); is_prev_lexem_end_of_stmt = false; }
 val         { processor.processAppropriateElement(yytext); is_prev_lexem_end_of_stmt = false; }
 
-fun         { processor.processAppropriateElement(yytext); is_prev_lexem_end_of_stmt = false; }
+fun         { is_prev_lexem_end_of_stmt = false; return processor.processAppropriateElement(yytext); }
 
 class       { processor.processAppropriateElement(yytext); is_prev_lexem_end_of_stmt = false; }
 this        { processor.foundInappropriateLexem(yytext); printStatementKeyword(yytext); is_prev_lexem_end_of_stmt = false; }
@@ -232,8 +232,8 @@ Char        { processor.foundInappropriateLexem(yytext); printType(yytext); is_p
 Boolean     { processor.foundInappropriateLexem(yytext); printType(yytext); is_prev_lexem_end_of_stmt = false; }
 
 null        { processor.foundInappropriateLexem(yytext); printConstantKeyword(yytext); is_prev_lexem_end_of_stmt = false; }
-true        { processor.foundInappropriateLexem(yytext); printConstantKeyword(yytext); is_prev_lexem_end_of_stmt = false; }
-false       { processor.foundInappropriateLexem(yytext); printConstantKeyword(yytext); is_prev_lexem_end_of_stmt = false; }
+true        { processor.foundInappropriateLexem(yytext); printConstantKeyword(yytext); is_prev_lexem_end_of_stmt = false; yylval.boolLiteral = false; return TRUE_LITERAL; }
+false       { processor.foundInappropriateLexem(yytext); printConstantKeyword(yytext); is_prev_lexem_end_of_stmt = false; yylval.boolLiteral = true; return FALSE_LITERAL; }
 
 "+"         { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; }
 "-"         { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; }
@@ -261,24 +261,28 @@ false       { processor.foundInappropriateLexem(yytext); printConstantKeyword(yy
 
 "!"         { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; }
 "?"         { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; }
-":"         { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; }
+":"         { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; return ':'; }
 
 ".."        { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; }
 "..<"       { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; }
-"("         { processor.foundInappropriateLexem(yytext); open_bracket += 1; printOperator(yytext); is_prev_lexem_end_of_stmt = false; }
-")"         { processor.foundInappropriateLexem(yytext); open_bracket -= 1; printOperator(yytext); is_prev_lexem_end_of_stmt = false; }
-"{"         { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; }
-"}"         { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; }
-"["         { processor.foundInappropriateLexem(yytext); open_square_brackets += 1; printOperator(yytext); is_prev_lexem_end_of_stmt = false; }
-"]"         { processor.foundInappropriateLexem(yytext); open_square_brackets -= 1; printOperator(yytext); is_prev_lexem_end_of_stmt = false; }
-";"         { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = true; }
+"("         { processor.foundInappropriateLexem(yytext); open_bracket += 1; printOperator(yytext); is_prev_lexem_end_of_stmt = false; return '('; }
+")"         { processor.foundInappropriateLexem(yytext); open_bracket -= 1; printOperator(yytext); is_prev_lexem_end_of_stmt = false; return ')'; }
+"{"         { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; return '{'; }
+"}"         { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; return '}'; }
+"["         { processor.foundInappropriateLexem(yytext); open_square_brackets += 1; printOperator(yytext); is_prev_lexem_end_of_stmt = false; return '['; }
+"]"         { processor.foundInappropriateLexem(yytext); open_square_brackets -= 1; printOperator(yytext); is_prev_lexem_end_of_stmt = false; return ']'; }
+";"         { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = true; return ';'; }
 
 -?((_[0-9_]+|[0-9][0-9_]*_|[0-9][0-9_]*_\.[0-9_]*|[0-9][0-9_]*\._[0-9_]*)|0{digit}) { std::cout << "Error: invalid numeric literal with underscore: " << yytext << std::endl; }
 
 {number} {
     processor.foundInappropriateLexem(yytext);
     is_prev_lexem_end_of_stmt = false;
-    std::cout << "Integer: " << atoi(remove_underscore(yytext).c_str()) << std::endl;
+
+    yylval.intLiteral = atoi(remove_underscore(yytext).c_str());
+
+    std::cout << "Integer: " << yylval.intLiteral << std::endl;
+    return INT_LITERAL;
 }
 
 {doubleNumber} {
@@ -307,10 +311,12 @@ false       { processor.foundInappropriateLexem(yytext); printConstantKeyword(yy
     std::cout << "Hex number: " << std::stoul(hexStr, nullptr, 16) << std::endl;
 }
 
-{id}  {
+{id} {
     processor.foundInappropriateLexem(yytext);
     is_prev_lexem_end_of_stmt = false;
     std::cout << "Identificator: " << yytext << std::endl;
+
+    yylval.identifier=(char *)malloc(strlen(yytext)+1); strcpy(yylval.identifier, yytext); return ID;
 }
 
 \n+ {
@@ -372,6 +378,8 @@ false       { processor.foundInappropriateLexem(yytext); printConstantKeyword(yy
         if ((open_bracket == 0) && (open_square_brackets == 0)) {
             if (!is_prev_lexem_end_of_stmt) {
                 printEndOfLine();
+                unput(c);
+                return ENDL;
             }
         }
         unput(c);

@@ -37,7 +37,9 @@ public:
     static ExprNode* createExprNode(ExprType type, ExprNode* left, ExprNode* right);
     static ExprNode* createIfNode(ExprNode* ifCond, StmtListNode* trueB, StmtListNode* falseB);
     static ExprNode* createMethodAccessExprNode(string name, ExprListNode* params, ExprNode* expr);
+    static ExprNode* createSafeMethodAccessExprNode(string name, ExprListNode* params, ExprNode* expr);
     static ExprNode* createFieldAccessExprNode(string name, ExprNode* expr);
+    static ExprNode* createSafeFieldAccessExprNode(string name, ExprNode* expr);
     static ExprNode* createFunctionCallExprNode(string name, ExprListNode* params);
     static ExprNode* createAssignmentExprNode(ExprType type, ExprNode* left, ExprNode* right);
     static ExprNode* createBracketExprNode(ExprNode* expr);
@@ -50,6 +52,7 @@ public:
     static ExprNode* createUnaryExprNode(ExprType type, ExprNode* expr);
     static ExprNode* createNotExprNode(ExprNode* expr);
     static ExprNode* createArrayExprNode(TypeNode* type, ExprListNode* exprs);
+    static ExprNode* createArrayAccessNode(ExprNode* arrayName, ExprNode* id);
 };
 
 

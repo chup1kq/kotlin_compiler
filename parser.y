@@ -189,9 +189,9 @@ expr: INT_LITERAL { $$ = ExprNode::createIntNode($1); }
     | expr '.' ele ID { $$ = ExprNode::createFieldAccessExprNode($4, $1); }
     | expr '.' ele ID '(' ')' { $$ = ExprNode::createMethodAccessExprNode($4, NULL, $1); }
     | expr '.' ele ID '(' expr_list ')' { $$ = ExprNode::createMethodAccessExprNode($4, $6, $1); }
-    | expr SAFE_CALL ele ID
-    | expr SAFE_CALL ele ID '(' ')'
-    | expr SAFE_CALL ele ID '(' expr_list ')'
+    | expr SAFE_CALL ele ID { $$ = ExprNode::createSafeFieldAccessExprNode($4, $1); }
+    | expr SAFE_CALL ele ID '(' ')' { $$ = ExprNode::createSafeMethodAccessExprNode($4, NULL, $1); }
+    | expr SAFE_CALL ele ID '(' expr_list ')' { $$ = ExprNode::createSafeMethodAccessExprNode($4, $6, $1); }
     | expr OR ele expr { $$ = ExprNode::createExprNode(_DISJUNCTION, $1, $4); }
     | expr AND ele expr { $$ = ExprNode::createExprNode(_CONJUNCTION, $1, $4); }
     | expr RANGE ele expr { $$ = ExprNode::createRangeExprNode($1, $4); }
@@ -231,7 +231,7 @@ expr: INT_LITERAL { $$ = ExprNode::createIntNode($1); }
     | ARRAY_OF '<' ele type ele '>' '(' ')' { $$ = ExprNode::createArrayExprNode($4, NULL); }
     | ARRAY_OF '<' ele nullable_type ele '>' '(' expr_list ')' { $$ = ExprNode::createArrayExprNode($4, $8); }
     | ARRAY_OF '<' ele type ele '>' '(' expr_list ')' { $$ = ExprNode::createArrayExprNode($4, $8); }
-    | expr '[' expr ']'
+    | expr '[' expr ']' { $$ = ExprNode::createArrayAccessNode($1, $3); }
     ;
 
 expr_list: expr { $$ = ExprListNode::addExprToList(nullptr, $1); }

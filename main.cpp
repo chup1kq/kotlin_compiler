@@ -9,7 +9,7 @@ int main() {
     yyparse(&root);
 
     if (root != nullptr) {
-        std::cout << "AST создан" << std::endl;
+        std::cout << "AST was created" << std::endl;
     } else {
         std::cout << "Error: root == nullptr" << std::endl;
     }
