@@ -16,14 +16,14 @@ Constructor *Constructor::createSecondaryConstructor(
         ModifierMap* modifiers,
         VarDeclarationList *args,
         StmtListNode* stmts,
-        string prevConstructor,
+        ExprType prevConstructorType,
         VarDeclarationList* prevConstructorArgs
 ) {
     Constructor *constructor = new Constructor();
     constructor->modifiers = modifiers;
     constructor->args = args;
     constructor->stmts = stmts;
-    constructor->prevConstructor = prevConstructor;
+    constructor->prevConstructorType = prevConstructorType;
     constructor->prevConstructorArgs = prevConstructorArgs;
     return constructor;
 }

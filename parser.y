@@ -65,7 +65,7 @@
 %token FOR WHILE DO
 %token <modifiers> VAL VAR
 %token RETURN BREAK CONTINUE
-%token <stringLiteral> THIS SUPER
+%token THIS SUPER
 %token ARRAY ARRAY_OF
 %token ENDL
 %token <identifier>ID
@@ -436,8 +436,8 @@ class_member_list: var_body end_of_stmt { $$ = ClassBodyNode::addMember(nullptr,
                  ;
 
 constructor_declaration: class_constructor ele '(' allowed_declaration_params ')' ele stmt_block { $$ = Constructor::createPrimaryConstructor($1, $4, $7); }
-		       | class_constructor ele '(' allowed_declaration_params ')' ':' ele THIS ele '(' allowed_declaration_params ')' ele stmt_block { $$ = Constructor::createSecondaryConstructor($1, $4, $14, $8, $11); }
-		       | class_constructor ele '(' allowed_declaration_params ')' ':' ele SUPER ele '(' allowed_declaration_params ')' ele stmt_block { $$ = Constructor::createSecondaryConstructor($1, $4, $14, $8, $11); }
+		       | class_constructor ele '(' allowed_declaration_params ')' ':' ele THIS ele '(' allowed_declaration_params ')' ele stmt_block { $$ = Constructor::createSecondaryConstructor($1, $4, $14, _THIS, $11); }
+		       | class_constructor ele '(' allowed_declaration_params ')' ':' ele SUPER ele '(' allowed_declaration_params ')' ele stmt_block { $$ = Constructor::createSecondaryConstructor($1, $4, $14, _SUPER, $11); }
 		       ;
 
 var: VAR { $$ = ModifierMap::createFunOrVarModifiers(NONE, NONE, NONE); }

@@ -11,11 +11,11 @@ public:
     ModifierMap* modifiers;
     VarDeclarationList* args;
     StmtListNode* stmts;
-    string prevConstructor;
+    ExprType prevConstructorType;
     VarDeclarationList* prevConstructorArgs;
 
     static Constructor* createPrimaryConstructor(ModifierMap* modifiers, VarDeclarationList* args, StmtListNode* stmts);
-    static Constructor* createSecondaryConstructor(ModifierMap* modifiers, VarDeclarationList* args, StmtListNode* stmts, string prevConstructor, VarDeclarationList* prevConstructorArgs);
+    static Constructor* createSecondaryConstructor(ModifierMap* modifiers, VarDeclarationList* args, StmtListNode* stmts, ExprType prevConstructorType, VarDeclarationList* prevConstructorArgs);
 
 };
 
