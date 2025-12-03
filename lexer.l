@@ -11,6 +11,8 @@
 
     TopLevelDeclarationProcessor processor;
 
+    bool is_prev_lexem_end_of_stmt = true;
+
     void printOperator(char* o);
     void printEndOfLine();
     void printType(char* t);
@@ -48,7 +50,6 @@ id             [a-zA-Z_][a-zA-Z0-9_]*
     int comment_depth = 0;
     int open_bracket = 0;
     int open_square_brackets = 0;
-    bool is_prev_lexem_end_of_stmt = true;
 %}
 
 \" {
@@ -78,6 +79,9 @@ id             [a-zA-Z_][a-zA-Z0-9_]*
     is_prev_lexem_end_of_stmt = false;
     std::cout << "Found singleline string: " << buff << std::endl;
     BEGIN(INITIAL);
+
+    yylval.stringLiteral = strdup(buff.c_str());
+    return STRING_LITERAL;
 }
 
 <STRING,CHARACTER>\n {
@@ -104,6 +108,11 @@ id             [a-zA-Z_][a-zA-Z0-9_]*
     else if (buff.length() == 1) {
         is_prev_lexem_end_of_stmt = false;
         std::cout << "Found character: " << buff << std::endl;
+
+        yylval.charLiteral = buff[0];
+        BEGIN(INITIAL);
+
+        return CHAR_LITERAL;
     }
     else {
         std::cerr << "Error in character. More than 1 character: " << buff << std::endl;
@@ -122,6 +131,9 @@ id             [a-zA-Z_][a-zA-Z0-9_]*
                         is_prev_lexem_end_of_stmt = false;
                         std::cout << "Found multiline string: " << buff << std::endl;
                         BEGIN(INITIAL);
+
+                        yylval.stringLiteral = strdup(buff.c_str());
+                        return STRING_LITERAL;
                     }
     [\"]{1,2}       { buff += yytext; }
     [^"]+           { buff += yytext; }
@@ -191,27 +203,27 @@ id             [a-zA-Z_][a-zA-Z0-9_]*
 "*/"        { std::cerr << "Error in multiline comment. Has no open sequence." << std::endl; }
 
 
-if          { processor.foundInappropriateLexem(yytext); printStatementKeyword(yytext); is_prev_lexem_end_of_stmt = false; }
-else        { processor.foundInappropriateLexem(yytext); printStatementKeyword(yytext); is_prev_lexem_end_of_stmt = false; }
+if          { processor.foundInappropriateLexem(yytext); printStatementKeyword(yytext); is_prev_lexem_end_of_stmt = false; return IF; }
+else        { processor.foundInappropriateLexem(yytext); printStatementKeyword(yytext); is_prev_lexem_end_of_stmt = false; return ELSE; }
 when        { processor.foundInappropriateLexem(yytext); printStatementKeyword(yytext); is_prev_lexem_end_of_stmt = false; }
-for         { processor.foundInappropriateLexem(yytext); printStatementKeyword(yytext); is_prev_lexem_end_of_stmt = false; }
-in          { processor.foundInappropriateLexem(yytext); printStatementKeyword(yytext); is_prev_lexem_end_of_stmt = false; }
-while       { processor.foundInappropriateLexem(yytext); printStatementKeyword(yytext); is_prev_lexem_end_of_stmt = false; }
-do          { processor.foundInappropriateLexem(yytext); printStatementKeyword(yytext); is_prev_lexem_end_of_stmt = false; }
-break       { processor.foundInappropriateLexem(yytext); printStatementKeyword(yytext); is_prev_lexem_end_of_stmt = false; }
-continue    { processor.foundInappropriateLexem(yytext); printStatementKeyword(yytext); is_prev_lexem_end_of_stmt = false; }
-downTo      { processor.foundInappropriateLexem(yytext); printStatementKeyword(yytext); is_prev_lexem_end_of_stmt = false; }
-step        { processor.foundInappropriateLexem(yytext); printStatementKeyword(yytext); is_prev_lexem_end_of_stmt = false; }
+for         { processor.foundInappropriateLexem(yytext); printStatementKeyword(yytext); is_prev_lexem_end_of_stmt = false; return FOR; }
+in          { processor.foundInappropriateLexem(yytext); printStatementKeyword(yytext); is_prev_lexem_end_of_stmt = false; return IN; }
+while       { processor.foundInappropriateLexem(yytext); printStatementKeyword(yytext); is_prev_lexem_end_of_stmt = false; return WHILE; }
+do          { processor.foundInappropriateLexem(yytext); printStatementKeyword(yytext); is_prev_lexem_end_of_stmt = false; return DO; }
+break       { processor.foundInappropriateLexem(yytext); printStatementKeyword(yytext); is_prev_lexem_end_of_stmt = false; return BREAK;}
+continue    { processor.foundInappropriateLexem(yytext); printStatementKeyword(yytext); is_prev_lexem_end_of_stmt = false; return CONTINUE; }
+downTo      { processor.foundInappropriateLexem(yytext); printStatementKeyword(yytext); is_prev_lexem_end_of_stmt = false; return DOWN_TO; }
+step        { processor.foundInappropriateLexem(yytext); printStatementKeyword(yytext); is_prev_lexem_end_of_stmt = false; return STEP; }
 
-var         { processor.processAppropriateElement(yytext); is_prev_lexem_end_of_stmt = false; }
-val         { processor.processAppropriateElement(yytext); is_prev_lexem_end_of_stmt = false; }
+var         { is_prev_lexem_end_of_stmt = false; return processor.processAppropriateElement(yytext); }
+val         { is_prev_lexem_end_of_stmt = false; return processor.processAppropriateElement(yytext); }
 
 fun         { is_prev_lexem_end_of_stmt = false; return processor.processAppropriateElement(yytext); }
 
-class       { processor.processAppropriateElement(yytext); is_prev_lexem_end_of_stmt = false; }
-this        { processor.foundInappropriateLexem(yytext); printStatementKeyword(yytext); is_prev_lexem_end_of_stmt = false; }
-super       { processor.foundInappropriateLexem(yytext); printStatementKeyword(yytext); is_prev_lexem_end_of_stmt = false; }
-constructor { processor.processAppropriateElement(yytext); is_prev_lexem_end_of_stmt = false; }
+class       { is_prev_lexem_end_of_stmt = false; return processor.processAppropriateElement(yytext); }
+this        { processor.foundInappropriateLexem(yytext); printStatementKeyword(yytext); is_prev_lexem_end_of_stmt = false; return THIS; }
+super       { processor.foundInappropriateLexem(yytext); printStatementKeyword(yytext); is_prev_lexem_end_of_stmt = false; return SUPER; }
+constructor { is_prev_lexem_end_of_stmt = false; return processor.processAppropriateElement(yytext); }
 enum        { processor.processAppropriateElement(yytext); is_prev_lexem_end_of_stmt = true; }
 
 final       { processor.processAppropriateElement(yytext); is_prev_lexem_end_of_stmt = true; }
@@ -221,50 +233,52 @@ private     { processor.processAppropriateElement(yytext); is_prev_lexem_end_of_
 public      { processor.processAppropriateElement(yytext); is_prev_lexem_end_of_stmt = true; }
 protected   { processor.processAppropriateElement(yytext); is_prev_lexem_end_of_stmt = true; }
 
-arrayOf     { processor.foundInappropriateLexem(yytext); printKeyword(yytext); is_prev_lexem_end_of_stmt = false; }
+arrayOf     { processor.foundInappropriateLexem(yytext); printKeyword(yytext); is_prev_lexem_end_of_stmt = false; return ARRAY_OF; }
 
-Array       { processor.foundInappropriateLexem(yytext); printType(yytext); is_prev_lexem_end_of_stmt = false; }
-Int         { processor.foundInappropriateLexem(yytext); printType(yytext); is_prev_lexem_end_of_stmt = false; }
-Double      { processor.foundInappropriateLexem(yytext); printType(yytext); is_prev_lexem_end_of_stmt = false; }
-Float       { processor.foundInappropriateLexem(yytext);printType(yytext); is_prev_lexem_end_of_stmt = false; }
-String      { processor.foundInappropriateLexem(yytext);printType(yytext); is_prev_lexem_end_of_stmt = false; }
-Char        { processor.foundInappropriateLexem(yytext); printType(yytext); is_prev_lexem_end_of_stmt = false; }
-Boolean     { processor.foundInappropriateLexem(yytext); printType(yytext); is_prev_lexem_end_of_stmt = false; }
+Array       { processor.foundInappropriateLexem(yytext); printType(yytext); is_prev_lexem_end_of_stmt = false; return ARRAY; }
+Int         { processor.foundInappropriateLexem(yytext); printType(yytext); is_prev_lexem_end_of_stmt = false; return INT_TYPE; }
+Double      { processor.foundInappropriateLexem(yytext); printType(yytext); is_prev_lexem_end_of_stmt = false; return DOUBLE_TYPE; }
+Float       { processor.foundInappropriateLexem(yytext);printType(yytext); is_prev_lexem_end_of_stmt = false; return FLOAT_TYPE; }
+String      { processor.foundInappropriateLexem(yytext);printType(yytext); is_prev_lexem_end_of_stmt = false; return STRING_TYPE; }
+Char        { processor.foundInappropriateLexem(yytext); printType(yytext); is_prev_lexem_end_of_stmt = false; return CHAR_TYPE; }
+Boolean     { processor.foundInappropriateLexem(yytext); printType(yytext); is_prev_lexem_end_of_stmt = false; return BOOLEAN_TYPE; }
 
-null        { processor.foundInappropriateLexem(yytext); printConstantKeyword(yytext); is_prev_lexem_end_of_stmt = false; }
+null        { processor.foundInappropriateLexem(yytext); printConstantKeyword(yytext); is_prev_lexem_end_of_stmt = false; return NULL_LITERAL; }
 true        { processor.foundInappropriateLexem(yytext); printConstantKeyword(yytext); is_prev_lexem_end_of_stmt = false; yylval.boolLiteral = false; return TRUE_LITERAL; }
 false       { processor.foundInappropriateLexem(yytext); printConstantKeyword(yytext); is_prev_lexem_end_of_stmt = false; yylval.boolLiteral = true; return FALSE_LITERAL; }
 
-"+"         { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; }
-"-"         { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; }
-"*"         { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; }
-"/"         { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; }
+"+"         { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; return '+'; }
+"-"         { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; return '-'; }
+"*"         { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; return '*'; }
+"/"         { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; return '/'; }
+"%"         { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; return '%'; }
 
-"++"        { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; }
-"--"        { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; }
-"+="        { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; }
-"-="        { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; }
-"*="        { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false;}
-"/="        { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false;}
+"++"        { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; return POST_INCREMENT; }
+"--"        { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; return POST_DECREMENT; }
+"+="        { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; return PLUS_ASSIGNMENT; }
+"-="        { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; return MINUS_ASSIGNMENT; }
+"*="        { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; return MUL_ASSIGNMENT; }
+"/="        { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; return DIV_ASSIGNMENT; }
+"%="        { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; return MOD_ASSIGNMENT; }
 
-"="         { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; }
-"=="        { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; }
-"!="        { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; }
-"<"         { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; }
-">"         { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; }
-"&&"        { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; }
-"||"        { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; }
+"="         { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; return '='; }
+"=="        { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; return EQUAL; }
+"!="        { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; return NOT_EQUAL; }
+"<"         { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; return '<'; }
+">"         { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; return '>'; }
+"&&"        { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; return AND; }
+"||"        { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; return OR; }
 
-"."         { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; }
-"?."        { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; }
+"."         { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; return '.'; }
+"?."        { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; return SAFE_CALL; }
 "->"        { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; }
 
-"!"         { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; }
-"?"         { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; }
+"!"         { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; return '!'; }
+"?"         { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; return '?'; }
 ":"         { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; return ':'; }
 
-".."        { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; }
-"..<"       { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; }
+".."        { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; return RANGE; }
+"..<"       { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; return UNTIL; }
 "("         { processor.foundInappropriateLexem(yytext); open_bracket += 1; printOperator(yytext); is_prev_lexem_end_of_stmt = false; return '('; }
 ")"         { processor.foundInappropriateLexem(yytext); open_bracket -= 1; printOperator(yytext); is_prev_lexem_end_of_stmt = false; return ')'; }
 "{"         { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; return '{'; }
@@ -288,35 +302,51 @@ false       { processor.foundInappropriateLexem(yytext); printConstantKeyword(yy
 {doubleNumber} {
     processor.foundInappropriateLexem(yytext);
     is_prev_lexem_end_of_stmt = false;
-    std::cout << "Double: " << strtod(remove_underscore(yytext).c_str(), NULL) << std::endl;
+
+    yylval.doubleLiteral = strtod(remove_underscore(yytext).c_str(), NULL);
+
+    std::cout << "Double: " << yylval.doubleLiteral << std::endl;
+    return DOUBLE_LITERAL;
 }
 
 {floatNumber} {
     processor.foundInappropriateLexem(yytext);
     is_prev_lexem_end_of_stmt = false;
-    std::cout << "Float: " << strtof(remove_underscore(yytext).c_str(), NULL) << std::endl;
+
+    yylval.floatLiteral = strtof(remove_underscore(yytext).c_str(), NULL);
+
+    std::cout << "Float: " << yylval.floatLiteral << std::endl;
+    return FLOAT_LITERAL;
 }
 
 {binNumber} {
     processor.foundInappropriateLexem(yytext);
     is_prev_lexem_end_of_stmt = false;
-    std::string binStr = remove_underscore(yytext + 2);
-    std::cout << "Bin number: " << std::stoul(binStr, nullptr, 2) << std::endl;
+
+    yylval.intLiteral = std::stoul(remove_underscore(yytext + 2), nullptr, 2);
+
+    std::cout << "Bin number: " << yylval.intLiteral << std::endl;
+    return INT_LITERAL;
 }
 
 {hexNumber} {
     processor.foundInappropriateLexem(yytext);
     is_prev_lexem_end_of_stmt = false;
-    std::string hexStr = remove_underscore(yytext + 2);
-    std::cout << "Hex number: " << std::stoul(hexStr, nullptr, 16) << std::endl;
+
+    yylval.intLiteral = std::stoul(remove_underscore(yytext + 2), nullptr, 16);
+
+    std::cout << "Hex number: " << yylval.intLiteral << std::endl;
+    return INT_LITERAL;
 }
 
 {id} {
     processor.foundInappropriateLexem(yytext);
     is_prev_lexem_end_of_stmt = false;
-    std::cout << "Identificator: " << yytext << std::endl;
 
-    yylval.identifier=(char *)malloc(strlen(yytext)+1); strcpy(yylval.identifier, yytext); return ID;
+    yylval.identifier = (char *)malloc(strlen(yytext)+1); strcpy(yylval.identifier, yytext);
+
+    std::cout << "Identificator: " << yylval.identifier << std::endl;
+    return ID;
 }
 
 \n+ {
