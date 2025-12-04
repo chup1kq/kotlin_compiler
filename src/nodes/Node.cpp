@@ -11,7 +11,7 @@ void Node::addDotChild(string &dot, const Node *child, const string &arrowLabel)
         return;
     }
 
-    dot += to_string(id) + " -> " + child->getDotLabel();
+    dot += to_string(id) + " -> " + to_string(child->id);
 
     if (!arrowLabel.empty()) {
         dot += " [label=\"" + arrowLabel + "\"]";
