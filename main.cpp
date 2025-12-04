@@ -14,5 +14,7 @@ int main() {
         std::cout << "Error: root == nullptr" << std::endl;
     }
 
+    std::cout << root->toDot() << std::endl;
+
     return 0;
 }
