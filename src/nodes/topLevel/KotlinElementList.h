@@ -13,6 +13,9 @@ public:
     static KotlinElementList* addElement(KotlinElementList* list, ClassNode* classNode);
     static KotlinElementList* addElement(KotlinElementList* list, FunNode* functionNode);
 
+    string toDot() const override;
+    string getDotLabel() const override;
+
 };
 
 

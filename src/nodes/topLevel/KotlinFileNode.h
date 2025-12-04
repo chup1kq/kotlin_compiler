@@ -8,6 +8,9 @@ public:
     KotlinElementList* topLevelList;
 
     KotlinFileNode(KotlinElementList* list);
+
+    string toDot() const override;
+    string getDotLabel() const override;
 };
 
 

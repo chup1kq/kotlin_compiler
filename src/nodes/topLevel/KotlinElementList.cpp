@@ -18,3 +18,30 @@ KotlinElementList *KotlinElementList::addElement(KotlinElementList *list, FunNod
     return list;
 }
 
+string KotlinElementList::toDot() const {
+    string dot;
+
+    addDotNode(dot);
+
+    if (!classList.empty()) {
+        int i = 0;
+        for (const auto *it : classList) {
+            addDotChild(dot, it, "class_" + to_string(i));
+        }
+    }
+
+    if (!functionList.empty()) {
+        int i = 0;
+        for (const auto *it : classList) {
+            addDotChild(dot, it, "class_" + to_string(i));
+        }
+    }
+
+    return dot;
+}
+
+string KotlinElementList::getDotLabel() const {
+    return "Top level List";
+}
+
+
