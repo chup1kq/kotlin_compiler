@@ -41,7 +41,7 @@ string KotlinElementList::toDot() const {
 }
 
 string KotlinElementList::getDotLabel() const {
-    return "Top level List";
+    return "TopLevelList";
 }
 
 

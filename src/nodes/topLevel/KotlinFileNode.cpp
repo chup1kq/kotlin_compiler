@@ -18,5 +18,5 @@ string KotlinFileNode::toDot() const {
 }
 
 string KotlinFileNode::getDotLabel() const {
-    return "Kotlin File";
+    return "KotlinFile";
 }

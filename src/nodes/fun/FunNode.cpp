@@ -19,3 +19,20 @@ FunNode * FunNode::createFunNodeFromExpr(TypeNode* returnType, ModifierMap* modi
     funNode->singleExpr = singleExpr;
     return funNode;
 }
+
+string FunNode::getDotLabel() const {
+    return "FunNode_" + name;
+}
+
+string FunNode::toDot() const {
+    string dot;
+
+    addDotNode(dot);
+    addDotChild(dot, type, "type");
+    addDotChild(dot, modifiers, "modifiers");
+    addDotChild(dot, args, "args");
+    addDotChild(dot, body, "body");
+    addDotChild(dot, singleExpr, "singleExpr");
+
+    return dot;
+}
