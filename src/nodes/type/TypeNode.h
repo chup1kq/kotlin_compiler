@@ -12,6 +12,9 @@ class TypeNode : public Node {
     static TypeNode* createType(Type type, bool isNull);
     static TypeNode* createArrayType(bool isNull, TypeNode* arrayType);
     static TypeNode* makeNullableType(TypeNode* typeNode);
+
+    string toDot() const override;
+    string getDotLabel() const override;
 };
 
 #endif //KOTLIN_COMPILER_TYPENODE_H

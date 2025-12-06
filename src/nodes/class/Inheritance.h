@@ -12,6 +12,9 @@ public:
     ExprListNode* constructorParams;
 
     static Inheritance* createInheritance(string name, ExprListNode* constructorParams);
+
+    string toDot() const override;
+    string getDotLabel() const override;
 };
 
 

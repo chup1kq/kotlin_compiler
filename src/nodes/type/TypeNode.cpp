@@ -19,3 +19,20 @@ TypeNode * TypeNode::makeNullableType(TypeNode* typeNode) {
     typeNode->isNull = true;
     return typeNode;
 }
+
+string TypeNode::getDotLabel() const {
+    if (type != _ARRAY) {
+        return typeToString(type) + (isNull ? " nullable" : " not-nullable");
+    }
+
+    return typeToString(type);
+}
+
+string TypeNode::toDot() const {
+    string dot;
+
+    addDotNode(dot);
+    addDotChild(dot, arrayType, "arrayElementsType");
+
+    return dot;
+}

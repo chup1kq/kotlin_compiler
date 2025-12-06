@@ -1,5 +1,7 @@
 #include "Constructor.h"
 
+#include "VarDeclarationList.h"
+
 Constructor *Constructor::createPrimaryConstructor(
         ModifierMap* modifiers,
         VarDeclarationList *args,
@@ -28,3 +30,19 @@ Constructor *Constructor::createSecondaryConstructor(
     return constructor;
 }
 
+string Constructor::getDotLabel() const {
+    return "Constructor" + (prevConstructorType ? ("from primary: " + exprTypeToString(prevConstructorType)) : "");
+}
+
+string Constructor::toDot() const {
+    string dot;
+
+    addDotNode(dot);
+    addDotChild(dot, modifiers, "modifiers");
+    addDotChild(dot, args, "args");
+    addDotChild(dot, stmts, "statements");
+    addDotChild(dot, modifiers, "modifiers");
+    addDotChild(dot, prevConstructorArgs, "prevConstructorArgs");
+
+    return dot;
+}

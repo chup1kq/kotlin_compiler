@@ -3,7 +3,7 @@
 unsigned int Node::maxId = 0;
 
 void Node::addDotNode(string &dot) const {
-    dot += to_string(id) + " [label=\"" + getDotLabel() + "\"];\n";
+    dot += "\t" + to_string(id) + " [label=\"" + getDotLabel() + "\"];\n";
 }
 
 void Node::addDotChild(string &dot, const Node *child, const string &arrowLabel) const {
@@ -11,7 +11,7 @@ void Node::addDotChild(string &dot, const Node *child, const string &arrowLabel)
         return;
     }
 
-    dot += to_string(id) + " -> " + to_string(child->id);
+    dot += "\t" + to_string(id) + " -> " + to_string(child->id);
 
     if (!arrowLabel.empty()) {
         dot += " [label=\"" + arrowLabel + "\"]";

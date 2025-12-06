@@ -37,6 +37,8 @@ public:
     static StmtNode* createVarOrValStmtNode(ModifierMap* modifiers, StmtType type, VarDeclaration* varDeclaration);
     static StmtNode * createReturnNode(ExprNode* expr);
 
+    string toDot() const override;
+    string getDotLabel() const override;
 };
 
 

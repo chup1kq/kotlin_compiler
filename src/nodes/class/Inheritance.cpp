@@ -8,3 +8,16 @@ Inheritance *Inheritance::createInheritance(string name, ExprListNode *construct
 
     return inheritance;
 }
+
+string Inheritance::getDotLabel() const {
+    return name;
+}
+
+string Inheritance::toDot() const {
+    string dot;
+
+    addDotNode(dot);
+    addDotChild(dot, constructorParams, "constructor");
+
+    return dot;
+}

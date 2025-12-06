@@ -12,6 +12,9 @@ public:
     ExprNode* defaultValue;
 
     static VarDeclaration * createVarDeclaration(std::string varId, TypeNode* varType, ExprNode* defaultValue);
+
+    string toDot() const override;
+    string getDotLabel() const override;
 };
 
 

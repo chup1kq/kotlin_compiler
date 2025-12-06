@@ -13,6 +13,8 @@ public:
 
     static EnumEntryList* addEnumEntry(EnumEntryList* list, EnumEntry* entry);
 
+    string toDot() const override;
+    string getDotLabel() const override;
 };
 
 

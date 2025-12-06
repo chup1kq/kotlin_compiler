@@ -16,6 +16,9 @@ public:
     static ModifierMap* createClassConstructorModifiers(ModifierType visibility);
     static ModifierMap* createEnumModifiers(ModifierType visibility);
     static ModifierMap* createEnumConstructorModifiers(ModifierType visibility);
+
+    string toDot() const override;
+    string getDotLabel() const override;
 };
 
 

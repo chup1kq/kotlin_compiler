@@ -17,6 +17,8 @@ public:
     static Constructor* createPrimaryConstructor(ModifierMap* modifiers, VarDeclarationList* args, StmtListNode* stmts);
     static Constructor* createSecondaryConstructor(ModifierMap* modifiers, VarDeclarationList* args, StmtListNode* stmts, ExprType prevConstructorType, VarDeclarationList* prevConstructorArgs);
 
+    string toDot() const override;
+    string getDotLabel() const override;
 };
 
 

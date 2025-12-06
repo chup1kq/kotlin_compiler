@@ -12,6 +12,8 @@ public:
 
     static EnumEntry* createEnumEntry(std::string name, ExprListNode* params);
 
+    string toDot() const override;
+    string getDotLabel() const override;
 };
 
 

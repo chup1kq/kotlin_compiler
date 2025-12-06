@@ -5,7 +5,7 @@ ClassBodyNode* ClassBodyNode::addMember(ClassBodyNode* body, Constructor* constr
         body = new ClassBodyNode();
     }
 
-    body->constructors.push_back(constructor);
+    body->constructors->push_back(constructor);
     return body;
 }
 
@@ -23,7 +23,7 @@ ClassBodyNode* ClassBodyNode::addMember(ClassBodyNode* body, FunNode* method) {
         body = new ClassBodyNode();
     }
 
-    body->methods.push_back(method);
+    body->methods->push_back(method);
     return body;
 }
 
@@ -34,4 +34,31 @@ ClassBodyNode* ClassBodyNode::addEnumEntries(ClassBodyNode* body, EnumEntryList*
 
     body->enumEntries = entries;
     return body;
+}
+
+string ClassBodyNode::getDotLabel() const {
+    return "ClassBodyNode";
+}
+
+string ClassBodyNode::toDot() const {
+    string dot;
+
+    addDotNode(dot);
+    if (!constructors->empty()) {
+        int i = 0;
+        for (const auto *it : *constructors) {
+            addDotChild(dot, it, "constructor_" + to_string(i));
+            i++;
+        }
+    }
+    addDotChild(dot, fields, "fields");
+    if (!methods->empty()) {
+        int i = 0;
+        for (const auto *it : *methods) {
+            addDotChild(dot, it, "method_" + to_string(i));
+            i++;
+        }
+    }
+
+    return dot;
 }

@@ -39,3 +39,22 @@ ModifierMap* ModifierMap::createEnumModifiers(ModifierType visibility) {
 ModifierMap* ModifierMap::createEnumConstructorModifiers(ModifierType visibility) {
     return createClassConstructorModifiers(visibility);
 }
+
+string ModifierMap::getDotLabel() const {
+    string dot;
+
+    dot += "visibility: " + modifierToString((*modifiers)["visibility"]);
+    dot += "\ninheritance: " + modifierToString((*modifiers)["inheritance"]);
+    dot += "\noverride: " + modifierToString((*modifiers)["override"]);
+
+    return dot;
+}
+
+
+string ModifierMap::toDot() const {
+    string dot = "";
+
+    addDotNode(dot);
+
+    return dot;
+}

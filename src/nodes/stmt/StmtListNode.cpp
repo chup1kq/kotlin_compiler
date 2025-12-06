@@ -27,3 +27,23 @@ StmtListNode * StmtListNode::addExprToStmtList(StmtListNode *list, ExprNode *exp
     return list;
 }
 
+string StmtListNode::getDotLabel() const {
+    return "StmtListNode";
+}
+
+string StmtListNode::toDot() const {
+    string dot;
+
+    addDotNode(dot);
+    if (!stmts->empty()) {
+        int i = 0;
+        for (const auto *it : *stmts) {
+            addDotChild(dot, it, "stmt_" + to_string(i));
+            i++;
+        }
+    }
+
+    return dot;
+}
+
+

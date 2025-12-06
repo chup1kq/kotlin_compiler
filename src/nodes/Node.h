@@ -18,8 +18,8 @@ public:
     unsigned int id;
     Node() {id = ++maxId;};
 
-    virtual string toDot() const;
-    virtual string getDotLabel() const;
+    virtual string toDot() const = 0;
+    virtual string getDotLabel() const = 0;
 };
 
 

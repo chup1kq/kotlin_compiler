@@ -13,3 +13,22 @@ VarDeclarationList* VarDeclarationList::addVarDeclarationToList(VarDeclarationLi
     list->decls->push_back(varDeclaration);
     return list;
 }
+
+string VarDeclarationList::getDotLabel() const {
+    return "VarDeclarationList";
+}
+
+string VarDeclarationList::toDot() const {
+    string dot;
+
+    addDotNode(dot);
+    if (!decls->empty()) {
+        int i = 0;
+        for (const auto *it : *decls) {
+            addDotChild(dot, it, "declaration_" + to_string(i));
+            i++;
+        }
+    }
+
+    return dot;
+}

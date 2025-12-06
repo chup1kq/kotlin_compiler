@@ -1,5 +1,7 @@
 #include "StmtNode.h"
 
+#include "VarDeclarationList.h"
+
 // создать while и do_while
 StmtNode * StmtNode::createCycleNodeFromSingleStmt(StmtType type, ExprNode *cycleCond, StmtNode *cycleStmt) {
     StmtNode* node = new StmtNode();
@@ -103,5 +105,26 @@ StmtNode * StmtNode::createReturnNode(ExprNode *expr) {
     node->expr = expr;
     return node;
 }
+
+string StmtNode::getDotLabel() const {
+    return stmtTypeToString(type);
+}
+
+string StmtNode::toDot() const {
+    string dot;
+
+    addDotNode(dot);
+    addDotChild(dot, cond, "condition");
+    addDotChild(dot, cycleSingleStmt, "cycle");
+    addDotChild(dot, blockStmts, "block");
+    addDotChild(dot, expr, "expr");
+    addDotChild(dot, varDeclaration, "variable declaration");
+    addDotChild(dot, forIterator, "iterator");
+    addDotChild(dot, forIteratorList, "iteratorList");
+    addDotChild(dot, varModifiers, "modifiers");
+
+    return dot;
+}
+
 
 

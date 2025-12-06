@@ -1,5 +1,7 @@
 #include "ExprNode.h"
 
+#include "StmtListNode.h"
+
 ExprNode* ExprNode::createIntNode(int value) {
     ExprNode* node = new ExprNode();
     node->type = _INTEGER_LITERAL;
@@ -218,4 +220,38 @@ ExprNode * ExprNode::createArrayAccessNode(ExprNode* arrayName, ExprNode* id) {
     node->left = arrayName;
     node->right = id;
     return node;
+}
+
+
+string ExprNode::getDotLabel() const {
+    switch (type) {
+        case _INTEGER_LITERAL: return to_string(intValue);
+        case _FLOAT_LITERAL: return to_string(floatValue);
+        case _DOUBLE_LITERAL: return to_string(doubleValue);
+        case _BOOL_LITERAL: return to_string(boolValue);
+        case _CHAR_LITERAL : return to_string(charValue);
+        case _STRING_LITERAL: return stringValue;
+
+        case _IDENTIFIER: return identifierName;
+
+        default: break;
+    }
+
+    return exprTypeToString(type);
+}
+
+string ExprNode::toDot() const {
+    string dot;
+
+    addDotNode(dot);
+    addDotChild(dot, left, "left");
+    addDotChild(dot, right, "right");
+    addDotChild(dot, cond, "condition");
+    addDotChild(dot, trueStmtList, "when_true");
+    addDotChild(dot, falseStmtList, "when_false");
+    addDotChild(dot, params, "params");
+    addDotChild(dot ,elements, "elements");
+    addDotChild(dot, typeElements, "type");
+
+    return dot;
 }

@@ -27,6 +27,7 @@ string KotlinElementList::toDot() const {
         int i = 0;
         for (const auto *it : classList) {
             addDotChild(dot, it, "class_" + to_string(i));
+            i++;
         }
     }
 
@@ -34,6 +35,7 @@ string KotlinElementList::toDot() const {
         int i = 0;
         for (const auto *it : functionList) {
             addDotChild(dot, it, "function_" + to_string(i));
+            i++;
         }
     }
 

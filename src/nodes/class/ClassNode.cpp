@@ -36,3 +36,21 @@ ClassNode *ClassNode::createEnumNode(
     return node;
 
 }
+
+string ClassNode::getDotLabel() const {
+    return (isEnum ? "enum " : "class ") + name;
+}
+
+string ClassNode::toDot() const {
+    string dot;
+
+    addDotNode(dot);
+    addDotChild(dot, modifiers, "modifiers");
+    addDotChild(dot, inheritance, "inheritance");
+    addDotChild(dot, primaryConstructor, "primaryConstructor");
+    addDotChild(dot, body, "body");
+
+    return dot;
+}
+
+

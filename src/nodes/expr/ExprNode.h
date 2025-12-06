@@ -23,7 +23,6 @@ public:
     StmtListNode *trueStmtList, *falseStmtList;
     ExprListNode* params;
     string identifierName;
-    bool isNullable;
     ExprListNode* elements;
     TypeNode* typeElements;
 
@@ -53,6 +52,9 @@ public:
     static ExprNode* createNotExprNode(ExprNode* expr);
     static ExprNode* createArrayExprNode(TypeNode* type, ExprListNode* exprs);
     static ExprNode* createArrayAccessNode(ExprNode* arrayName, ExprNode* id);
+
+    string toDot() const override;
+    string getDotLabel() const override;
 };
 
 

@@ -1,5 +1,6 @@
 #ifndef KOTLIN_COMPILER_TYPES_H
 #define KOTLIN_COMPILER_TYPES_H
+#include <string>
 
 enum ModifierType {
     PUBLIC,
@@ -88,5 +89,12 @@ enum Type {
     _UNDEFINED,
     _VOID
 };
+
+
+std::string modifierToString(ModifierType m);
+std::string exprTypeToString(ExprType t);
+std::string stmtTypeToString(StmtType t);
+std::string typeToString(Type t);
+
 
 #endif //KOTLIN_COMPILER_TYPES_H

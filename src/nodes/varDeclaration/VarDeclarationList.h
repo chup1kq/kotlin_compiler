@@ -11,6 +11,8 @@ public:
 
     static VarDeclarationList* addVarDeclarationToList(VarDeclarationList *list, VarDeclaration *varDeclaration);
 
+    string toDot() const override;
+    string getDotLabel() const override;
 };
 
 

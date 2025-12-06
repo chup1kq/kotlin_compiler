@@ -16,3 +16,21 @@ ExprListNode *ExprListNode::addExprToList(ExprListNode *list, ExprNode *expr) {
     return list;
 }
 
+
+string ExprListNode::getDotLabel() const {
+    return "StmtListNode";
+}
+
+string ExprListNode::toDot() const {
+    string dot;
+
+    addDotNode(dot);
+    if (!exprs->empty()) {
+        int i = 0;
+        for (const auto *it : *exprs) {
+            addDotChild(dot, it, "expr_" + to_string(it->id));
+        }
+    }
+
+    return dot;
+}

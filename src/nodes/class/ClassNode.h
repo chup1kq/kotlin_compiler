@@ -22,6 +22,8 @@ public:
 
     static ClassNode* createEnumNode(ModifierMap* modifiers, std::string name, Constructor* primaryConstructor, ClassBodyNode* body);
 
+    string toDot() const override;
+    string getDotLabel() const override;
 };
 
 

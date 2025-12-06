@@ -14,6 +14,9 @@ public:
 
     static StmtListNode* addStmtToList(StmtListNode *list, StmtNode *stmt);
     static StmtListNode* addExprToStmtList(StmtListNode *list, ExprNode *expr);
+
+    string toDot() const override;
+    string getDotLabel() const override;
 };
 
 

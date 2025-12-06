@@ -50,6 +50,7 @@ add_executable(kotlin_parser
         src/lexer/TopLevelDeclarationProcessor.h
         src/nodes/node.cpp
         src/nodes/node.h
+        src/nodes/types.cpp
         src/nodes/types.h
         src/nodes/expr/ExprListNode.cpp
         src/nodes/expr/ExprListNode.h
@@ -85,4 +86,5 @@ add_executable(kotlin_parser
         src/nodes/topLevel/KotlinFileNode.h
         src/nodes/topLevel/KotlinElementList.cpp
         src/nodes/topLevel/KotlinElementList.h
+        src/utils/output/dot.cpp
 )

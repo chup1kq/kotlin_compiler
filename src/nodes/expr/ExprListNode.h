@@ -13,6 +13,9 @@ public:
     ExprListNode(ExprNode* expr);
 
     static ExprListNode* addExprToList(ExprListNode *list, ExprNode *expr);
+
+    string toDot() const override;
+    string getDotLabel() const override;
 };
 
 

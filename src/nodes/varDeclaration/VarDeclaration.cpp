@@ -7,3 +7,17 @@ VarDeclaration *VarDeclaration::createVarDeclaration(std::string varId, TypeNode
     varDeclaration->defaultValue = defaultValue;
     return varDeclaration;
 }
+
+string VarDeclaration::getDotLabel() const {
+    return varId;
+}
+
+string VarDeclaration::toDot() const {
+    string dot;
+
+    addDotNode(dot);
+    addDotChild(dot, varType, "type");
+    addDotChild(dot, defaultValue, "defaultValue");
+
+    return dot;
+}
