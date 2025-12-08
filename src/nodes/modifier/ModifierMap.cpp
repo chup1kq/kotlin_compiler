@@ -19,6 +19,7 @@ ModifierMap* ModifierMap::createClassModifiers(ModifierType visibility, Modifier
 
     (*map->modifiers)["visibility"] = visibility;
     (*map->modifiers)["inheritance"] = inheritance;
+    (*map->modifiers)["override"] = NONE;
 
     return map;
 }
@@ -28,6 +29,8 @@ ModifierMap* ModifierMap::createClassConstructorModifiers(ModifierType visibilit
     map->modifiers = new std::map<std::string, ModifierType>();
 
     (*map->modifiers)["visibility"] = visibility;
+    (*map->modifiers)["inheritance"] = NONE;
+    (*map->modifiers)["override"] = NONE;
 
     return map;
 }

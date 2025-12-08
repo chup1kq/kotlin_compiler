@@ -23,7 +23,7 @@ void yyerror(const char* s);
 
 %token PRIVATE_ENUM PUBLIC_ENUM
 
-%token PRIVATE_CONSTRUCTOR PUBLIC_CONSTRUCTOR PROTECTED_CONSTRUCTOR
+%token PRIVATE_CONSTRUCTOR PUBLIC_CONSTRUCTOR PROTECTED_CONSTRUCTOR CONSTRUCTOR
 
 %token PRIVATE_FUN PUBLIC_FUN
 %token PRIVATE_FINAL_FUN PUBLIC_FINAL_FUN PROTECTED_FINAL_FUN
@@ -257,7 +257,8 @@ enum: PRIVATE_ENUM
     | PUBLIC_ENUM
     ;
 
-enum_constructor: PRIVATE_CONSTRUCTOR
+enum_constructor: CONSTRUCTOR
+		| PRIVATE_CONSTRUCTOR
 		;
 
 enum_declaration: enum ele ID ele
@@ -323,7 +324,8 @@ fun_declaration: fun ele ID ele '(' allowed_declaration_params ')' ele stmt_bloc
 	       | fun ele ID ele '(' allowed_declaration_params ')' ele ':' type ele '=' ele expr end_of_stmt
 	       ;
 
-class_constructor: PRIVATE_CONSTRUCTOR
+class_constructor: CONSTRUCTOR
+		 | PRIVATE_CONSTRUCTOR
 		 | PUBLIC_CONSTRUCTOR
 		 | PROTECTED_CONSTRUCTOR
 		 ;

@@ -159,8 +159,11 @@ yytokentype TopLevelDeclarationProcessor::combineConstructorLexem() {
     if (has("protected")) {
         return PROTECTED_CONSTRUCTOR;
     }
+    if (has("public")) {
+        return PUBLIC_CONSTRUCTOR;
+    }
 
-    return PUBLIC_CONSTRUCTOR;
+    return CONSTRUCTOR;
 }
 
 yytokentype TopLevelDeclarationProcessor::foundEndKeyword(const std::string& keyword) {

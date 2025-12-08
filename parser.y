@@ -76,7 +76,7 @@
 
 %token <modifiers> PRIVATE_ENUM PUBLIC_ENUM
 
-%token <modifiers> PRIVATE_CONSTRUCTOR PUBLIC_CONSTRUCTOR PROTECTED_CONSTRUCTOR
+%token <modifiers> PRIVATE_CONSTRUCTOR PUBLIC_CONSTRUCTOR PROTECTED_CONSTRUCTOR CONSTRUCTOR
 
 %token <modifiers> PRIVATE_FUN PUBLIC_FUN
 %token <modifiers> PRIVATE_FINAL_FUN PUBLIC_FINAL_FUN PROTECTED_FINAL_FUN
@@ -488,7 +488,8 @@ fun: PRIVATE_FUN { $$ = ModifierMap::createFunOrVarModifiers(PRIVATE, NONE, NONE
    | FINAL_OVERRIDE_FUN { $$ = ModifierMap::createFunOrVarModifiers(NONE, FINAL, OVERRIDE); }
    ;
 
-class_constructor: PRIVATE_CONSTRUCTOR { $$ = ModifierMap::createClassConstructorModifiers(PRIVATE); }
+class_constructor: CONSTRUCTOR { $$ = ModifierMap::createClassConstructorModifiers(PUBLIC); }
+		 | PRIVATE_CONSTRUCTOR { $$ = ModifierMap::createClassConstructorModifiers(PRIVATE); }
 		 | PUBLIC_CONSTRUCTOR { $$ = ModifierMap::createClassConstructorModifiers(PUBLIC); }
 		 | PROTECTED_CONSTRUCTOR { $$ = ModifierMap::createClassConstructorModifiers(PROTECTED); }
 		 ;
@@ -499,7 +500,8 @@ class: PRIVATE_FINAL_CLASS { $$ = ModifierMap::createClassModifiers(PRIVATE, FIN
      | PUBLIC_OPEN_CLASS { $$ = ModifierMap::createClassModifiers(PUBLIC, OPEN); }
      ;
 
-enum_constructor: PRIVATE_CONSTRUCTOR { $$ = ModifierMap::createEnumConstructorModifiers(PRIVATE); }
+enum_constructor: CONSTRUCTOR { $$ = ModifierMap::createEnumConstructorModifiers(PRIVATE); }
+		| PRIVATE_CONSTRUCTOR { $$ = ModifierMap::createEnumConstructorModifiers(PRIVATE); }
 		;
 
 enum: PRIVATE_ENUM { $$ = ModifierMap::createEnumModifiers(PRIVATE); }
