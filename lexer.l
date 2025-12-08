@@ -286,6 +286,7 @@ false       { processor.foundInappropriateLexem(yytext); printConstantKeyword(yy
 "["         { processor.foundInappropriateLexem(yytext); open_square_brackets += 1; printOperator(yytext); is_prev_lexem_end_of_stmt = false; return '['; }
 "]"         { processor.foundInappropriateLexem(yytext); open_square_brackets -= 1; printOperator(yytext); is_prev_lexem_end_of_stmt = false; return ']'; }
 ";"         { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = true; return ';'; }
+","         { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = true; return ','; }
 
 -?((_[0-9_]+|[0-9][0-9_]*_|[0-9][0-9_]*_\.[0-9_]*|[0-9][0-9_]*\._[0-9_]*)|0{digit}) { std::cout << "Error: invalid numeric literal with underscore: " << yytext << std::endl; }
 
