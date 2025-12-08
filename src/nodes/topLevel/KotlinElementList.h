@@ -7,8 +7,10 @@
 
 class KotlinElementList : public Node  {
 public:
-    std::list<ClassNode*> classList;
-    std::list<FunNode*> functionList;
+    std::list<ClassNode*> *classList;
+    std::list<FunNode*> *functionList;
+
+    KotlinElementList();
 
     static KotlinElementList* addElement(KotlinElementList* list, ClassNode* classNode);
     static KotlinElementList* addElement(KotlinElementList* list, FunNode* functionNode);

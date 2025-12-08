@@ -1,6 +1,11 @@
 #include "KotlinFileNode.h"
 
 KotlinFileNode::KotlinFileNode(KotlinElementList *list) {
+    if (!list) {
+        topLevelList = new KotlinElementList();
+        return;
+    }
+
     topLevelList = list;
 }
 

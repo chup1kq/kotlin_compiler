@@ -2,6 +2,10 @@
 
 #include "StmtNode.h"
 
+StmtListNode::StmtListNode() {
+    stmts = new std::list<StmtNode*>();
+}
+
 StmtListNode::StmtListNode(StmtNode *first) {
     stmts = new std::list<StmtNode*>();
     stmts->push_back(first);

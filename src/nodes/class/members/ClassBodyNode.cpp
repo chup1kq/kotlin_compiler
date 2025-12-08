@@ -1,5 +1,11 @@
 #include "ClassBodyNode.h"
 
+ClassBodyNode::ClassBodyNode() {
+    constructors = new std::list<Constructor*>();
+    fields = new StmtListNode();
+    methods = new std::list<FunNode*>();
+}
+
 ClassBodyNode* ClassBodyNode::addMember(ClassBodyNode* body, Constructor* constructor) {
     if (!body) {
         body = new ClassBodyNode();
