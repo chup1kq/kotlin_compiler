@@ -21,7 +21,7 @@ FunNode * FunNode::createFunNodeFromExpr(TypeNode* returnType, ModifierMap* modi
 }
 
 string FunNode::getDotLabel() const {
-    return "FunNode_" + name;
+    return "fun " + name;
 }
 
 string FunNode::toDot() const {

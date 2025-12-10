@@ -12,6 +12,8 @@
     TopLevelDeclarationProcessor processor;
 
     bool is_prev_lexem_end_of_stmt = true;
+    int open_bracket = 0;
+    int open_square_brackets = 0;
 
     void printOperator(char* o);
     void printEndOfLine();
@@ -48,8 +50,6 @@ id             [a-zA-Z_][a-zA-Z0-9_]*
 %{
     std::string buff = "";
     int comment_depth = 0;
-    int open_bracket = 0;
-    int open_square_brackets = 0;
 %}
 
 \" {
@@ -214,6 +214,7 @@ break       { processor.foundInappropriateLexem(yytext); printStatementKeyword(y
 continue    { processor.foundInappropriateLexem(yytext); printStatementKeyword(yytext); is_prev_lexem_end_of_stmt = false; return CONTINUE; }
 downTo      { processor.foundInappropriateLexem(yytext); printStatementKeyword(yytext); is_prev_lexem_end_of_stmt = false; return DOWN_TO; }
 step        { processor.foundInappropriateLexem(yytext); printStatementKeyword(yytext); is_prev_lexem_end_of_stmt = false; return STEP; }
+return      { processor.foundInappropriateLexem(yytext); printStatementKeyword(yytext); is_prev_lexem_end_of_stmt = false; return RETURN; }
 
 var         { is_prev_lexem_end_of_stmt = false; return processor.processAppropriateElement(yytext); }
 val         { is_prev_lexem_end_of_stmt = false; return processor.processAppropriateElement(yytext); }
@@ -244,8 +245,8 @@ Char        { processor.foundInappropriateLexem(yytext); printType(yytext); is_p
 Boolean     { processor.foundInappropriateLexem(yytext); printType(yytext); is_prev_lexem_end_of_stmt = false; return BOOLEAN_TYPE; }
 
 null        { processor.foundInappropriateLexem(yytext); printConstantKeyword(yytext); is_prev_lexem_end_of_stmt = false; return NULL_LITERAL; }
-true        { processor.foundInappropriateLexem(yytext); printConstantKeyword(yytext); is_prev_lexem_end_of_stmt = false; yylval.boolLiteral = false; return TRUE_LITERAL; }
-false       { processor.foundInappropriateLexem(yytext); printConstantKeyword(yytext); is_prev_lexem_end_of_stmt = false; yylval.boolLiteral = true; return FALSE_LITERAL; }
+true        { processor.foundInappropriateLexem(yytext); printConstantKeyword(yytext); is_prev_lexem_end_of_stmt = false; yylval.boolLiteral = true; return TRUE_LITERAL; }
+false       { processor.foundInappropriateLexem(yytext); printConstantKeyword(yytext); is_prev_lexem_end_of_stmt = false; yylval.boolLiteral = false; return FALSE_LITERAL; }
 
 "+"         { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; return '+'; }
 "-"         { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; return '-'; }
@@ -253,8 +254,8 @@ false       { processor.foundInappropriateLexem(yytext); printConstantKeyword(yy
 "/"         { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; return '/'; }
 "%"         { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; return '%'; }
 
-"++"        { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; return POST_INCREMENT; }
-"--"        { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; return POST_DECREMENT; }
+"++"        { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; return INCREMENT; }
+"--"        { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; return DECREMENT; }
 "+="        { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; return PLUS_ASSIGNMENT; }
 "-="        { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; return MINUS_ASSIGNMENT; }
 "*="        { processor.foundInappropriateLexem(yytext); printOperator(yytext); is_prev_lexem_end_of_stmt = false; return MUL_ASSIGNMENT; }

@@ -226,8 +226,8 @@ expr: INT_LITERAL { $$ = ExprNode::createIntNode($1); }
     | expr MOD_ASSIGNMENT ele expr { $$ = ExprNode::createAssignmentExprNode(_MOD_ASSIGNMENT, $1, $4); }
     | INCREMENT ele expr { $$ = ExprNode::createPrefExprNode(_PREF_INCREMENT, $3); }
     | DECREMENT ele expr { $$ = ExprNode::createPrefExprNode(_PREF_DECREMENT, $3); }
-    | expr INCREMENT %prec POST_INCREMENT { $$ = ExprNode::createPostExprNode(_PREF_INCREMENT, $1); }
-    | expr DECREMENT %prec POST_DECREMENT { $$ = ExprNode::createPostExprNode(_PREF_DECREMENT, $1); }
+    | expr INCREMENT %prec POST_INCREMENT { $$ = ExprNode::createPostExprNode(_POST_INCREMENT, $1); }
+    | expr DECREMENT %prec POST_DECREMENT { $$ = ExprNode::createPostExprNode(_POST_DECREMENT, $1); }
     | ARRAY_OF '(' ')' { $$ = ExprNode::createArrayExprNode(NULL, NULL); }
     | ARRAY_OF '(' expr_list ')' { $$ = ExprNode::createArrayExprNode(NULL, $3); }
     | ARRAY_OF '<' ele nullable_type ele '>' '(' ')' { $$ = ExprNode::createArrayExprNode($4, NULL); }
@@ -337,7 +337,7 @@ do_while_stmt: DO ele stmt_block ele WHILE ele '(' expr ')' end_of_stmt { $$ = S
 	     | DO ele stmt WHILE ele '(' expr ')' end_of_stmt { $$ = StmtNode::createCycleNodeFromSingleStmt(_DO_WHILE, $7, $3); }
              ;
 
-return_body: RETURN { $$ = StmtNode::createReturnNode(NULL); }
+return_body: RETURN { $$ = StmtNode::createReturnNode(nullptr); }
 	   | RETURN expr { $$ = StmtNode::createReturnNode($2); }
 	   ;
 
