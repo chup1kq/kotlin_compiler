@@ -14,6 +14,7 @@
     #include "../src/nodes/class/Inheritance.h"
     #include "../src/nodes/class/members/ClassBodyNode.h"
     #include "../src/nodes/class/members/Constructor.h"
+    #include "../src/nodes/class/members/ConstructorArgs.h"
     #include "../src/nodes/class/members/enumEntry/EnumEntry.h"
     #include "../src/nodes/class/members/enumEntry/EnumEntryList.h"
     #include "../src/nodes/topLevel/KotlinFileNode.h"
@@ -50,6 +51,7 @@
     ModifierMap* modifiers;
     ClassNode* classDeclaration;
     Constructor* contruct;
+    ConstructorArgs* constructorArgs;
     ClassBodyNode* classBody;
     Inheritance* inher;
     EnumEntry* enumEntry;
@@ -136,13 +138,14 @@
 %type <varDecl> var_declaration var_declaration_default_value
 %type <varDeclList> var_declaration_list
 
-%type <varDeclList> class_declaration_argument_list declaration_argument_list allowed_declaration_params class_allowed_declaration_params
-%type <varDecl> declaration_argument class_declaration_argument
+%type <varDeclList> declaration_argument_list allowed_declaration_params
+%type <varDecl> declaration_argument
 
 %type <function> fun_declaration
 %type <classDeclaration> class_declaration enum_declaration
 %type <contruct> constructor_declaration
 %type <classBody> class_body class_member_list enum_body
+%type <constructorArgs> class_allowed_declaration_params class_declaration_argument_list
 %type <inher> inheritance
 %type <enumEntry> enum_entry
 %type <enumEntryList> enum_entries
@@ -379,16 +382,15 @@ allowed_declaration_params: ele { $$ = VarDeclarationList::addVarDeclarationToLi
 		          | declaration_argument_list ele ',' { $$ = $1; }
 		          ;
 
-class_declaration_argument: var ele declaration_argument { $$ = $3; }
-			  | val ele declaration_argument { $$ = $3; }
-			  | declaration_argument { $$ = $1; }
-			  ;
-
-class_declaration_argument_list: class_declaration_argument { $$ = VarDeclarationList::addVarDeclarationToList(nullptr, $1); }
-		               | class_declaration_argument_list ele ',' ele class_declaration_argument { $$ = VarDeclarationList::addVarDeclarationToList($1, $5); }
+class_declaration_argument_list: declaration_argument { $$ = ConstructorArgs::addMember(nullptr, $1); }
+			       | var ele declaration_argument { $$ = ConstructorArgs::addMember(nullptr, StmtNode::createVarOrValStmtNode($1, _VAR, $3)); }
+			       | val ele declaration_argument { $$ = ConstructorArgs::addMember(nullptr, StmtNode::createVarOrValStmtNode($1, _VAL, $3)); }
+		               | class_declaration_argument_list ele ',' ele declaration_argument { $$ = ConstructorArgs::addMember($1, $5); }
+		               | class_declaration_argument_list ele ',' ele var ele declaration_argument { $$ = ConstructorArgs::addMember($1, StmtNode::createVarOrValStmtNode($5, _VAR, $7)); }
+		               | class_declaration_argument_list ele ',' ele val ele declaration_argument { $$ = ConstructorArgs::addMember($1, StmtNode::createVarOrValStmtNode($5, _VAL, $7)); }
 		               ;
 
-class_allowed_declaration_params: ele { $$ = VarDeclarationList::addVarDeclarationToList(nullptr, nullptr); }
+class_allowed_declaration_params: ele { $$ = new ConstructorArgs(); }
 			        | ele class_declaration_argument_list ele { $$ = $2; }
 			        | ele class_declaration_argument_list ele ',' ele { $$ = $2; }
 			        ;
@@ -435,7 +437,7 @@ class_member_list: var_body end_of_stmt { $$ = ClassBodyNode::addMember(nullptr,
                  | class_member_list ele constructor_declaration { $$ = ClassBodyNode::addMember($1, $3); }
                  ;
 
-constructor_declaration: class_constructor ele '(' allowed_declaration_params ')' ele stmt_block { $$ = Constructor::createPrimaryConstructor($1, $4, $7); }
+constructor_declaration: class_constructor ele '(' allowed_declaration_params ')' ele stmt_block { $$ = Constructor::createPrimaryConstructor($1, ConstructorArgs::addVarDeclarationList($4), $7); }
 		       | class_constructor ele '(' allowed_declaration_params ')' ':' ele THIS ele '(' allowed_declaration_params ')' ele stmt_block { $$ = Constructor::createSecondaryConstructor($1, $4, $14, _THIS, $11); }
 		       | class_constructor ele '(' allowed_declaration_params ')' ':' ele SUPER ele '(' allowed_declaration_params ')' ele stmt_block { $$ = Constructor::createSecondaryConstructor($1, $4, $14, _SUPER, $11); }
 		       ;

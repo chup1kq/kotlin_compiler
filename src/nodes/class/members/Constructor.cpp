@@ -4,7 +4,7 @@
 
 Constructor *Constructor::createPrimaryConstructor(
         ModifierMap* modifiers,
-        VarDeclarationList *args,
+        ConstructorArgs* args,
         StmtListNode* stmts
 ) {
     Constructor *constructor = new Constructor();
@@ -23,7 +23,7 @@ Constructor *Constructor::createSecondaryConstructor(
 ) {
     Constructor *constructor = new Constructor();
     constructor->modifiers = modifiers;
-    constructor->args = args;
+    constructor->args = ConstructorArgs::addVarDeclarationList(args);
     constructor->stmts = stmts;
     constructor->prevConstructorType = prevConstructorType;
     constructor->prevConstructorArgs = prevConstructorArgs;
@@ -41,7 +41,6 @@ string Constructor::toDot() const {
     addDotChild(dot, modifiers, "modifiers");
     addDotChild(dot, args, "args");
     addDotChild(dot, stmts, "statements");
-    addDotChild(dot, modifiers, "modifiers");
     addDotChild(dot, prevConstructorArgs, "prevConstructorArgs");
 
     return dot;

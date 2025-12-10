@@ -87,4 +87,6 @@ add_executable(kotlin_parser
         src/nodes/topLevel/KotlinElementList.cpp
         src/nodes/topLevel/KotlinElementList.h
         src/utils/output/dot.cpp
+        src/nodes/class/members/ConstructorArgs.cpp
+        src/nodes/class/members/ConstructorArgs.h
 )
