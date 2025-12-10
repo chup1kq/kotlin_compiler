@@ -200,7 +200,7 @@ yytokentype TopLevelDeclarationProcessor::combineEndLexem(const std::string& key
     }
 
     if (keyword == "val" && prevLexems.empty()) {
-        return VAR;
+        return VAL;
     }
 
     if (has("override")) {

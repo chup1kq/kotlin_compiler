@@ -231,6 +231,10 @@ string ExprNode::getDotLabel() const {
         case _BOOL_LITERAL: return to_string(boolValue);
         case _CHAR_LITERAL : return to_string(charValue);
         case _STRING_LITERAL: return stringValue;
+        case _FUNC_ACCESS: return identifierName;
+        case _FUNC_CALL: return identifierName;
+        case _FIELD_ACCESS: return identifierName;
+        case _SAFE_FUNC_ACCESS: return "Safe" + identifierName;
 
         case _IDENTIFIER: return identifierName;
 

@@ -287,14 +287,14 @@ type: INT_TYPE { $$ = TypeNode::createType(_INT, false); }
 nullable_type: type '?' { $$ = TypeNode::makeNullableType($1); }
              ;
 
-var_body: var ele var_declaration { $$ = StmtNode::createVarOrValStmtNode(_VAR, $3); }
-        | var ele var_declaration_default_value { $$ = StmtNode::createVarOrValStmtNode(_VAR, $3); }
-        | var ele ID '=' ele expr { $$ = StmtNode::createVarOrValStmtNode(_VAR, VarDeclaration::createVarDeclaration($3, NULL, $6)); }
+var_body: var ele var_declaration { $$ = StmtNode::createVarOrValStmtNode($1, _VAR, $3); }
+        | var ele var_declaration_default_value { $$ = StmtNode::createVarOrValStmtNode($1, _VAR, $3); }
+        | var ele ID '=' ele expr { $$ = StmtNode::createVarOrValStmtNode($1, _VAR, VarDeclaration::createVarDeclaration($3, NULL, $6)); }
         ;
 
-val_body: val ele var_declaration { $$ = StmtNode::createVarOrValStmtNode(_VAL, $3); }
-        | val ele var_declaration_default_value { $$ = StmtNode::createVarOrValStmtNode(_VAL, $3); }
-        | val ele ID '=' ele expr { $$ = StmtNode::createVarOrValStmtNode(_VAL, VarDeclaration::createVarDeclaration($3, NULL, $6)); }
+val_body: val ele var_declaration { $$ = StmtNode::createVarOrValStmtNode($1, _VAL, $3); }
+        | val ele var_declaration_default_value { $$ = StmtNode::createVarOrValStmtNode($1, _VAL, $3); }
+        | val ele ID '=' ele expr { $$ = StmtNode::createVarOrValStmtNode($1, _VAL, VarDeclaration::createVarDeclaration($3, NULL, $6)); }
         ;
 
 var_declaration: ID ele ':' ele nullable_type { $$ = VarDeclaration::createVarDeclaration($1, $5, NULL); }
