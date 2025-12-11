@@ -21,18 +21,17 @@ TypeNode * TypeNode::makeNullableType(TypeNode* typeNode) {
 }
 
 string TypeNode::getDotLabel() const {
-    if (type != _ARRAY) {
-        return typeToString(type) + (isNull ? " nullable" : " not-nullable");
+    if (type == _ARRAY) {
+        return typeToString(type) + "<" + this->arrayType->getDotLabel() + ">";
     }
 
-    return typeToString(type);
+    return typeToString(type) + (isNull ? " nullable" : " not-nullable");
 }
 
 string TypeNode::toDot() const {
     string dot;
 
     addDotNode(dot);
-    addDotChild(dot, arrayType, "arrayElementsType");
 
     return dot;
 }

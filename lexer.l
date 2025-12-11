@@ -420,7 +420,7 @@ false       { processor.foundInappropriateLexem(yytext); printConstantKeyword(yy
 
 [ \t]+                  { ; }
 
-.                       { std::cout << "Error: Found inappropriate lexem: " << yytext << std::endl; }
+[\x01-\xFF]             { std::cout << "Error: Found inappropriate lexem: " << yytext << std::endl; }
 
 ";;"                    { std::cout << "Unexpected sequence: " << yytext << std::endl; }
 

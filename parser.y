@@ -80,21 +80,21 @@
 
 %token <modifiers> PRIVATE_CONSTRUCTOR PUBLIC_CONSTRUCTOR PROTECTED_CONSTRUCTOR CONSTRUCTOR
 
-%token <modifiers> PRIVATE_FUN PUBLIC_FUN
+%token <modifiers> PRIVATE_FUN PUBLIC_FUN PROTECTED_FUN
 %token <modifiers> PRIVATE_FINAL_FUN PUBLIC_FINAL_FUN PROTECTED_FINAL_FUN
 %token <modifiers> PUBLIC_OPEN_FUN PROTECTED_OPEN_FUN
 %token <modifiers> PUBLIC_FINAL_OVERRIDE_FUN PROTECTED_FINAL_OVERRIDE_FUN
 %token <modifiers> PUBLIC_OPEN_OVERRIDE_FUN PROTECTED_OPEN_OVERRIDE_FUN
 %token <modifiers> OPEN_OVERRIDE_FUN FINAL_OVERRIDE_FUN
 
-%token <modifiers> PRIVATE_VAR PUBLIC_VAR
+%token <modifiers> PRIVATE_VAR PUBLIC_VAR PROTECTED_VAR
 %token <modifiers> PRIVATE_FINAL_VAR PUBLIC_FINAL_VAR PROTECTED_FINAL_VAR
 %token <modifiers> PUBLIC_OPEN_VAR PROTECTED_OPEN_VAR
 %token <modifiers> PUBLIC_FINAL_OVERRIDE_VAR PROTECTED_FINAL_OVERRIDE_VAR
 %token <modifiers> PUBLIC_OPEN_OVERRIDE_VAR PROTECTED_OPEN_OVERRIDE_VAR
 %token <modifiers> OPEN_OVERRIDE_VAR FINAL_OVERRIDE_VAR
 
-%token <modifiers> PRIVATE_VAL PUBLIC_VAL
+%token <modifiers> PRIVATE_VAL PUBLIC_VAL PROTECTED_VAL
 %token <modifiers> PRIVATE_FINAL_VAL PUBLIC_FINAL_VAL PROTECTED_FINAL_VAL
 %token <modifiers> PUBLIC_OPEN_VAL PROTECTED_OPEN_VAL
 %token <modifiers> PUBLIC_FINAL_OVERRIDE_VAL PROTECTED_FINAL_OVERRIDE_VAL
@@ -445,6 +445,7 @@ constructor_declaration: class_constructor ele '(' allowed_declaration_params ')
 var: VAR { $$ = ModifierMap::createFunOrVarModifiers(NONE, NONE, NONE); }
    | PRIVATE_VAR { $$ = ModifierMap::createFunOrVarModifiers(PRIVATE, NONE, NONE); }
    | PUBLIC_VAR { $$ = ModifierMap::createFunOrVarModifiers(PUBLIC, NONE, NONE); }
+   | PROTECTED_VAR { $$ = ModifierMap::createFunOrVarModifiers(PROTECTED, NONE, NONE); }
    | PRIVATE_FINAL_VAR { $$ = ModifierMap::createFunOrVarModifiers(PRIVATE, FINAL, NONE); }
    | PUBLIC_FINAL_VAR { $$ = ModifierMap::createFunOrVarModifiers(PUBLIC, FINAL, NONE); }
    | PROTECTED_FINAL_VAR { $$ = ModifierMap::createFunOrVarModifiers(PROTECTED, FINAL, NONE); }
@@ -461,6 +462,7 @@ var: VAR { $$ = ModifierMap::createFunOrVarModifiers(NONE, NONE, NONE); }
 val: VAL { $$ = ModifierMap::createFunOrVarModifiers(NONE, NONE, NONE); }
    | PRIVATE_VAL { $$ = ModifierMap::createFunOrVarModifiers(PRIVATE, NONE, NONE); }
    | PUBLIC_VAL { $$ = ModifierMap::createFunOrVarModifiers(PUBLIC, NONE, NONE); }
+   | PROTECTED_VAL { $$ = ModifierMap::createFunOrVarModifiers(PROTECTED, NONE, NONE); }
    | PRIVATE_FINAL_VAL { $$ = ModifierMap::createFunOrVarModifiers(PRIVATE, FINAL, NONE); }
    | PUBLIC_FINAL_VAL { $$ = ModifierMap::createFunOrVarModifiers(PUBLIC, FINAL, NONE); }
    | PROTECTED_FINAL_VAL { $$ = ModifierMap::createFunOrVarModifiers(PROTECTED, FINAL, NONE); }
@@ -477,6 +479,7 @@ val: VAL { $$ = ModifierMap::createFunOrVarModifiers(NONE, NONE, NONE); }
 
 fun: PRIVATE_FUN { $$ = ModifierMap::createFunOrVarModifiers(PRIVATE, NONE, NONE); }
    | PUBLIC_FUN { $$ = ModifierMap::createFunOrVarModifiers(PUBLIC, NONE, NONE); }
+   | PROTECTED_FUN { $$ = ModifierMap::createFunOrVarModifiers(PROTECTED, NONE, NONE); }
    | PRIVATE_FINAL_FUN { $$ = ModifierMap::createFunOrVarModifiers(PRIVATE, FINAL, NONE); }
    | PUBLIC_FINAL_FUN { $$ = ModifierMap::createFunOrVarModifiers(PUBLIC, FINAL, NONE); }
    | PROTECTED_FINAL_FUN { $$ = ModifierMap::createFunOrVarModifiers(PROTECTED, FINAL, NONE); }

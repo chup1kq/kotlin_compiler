@@ -271,6 +271,12 @@ yytokentype TopLevelDeclarationProcessor::combineEndLexem(const std::string& key
         return PRIVATE_FUN;
     }
 
+    if (has("protected")) {
+        if (keyword == "var") return PROTECTED_VAR;
+        if (keyword == "val") return PROTECTED_VAL;
+        return PROTECTED_FUN;
+    }
+
     if (keyword == "var") return PUBLIC_VAR;
     if (keyword == "val") return PUBLIC_VAL;
     return PUBLIC_FUN;
