@@ -434,10 +434,12 @@ class_body: '{' ele '}' { $$ = new ClassBodyNode(); }
           | '{' ele class_member_list ele '}' { $$ = $3; }
           ;
 
-class_member_list: var_body end_of_stmt { $$ = ClassBodyNode::addMember(nullptr, $1); }
+class_member_list: ';' { $$ = new ClassBodyNode(); }
+		 | var_body end_of_stmt { $$ = ClassBodyNode::addMember(nullptr, $1); }
                  | val_body end_of_stmt { $$ = ClassBodyNode::addMember(nullptr, $1); }
                  | fun_declaration { $$ = ClassBodyNode::addMember(nullptr, $1); }
                  | constructor_declaration { $$ = ClassBodyNode::addMember(nullptr, $1); }
+                 | class_member_list ele ';' { $$ = $1; }
                  | class_member_list ele var_body end_of_stmt { $$ = ClassBodyNode::addMember($1, $3); }
                  | class_member_list ele val_body end_of_stmt { $$ = ClassBodyNode::addMember($1, $3); }
                  | class_member_list ele fun_declaration { $$ = ClassBodyNode::addMember($1, $3); }
