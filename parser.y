@@ -314,11 +314,15 @@ var_declaration_list: ID { $$ = VarDeclarationList::addVarDeclarationToList(null
 condition_expr: ele '(' expr ')' ele { $$ = $3; }
               ;
 
-if_expr: IF condition_expr stmt_block ELSE stmt_block { $$ = ExprNode::createIfNode($2, $3, $5); }
-       | IF condition_expr expr ELSE stmt_block { $$ = ExprNode::createIfNode($2, StmtListNode::addExprToStmtList(nullptr, $3), $5); }
-       | IF condition_expr expr ELSE stmt { $$ = ExprNode::createIfNode($2, StmtListNode::addExprToStmtList(nullptr, $3), StmtListNode::addStmtToList(nullptr, $5)); }
-       | IF condition_expr stmt_block { $$ = ExprNode::createIfNode($2, $3, nullptr); }
-       | IF condition_expr stmt { $$ = ExprNode::createIfNode($2, StmtListNode::addStmtToList(nullptr, $3), nullptr); }
+if_expr: IF condition_expr stmt_block ele ELSE ele stmt_block { $$ = ExprNode::createIfNode($2, $3, $7); }
+       | IF condition_expr expr ELSE ele stmt_block { $$ = ExprNode::createIfNode($2, StmtListNode::addExprToStmtList(nullptr, $3), $6); }
+       | IF condition_expr stmt ELSE ele stmt_block { $$ = ExprNode::createIfNode($2, StmtListNode::addStmtToList(nullptr, $3), $6); }
+       | IF condition_expr stmt_block ele { $$ = ExprNode::createIfNode($2, $3, nullptr); }
+
+       | IF condition_expr stmt_block ele ELSE ele expr { $$ = ExprNode::createIfNode($2, $3, StmtListNode::addExprToStmtList(nullptr, $7)); }
+       | IF condition_expr expr ELSE ele expr { $$ = ExprNode::createIfNode($2, StmtListNode::addExprToStmtList(nullptr, $3), StmtListNode::addExprToStmtList(nullptr, $6)); }
+       | IF condition_expr stmt ELSE ele expr { $$ = ExprNode::createIfNode($2, StmtListNode::addStmtToList(nullptr, $3), StmtListNode::addExprToStmtList(nullptr, $6)); }
+       | IF condition_expr expr { $$ = ExprNode::createIfNode($2, StmtListNode::addExprToStmtList(nullptr, $3), nullptr); }
        ;
 
 while_stmt: WHILE condition_expr stmt_block end_of_stmt { $$ = StmtNode::createCycleNodeFromBlockStmt(_WHILE, $2, $3); }
@@ -395,12 +399,15 @@ class_allowed_declaration_params: ele { $$ = new ConstructorArgs(); }
 			        | ele class_declaration_argument_list ele ',' ele { $$ = $2; }
 			        ;
 
-fun_declaration: fun ele ID ele '(' allowed_declaration_params ')' ele stmt_block { $$ = FunNode::createFunNode(TypeNode::createType(_VOID, false), $1, $3, $6, $9); }
-	       | fun ele ID ele '(' allowed_declaration_params ')' ele ':' ele nullable_type ele stmt_block { $$ = FunNode::createFunNode($11, $1, $3, $6, $13); }
-	       | fun ele ID ele '(' allowed_declaration_params ')' ele ':' ele type ele stmt_block { $$ = FunNode::createFunNode($11, $1, $3, $6, $13); }
+fun_declaration: fun ele ID ele '(' allowed_declaration_params ')' ele stmt_block ele { $$ = FunNode::createFunNode(TypeNode::createType(_VOID, false), $1, $3, $6, $9); }
+	       | fun ele ID ele '(' allowed_declaration_params ')' ele ':' ele nullable_type ele stmt_block ele { $$ = FunNode::createFunNode($11, $1, $3, $6, $13); }
+	       | fun ele ID ele '(' allowed_declaration_params ')' ele ':' ele type ele stmt_block ele { $$ = FunNode::createFunNode($11, $1, $3, $6, $13); }
 	       | fun ele ID ele '(' allowed_declaration_params ')' ele '=' ele expr end_of_stmt { $$ = FunNode::createFunNodeFromExpr(TypeNode::createType(_VOID, false), $1, $3, $6, $11); }
 	       | fun ele ID ele '(' allowed_declaration_params ')' ele ':' ele nullable_type ele '=' ele expr end_of_stmt { $$ = FunNode::createFunNodeFromExpr($11, $1, $3, $6, $15); }
 	       | fun ele ID ele '(' allowed_declaration_params ')' ele ':' ele type ele '=' ele expr end_of_stmt { $$ = FunNode::createFunNodeFromExpr($11, $1, $3, $6, $15); }
+	       | fun ele ID ele '(' allowed_declaration_params ')' ele '=' ele expr { $$ = FunNode::createFunNodeFromExpr(TypeNode::createType(_VOID, false), $1, $3, $6, $11); }
+	       | fun ele ID ele '(' allowed_declaration_params ')' ele ':' ele nullable_type ele '=' ele expr { $$ = FunNode::createFunNodeFromExpr($11, $1, $3, $6, $15); }
+	       | fun ele ID ele '(' allowed_declaration_params ')' ele ':' ele type ele '=' ele expr { $$ = FunNode::createFunNodeFromExpr($11, $1, $3, $6, $15); }
 	       ;
 
 class_declaration: class ele ID ele { $$ = ClassNode::createClassNode($1, $3, nullptr, nullptr, nullptr); }
