@@ -89,4 +89,11 @@ add_executable(kotlin_parser
         src/utils/output/dot.cpp
         src/nodes/class/members/ConstructorArgs.cpp
         src/nodes/class/members/ConstructorArgs.h
+        src/semantic/tables/ClassTable.cpp
+        src/semantic/tables/ClassTable.h
+        src/semantic/tables/ClassTableElement.cpp
+        src/semantic/tables/ClassTableElement.h
+        src/semantic/error/SemanticError.cpp
+        src/semantic/error/SemanticError.h
+        src/semantic/error/SemanticErrorCode.h
 )
