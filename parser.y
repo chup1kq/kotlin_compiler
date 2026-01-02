@@ -124,12 +124,12 @@
 %right UMINUS UPLUS INCREMENT DECREMENT '!'
 %left POST_INCREMENT POST_DECREMENT '.' SAFE_CALL '?' '[' ']' '(' ')'
 
-%type <expression> expr if_expr condition_expr
+%type <expression> expr condition_expr
 %type <exprList> expr_list argument_list
 
 %type <modifiers> var val fun class class_constructor enum enum_constructor
 
-%type <statement> stmt var_body val_body while_stmt do_while_stmt return_body for_stmt
+%type <statement> stmt var_body val_body if_stmt while_stmt do_while_stmt return_body for_stmt
 
 %type <stmtList> stmt_list stmt_block
 
@@ -186,7 +186,6 @@ expr: INT_LITERAL { $$ = ExprNode::createIntNode($1); }
     | FALSE_LITERAL { $$ = ExprNode::createBoolNode($1); }
     | NULL_LITERAL { $$ = ExprNode::createNullNode(); }
     | ID { $$ = ExprNode::createIDNode($1); }
-    | if_expr { $$ = $1; }
     | THIS { $$ = ExprNode::createThisExprNode(); }
     | SUPER { $$ = ExprNode::createSuperExprNode(); }
     | expr '.' ele ID { $$ = ExprNode::createFieldAccessExprNode($4, $1); }
@@ -245,6 +244,7 @@ stmt: ';' { $$ = StmtNode::createEmptyStmt(); }
     | expr end_of_stmt { $$ = StmtNode::createStmtFromExpr($1); }
     | var_body end_of_stmt { $$ = $1; }
     | val_body end_of_stmt { $$ = $1; }
+    | if_stmt { $$ = $1; }
     | for_stmt { $$ = $1; }
     | while_stmt  { $$ = $1; }
     | do_while_stmt { $$ = $1; }
@@ -314,15 +314,14 @@ var_declaration_list: ID { $$ = VarDeclarationList::addVarDeclarationToList(null
 condition_expr: ele '(' expr ')' ele { $$ = $3; }
               ;
 
-if_expr: IF condition_expr stmt_block ele ELSE ele stmt_block { $$ = ExprNode::createIfNode($2, $3, $7); }
-       | IF condition_expr expr ELSE ele stmt_block { $$ = ExprNode::createIfNode($2, StmtListNode::addExprToStmtList(nullptr, $3), $6); }
-       | IF condition_expr stmt ELSE ele stmt_block { $$ = ExprNode::createIfNode($2, StmtListNode::addStmtToList(nullptr, $3), $6); }
-       | IF condition_expr stmt_block ele { $$ = ExprNode::createIfNode($2, $3, nullptr); }
-
-       | IF condition_expr stmt_block ele ELSE ele expr { $$ = ExprNode::createIfNode($2, $3, StmtListNode::addExprToStmtList(nullptr, $7)); }
-       | IF condition_expr expr ELSE ele expr { $$ = ExprNode::createIfNode($2, StmtListNode::addExprToStmtList(nullptr, $3), StmtListNode::addExprToStmtList(nullptr, $6)); }
-       | IF condition_expr stmt ELSE ele expr { $$ = ExprNode::createIfNode($2, StmtListNode::addStmtToList(nullptr, $3), StmtListNode::addExprToStmtList(nullptr, $6)); }
-       | IF condition_expr expr { $$ = ExprNode::createIfNode($2, StmtListNode::addExprToStmtList(nullptr, $3), nullptr); }
+if_stmt: IF condition_expr stmt_block ele ELSE ele stmt_block ele { $$ = StmtNode::createStmtFromExpr(ExprNode::createIfNode($2, $3, $7)); }
+       | IF condition_expr stmt_block ele ELSE ele stmt { $$ = StmtNode::createStmtFromExpr(ExprNode::createIfNode($2, $3, StmtListNode::addStmtToList(nullptr, $7))); }
+       | IF condition_expr expr ELSE ele stmt_block ele { $$ = StmtNode::createStmtFromExpr(ExprNode::createIfNode($2, StmtListNode::addExprToStmtList(nullptr, $3), $6)); }
+       | IF condition_expr expr ELSE ele stmt { $$ = StmtNode::createStmtFromExpr(ExprNode::createIfNode($2, StmtListNode::addExprToStmtList(nullptr, $3), StmtListNode::addStmtToList(nullptr, $6))); }
+       | IF condition_expr stmt ELSE ele stmt_block ele { $$ = StmtNode::createStmtFromExpr(ExprNode::createIfNode($2, StmtListNode::addStmtToList(nullptr, $3), $6)); }
+       | IF condition_expr stmt ELSE ele stmt { $$ = StmtNode::createStmtFromExpr(ExprNode::createIfNode($2, StmtListNode::addStmtToList(nullptr, $3), StmtListNode::addStmtToList(nullptr, $6))); }
+       | IF condition_expr stmt_block ele { $$ = StmtNode::createStmtFromExpr(ExprNode::createIfNode($2, $3, nullptr)); }
+       | IF condition_expr stmt { $$ = StmtNode::createStmtFromExpr(ExprNode::createIfNode($2, StmtListNode::addStmtToList(nullptr, $3), nullptr)); }
        ;
 
 while_stmt: WHILE condition_expr stmt_block end_of_stmt { $$ = StmtNode::createCycleNodeFromBlockStmt(_WHILE, $2, $3); }
