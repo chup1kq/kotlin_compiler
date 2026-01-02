@@ -14,7 +14,11 @@ public:
 
     static SemanticError* buildClassTable(KotlinFileNode* root);
 
-};
+    // ------------------- Helpers -----------------
 
+    static bool exists(const std::string& name);
+    static void add(const std::string& name, ClassTableElement* elem);
+
+};
 
 #endif //KOTLIN_COMPILER_CLASSTABLE_H
