@@ -1,34 +1,34 @@
 #include "ConstructorArgs.h"
 
-#include "StmtListNode.h"
-
-ConstructorArgs *ConstructorArgs::addMember(ConstructorArgs *args, VarDeclaration *declaration) {
+ConstructorArgs* ConstructorArgs::addMember(ConstructorArgs* args, VarDeclaration* declaration) {
     if (!args) {
         args = new ConstructorArgs();
-        args->stmtArgs = new StmtListNode();
-        args->simpleArgs = new VarDeclarationList(nullptr);
     }
 
-    args->simpleArgs->addVarDeclarationToList(args->simpleArgs, declaration);
+    args->args.push_back(declaration);
     return args;
 }
 
 ConstructorArgs* ConstructorArgs::addMember(ConstructorArgs* args, StmtNode* stmt) {
     if (!args) {
         args = new ConstructorArgs();
-        args->simpleArgs = new VarDeclarationList(nullptr);
-        args->stmtArgs = new StmtListNode();
     }
 
-    args->stmtArgs->addStmtToList(args->stmtArgs, stmt);
+    args->args.push_back(stmt);
     return args;
 }
 
-ConstructorArgs* ConstructorArgs::addVarDeclarationList(VarDeclarationList *declarations) {
+ConstructorArgs* ConstructorArgs::addVarDeclarationList(VarDeclarationList* declarations) {
     ConstructorArgs* args = new ConstructorArgs();
-    args->simpleArgs = new VarDeclarationList(nullptr);
-    args->stmtArgs = new StmtListNode();
-    args->simpleArgs = declarations;
+
+    if (!declarations || !declarations->decls) {
+        return args;
+    }
+
+    for (VarDeclaration* decl : *declarations->decls) {
+        args->args.push_back(decl);
+    }
+
     return args;
 }
 
@@ -40,8 +40,10 @@ string ConstructorArgs::toDot() const {
     string dot;
 
     addDotNode(dot);
-    addDotChild(dot, simpleArgs, "simpleArgs");
-    addDotChild(dot, stmtArgs, "stmtArgs");
+
+    for (size_t i = 0; i < args.size(); ++i) {
+        addDotChild(dot, args[i], "arg_" + std::to_string(i));
+    }
 
     return dot;
 }
