@@ -21,7 +21,6 @@ enum ExprType {
     _DOUBLE_LITERAL,
     _CHAR_LITERAL,
     _STRING_LITERAL,
-    _IF_STMT,
     _PLUS,
     _MINUS,
     _DIV,
@@ -65,6 +64,7 @@ enum ExprType {
 };
 
 enum StmtType {
+    _IF_STMT,
     _EXPRESSION,
     _WHILE,
     _FOR,

@@ -23,7 +23,6 @@ std::string exprTypeToString(ExprType t) {
         case _DOUBLE_LITERAL:     return "DOUBLE_LITERAL";
         case _CHAR_LITERAL:       return "CHAR_LITERAL";
         case _STRING_LITERAL:     return "STRING_LITERAL";
-        case _IF_STMT:            return "IF_STMT";
         case _PLUS:               return "PLUS";
         case _MINUS:              return "MINUS";
         case _DIV:                return "DIV";
@@ -71,6 +70,7 @@ std::string exprTypeToString(ExprType t) {
 std::string stmtTypeToString(StmtType t) {
     switch (t) {
         case _EXPRESSION: return "EXPRESSION";
+        case _IF_STMT:    return "IF_STMT";
         case _WHILE:      return "WHILE";
         case _FOR:        return "FOR";
         case _DO_WHILE:   return "DO_WHILE";

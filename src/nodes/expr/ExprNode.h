@@ -19,8 +19,6 @@ public:
     bool boolValue;
     char charValue;
     string stringValue;
-    ExprNode *cond;
-    StmtListNode *trueStmtList, *falseStmtList;
     ExprListNode* params;
     string identifierName;
     ExprListNode* elements;
@@ -34,7 +32,6 @@ public:
     static ExprNode* createBoolNode(bool value);
     static ExprNode* createNullNode();
     static ExprNode* createExprNode(ExprType type, ExprNode* left, ExprNode* right);
-    static ExprNode* createIfNode(ExprNode* ifCond, StmtListNode* trueB, StmtListNode* falseB);
     static ExprNode* createMethodAccessExprNode(string name, ExprListNode* params, ExprNode* expr);
     static ExprNode* createSafeMethodAccessExprNode(string name, ExprListNode* params, ExprNode* expr);
     static ExprNode* createFieldAccessExprNode(string name, ExprNode* expr);

@@ -110,6 +110,16 @@ string StmtNode::getDotLabel() const {
     return stmtTypeToString(type);
 }
 
+StmtNode * StmtNode::createIfNode(ExprNode *ifCond, StmtListNode *trueB, StmtListNode *falseB) {
+    StmtNode* node = new StmtNode();
+    node->type = _IF_STMT;
+    node->cond = ifCond;
+    node->trueStmtList = trueB;
+    node->falseStmtList = falseB;
+    return node;
+}
+
+
 string StmtNode::toDot() const {
     string dot;
 

@@ -314,14 +314,14 @@ var_declaration_list: ID { $$ = VarDeclarationList::addVarDeclarationToList(null
 condition_expr: ele '(' expr ')' ele { $$ = $3; }
               ;
 
-if_stmt: IF condition_expr stmt_block ele ELSE ele stmt_block end_of_stmt { $$ = StmtNode::createStmtFromExpr(ExprNode::createIfNode($2, $3, $7)); }
-       | IF condition_expr stmt_block ele ELSE ele stmt { $$ = StmtNode::createStmtFromExpr(ExprNode::createIfNode($2, $3, StmtListNode::addStmtToList(nullptr, $7))); }
-       | IF condition_expr expr ELSE ele stmt_block end_of_stmt { $$ = StmtNode::createStmtFromExpr(ExprNode::createIfNode($2, StmtListNode::addExprToStmtList(nullptr, $3), $6)); }
-       | IF condition_expr expr ELSE ele stmt { $$ = StmtNode::createStmtFromExpr(ExprNode::createIfNode($2, StmtListNode::addExprToStmtList(nullptr, $3), StmtListNode::addStmtToList(nullptr, $6))); }
-       | IF condition_expr stmt ELSE ele stmt_block end_of_stmt { $$ = StmtNode::createStmtFromExpr(ExprNode::createIfNode($2, StmtListNode::addStmtToList(nullptr, $3), $6)); }
-       | IF condition_expr stmt ELSE ele stmt { $$ = StmtNode::createStmtFromExpr(ExprNode::createIfNode($2, StmtListNode::addStmtToList(nullptr, $3), StmtListNode::addStmtToList(nullptr, $6))); }
-       | IF condition_expr stmt_block end_of_stmt { $$ = StmtNode::createStmtFromExpr(ExprNode::createIfNode($2, $3, nullptr)); }
-       | IF condition_expr stmt { $$ = StmtNode::createStmtFromExpr(ExprNode::createIfNode($2, StmtListNode::addStmtToList(nullptr, $3), nullptr)); }
+if_stmt: IF condition_expr stmt_block ele ELSE ele stmt_block end_of_stmt { $$ = StmtNode::createIfNode($2, $3, $7); }
+       | IF condition_expr stmt_block ele ELSE ele stmt { $$ = StmtNode::createIfNode($2, $3, StmtListNode::addStmtToList(nullptr, $7)); }
+       | IF condition_expr expr ELSE ele stmt_block end_of_stmt { $$ = StmtNode::createIfNode($2, StmtListNode::addExprToStmtList(nullptr, $3), $6); }
+       | IF condition_expr expr ELSE ele stmt { $$ = StmtNode::createIfNode($2, StmtListNode::addExprToStmtList(nullptr, $3), StmtListNode::addStmtToList(nullptr, $6)); }
+       | IF condition_expr stmt ELSE ele stmt_block end_of_stmt { $$ = StmtNode::createIfNode($2, StmtListNode::addStmtToList(nullptr, $3), $6); }
+       | IF condition_expr stmt ELSE ele stmt { $$ = StmtNode::createIfNode($2, StmtListNode::addStmtToList(nullptr, $3), StmtListNode::addStmtToList(nullptr, $6)); }
+       | IF condition_expr stmt_block end_of_stmt { $$ = StmtNode::createIfNode($2, $3, nullptr); }
+       | IF condition_expr stmt { $$ = StmtNode::createIfNode($2, StmtListNode::addStmtToList(nullptr, $3), nullptr); }
        ;
 
 while_stmt: WHILE condition_expr stmt_block end_of_stmt { $$ = StmtNode::createCycleNodeFromBlockStmt(_WHILE, $2, $3); }

@@ -58,15 +58,6 @@ ExprNode * ExprNode::createExprNode(ExprType type, ExprNode *left, ExprNode *rig
     return node;
 }
 
-ExprNode * ExprNode::createIfNode(ExprNode *ifCond, StmtListNode *trueB, StmtListNode *falseB) {
-    ExprNode* node = new ExprNode();
-    node->type = _IF_STMT;
-    node->cond = ifCond;
-    node->trueStmtList = trueB;
-    node->falseStmtList = falseB;
-    return node;
-}
-
 // ExprNode * ExprNode::createIfNode(ExprNode *ifCond, StmtListNode *trueB, StmtNode *falseB) {
 // }
 //
@@ -250,9 +241,6 @@ string ExprNode::toDot() const {
     addDotNode(dot);
     addDotChild(dot, left, "left");
     addDotChild(dot, right, "right");
-    addDotChild(dot, cond, "condition");
-    addDotChild(dot, trueStmtList, "when_true");
-    addDotChild(dot, falseStmtList, "when_false");
     addDotChild(dot, params, "params");
     addDotChild(dot ,elements, "elements");
     addDotChild(dot, typeElements, "type");
