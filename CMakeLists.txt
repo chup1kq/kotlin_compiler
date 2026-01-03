@@ -100,4 +100,6 @@ add_executable(kotlin_parser
         src/semantic/tables/class/FieldTableElement.h
         src/semantic/tables/class/Field/FieldTable.h
         src/semantic/tables/class/Field/FieldTableElement.h
+        src/semantic/tables/field/FieldTable.h
+        src/semantic/tables/field/FieldTableElement.h
 )

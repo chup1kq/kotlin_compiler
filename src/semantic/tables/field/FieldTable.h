@@ -2,7 +2,7 @@
 #define KOTLIN_COMPILER_FIELDTABLE_H
 #include <map>
 #include <string>
-#include "../FieldTableElement.h"
+#include "FieldTableElement.h"
 
 class FieldTable {
 public:
