@@ -96,4 +96,6 @@ add_executable(kotlin_parser
         src/semantic/error/SemanticError.cpp
         src/semantic/error/SemanticError.h
         src/semantic/error/SemanticErrorCode.h
+        src/semantic/tables/class/FieldTable.h
+        src/semantic/tables/class/FieldTableElement.h
 )
