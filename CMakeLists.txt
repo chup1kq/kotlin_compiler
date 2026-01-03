@@ -104,4 +104,6 @@ add_executable(kotlin_parser
         src/semantic/tables/constant/ConstantTableElement.h
         src/utils/output/constTableToCsv.cpp
         src/utils/math/math.cpp
+        src/semantic/tables/method/MethodTable.h
+        src/semantic/tables/method/MethodTableElement.h
 )
