@@ -1,40 +1,40 @@
 #include "SemanticError.h"
-#include "SemanticErrorCode.h"
 #include <iostream>
 
-SemanticError::SemanticError(int code, std::string message)
-    : code(code), message(std::move(message)) {}
-
-void SemanticError::print() const {
-    std::cerr << "[Semantic error " << code << "] " << message << std::endl;
+SemanticError::SemanticError(int code, const std::string& message)
+    : code(code), message(message) {
 }
 
-// ---------- static methods ----------
+const char* SemanticError::what() const noexcept {
+    return message.c_str();
+}
 
-SemanticError *SemanticError::redefinition(const std::string &name) {
-    return new SemanticError(
-        REDEFINITION,
+// ---------- factory methods ----------
+
+SemanticError SemanticError::redefinition(const std::string &name) {
+    return SemanticError(
+        1001,
         "Redefinition of '" + name + "'"
     );
 }
 
-SemanticError *SemanticError::undefinedClass(const std::string &name) {
-    return new SemanticError(
-        UNDEFINED_CLASS,
+SemanticError SemanticError::undefinedClass(const std::string& name) {
+    return SemanticError(
+        1002,
         "Undefined class '" + name + "'"
     );
 }
 
-SemanticError *SemanticError::invalidInheritance(const std::string &cls, const std::string &parent) {
-    return new SemanticError(
-        INVALID_INHERITANCE,
+SemanticError SemanticError::invalidInheritance(const std::string &cls, const std::string &parent) {
+    return SemanticError(
+        1003,
         "Class '" + cls + "' cannot inherit from '" + parent + "'"
     );
 }
 
-SemanticError *SemanticError::finalClassInheritance(const std::string &cls) {
-    return new SemanticError(
-        FINAL_CLASS_INHERITANCE,
-        "Class '" + cls + "' is final and cannot be inherited"
+SemanticError SemanticError::finalClassInheritance(const std::string &cls) {
+    return SemanticError(
+        1004,
+        "Cannot inherit from final class '" + cls + "'"
     );
 }
