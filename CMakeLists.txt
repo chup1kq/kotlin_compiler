@@ -89,17 +89,17 @@ add_executable(kotlin_parser
         src/utils/output/dot.cpp
         src/nodes/class/members/ConstructorArgs.cpp
         src/nodes/class/members/ConstructorArgs.h
+        src/semantic/error/SemanticError.cpp
+        src/semantic/error/SemanticError.h
+        src/semantic/error/SemanticErrorCode.h
         src/semantic/tables/class/ClassTable.cpp
         src/semantic/tables/class/ClassTable.h
         src/semantic/tables/class/ClassTableElement.cpp
         src/semantic/tables/class/ClassTableElement.h
-        src/semantic/error/SemanticError.cpp
-        src/semantic/error/SemanticError.h
-        src/semantic/error/SemanticErrorCode.h
-        src/semantic/tables/class/FieldTable.h
-        src/semantic/tables/class/FieldTableElement.h
-        src/semantic/tables/class/Field/FieldTable.h
-        src/semantic/tables/class/Field/FieldTableElement.h
         src/semantic/tables/field/FieldTable.h
         src/semantic/tables/field/FieldTableElement.h
+        src/semantic/tables/constant/ConstantTable.cpp
+        src/semantic/tables/constant/ConstantTable.h
+        src/semantic/tables/constant/ConstantTableElement.cpp
+        src/semantic/tables/constant/ConstantTableElement.h
 )
