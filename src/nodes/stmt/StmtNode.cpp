@@ -125,6 +125,8 @@ string StmtNode::toDot() const {
 
     addDotNode(dot);
     addDotChild(dot, cond, "condition");
+    addDotChild(dot, trueStmtList, "true_branch");
+    addDotChild(dot, falseStmtList, "false_branch");
     addDotChild(dot, cycleSingleStmt, "cycle");
     addDotChild(dot, blockStmts, "block");
     addDotChild(dot, expr, "expr");
