@@ -3,9 +3,9 @@
 #include <map>
 #include <string>
 
-#include "ClassTableElement.h"
+#include "../ClassTableElement.h"
 #include "topLevel/KotlinFileNode.h"
-#include "../error/SemanticError.h"
+#include "../../error/SemanticError.h"
 
 
 class ClassTable {

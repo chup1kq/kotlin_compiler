@@ -1,4 +1,4 @@
-#include "ClassTable.h"
+#include "../ClassTable.h"
 
 SemanticError* ClassTable::buildClassTable(KotlinFileNode* root) {
     // добавляем все классы
