@@ -26,11 +26,11 @@ public:
     ConstantTableElement(
         int id,
         ConstantType type,
-        std::string utf8String = nullptr,
-        int intValue = NULL,
-        double doubleValue = NULL,
-        int firstRef = NULL,
-        int secondRef = NULL
+        std::string utf8String = "",
+        int intValue = 0,
+        double doubleValue = 0.0,
+        int firstRef = 0,
+        int secondRef = 0
     );
 };
 

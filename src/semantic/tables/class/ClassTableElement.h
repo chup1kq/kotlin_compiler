@@ -20,6 +20,8 @@ public:
     MethodTable* methods;
     FieldTable* fields;
 
+    ConstantTable* constants;
+
     std::string clsName;
 
     ClassTableElement();
