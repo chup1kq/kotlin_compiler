@@ -106,4 +106,5 @@ add_executable(kotlin_parser
         src/utils/math/math.cpp
         src/semantic/tables/method/MethodTable.h
         src/semantic/tables/method/MethodTableElement.h
+        src/semantic/tables/variables/FuncParam.h
 )
