@@ -15,6 +15,47 @@ ExprNode::ExprNode()
       typeElements(nullptr)
 {}
 
+ExprNode* ExprNode::clone() const {
+    ExprNode* copy = new ExprNode();
+
+    copy->type = this->type;
+    copy->intValue = this->intValue;
+    copy->floatValue = this->floatValue;
+    copy->doubleValue = this->doubleValue;
+    copy->boolValue = this->boolValue;
+    copy->charValue = this->charValue;
+    copy->stringValue = this->stringValue;
+    copy->identifierName = this->identifierName;
+
+    copy->left = this->left ? this->left->clone() : nullptr;
+    copy->right = this->right ? this->right->clone() : nullptr;
+
+    copy->params = nullptr;
+    if (this->params && this->params->exprs) {
+        copy->params = new ExprListNode();
+        for (auto* expr : *this->params->exprs) {
+            copy->params->exprs->push_back(
+                expr ? expr->clone() : nullptr
+            );
+        }
+    }
+
+    copy->elements = nullptr;
+    if (this->elements && this->elements->exprs) {
+        copy->elements = new ExprListNode();
+        for (auto* expr : *this->elements->exprs) {
+            copy->elements->exprs->push_back(
+                expr ? expr->clone() : nullptr
+            );
+        }
+    }
+
+    copy->typeElements = this->typeElements;
+
+    return copy;
+}
+
+
 ExprNode* ExprNode::createIntNode(int value) {
     ExprNode* node = new ExprNode();
     node->type = _INTEGER_LITERAL;

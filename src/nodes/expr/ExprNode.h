@@ -25,6 +25,7 @@ public:
     TypeNode* typeElements;
 
     ExprNode();
+    ExprNode* clone() const;
 
     static ExprNode* createIntNode(int value);
     static ExprNode* createFloatNode(float value);

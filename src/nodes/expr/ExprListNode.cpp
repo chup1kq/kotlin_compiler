@@ -2,6 +2,10 @@
 
 #include "VarDeclarationList.h"
 
+ExprListNode::ExprListNode() {
+    exprs = new std::list<ExprNode*>;
+}
+
 ExprListNode::ExprListNode(ExprNode *expr) {
     exprs = new std::list<ExprNode*>;
     exprs->push_back(expr);

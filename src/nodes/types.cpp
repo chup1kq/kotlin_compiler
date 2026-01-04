@@ -45,6 +45,7 @@ std::string exprTypeToString(ExprType t) {
         case _THIS:               return "THIS";
         case _SUPER:              return "SUPER";
         case _RANGE:              return "RANGE";
+        case _DOWN_TO:            return "DOWN_TO";
         case _UNTIL:              return "UNTIL";
         case _STEP:               return "STEP";
         case _PREF_INCREMENT:     return "PREF_INCREMENT";

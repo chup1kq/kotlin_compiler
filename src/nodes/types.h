@@ -43,6 +43,7 @@ enum ExprType {
     _THIS,
     _SUPER,
     _RANGE,
+    _DOWN_TO,
     _UNTIL,
     _STEP,
     _PREF_INCREMENT,
