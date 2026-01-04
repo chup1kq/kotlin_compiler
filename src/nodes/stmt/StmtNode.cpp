@@ -5,7 +5,6 @@
 StmtNode::StmtNode()
     : type(_EMPTY),
       cond(nullptr),
-      cycleSingleStmt(nullptr),
       blockStmts(nullptr),
       expr(nullptr),
       varDeclaration(nullptr),
@@ -18,10 +17,12 @@ StmtNode::StmtNode()
 
 // создать while и do_while
 StmtNode * StmtNode::createCycleNodeFromSingleStmt(StmtType type, ExprNode *cycleCond, StmtNode *cycleStmt) {
+    StmtListNode *listNode = new StmtListNode(cycleStmt);
+
     StmtNode* node = new StmtNode();
     node->type = type;
     node->cond = cycleCond;
-    node->cycleSingleStmt = cycleStmt;
+    node->blockStmts = listNode;
     return node;
 }
 
@@ -76,11 +77,13 @@ StmtNode *StmtNode::createVarOrValStmtNode(ModifierMap* modifiers, StmtType type
 }
 
 StmtNode * StmtNode::createForNodeFromSingleStmt(VarDeclaration* iterator, ExprNode *range, StmtNode *cycleStmt) {
+    StmtListNode *listNode = new StmtListNode(cycleStmt);
+
     StmtNode* node = new StmtNode();
     node->type = _FOR;
     node->forIterator = iterator;
     node->cond = range;
-    node->cycleSingleStmt = cycleStmt;
+    node->blockStmts = listNode;
     return node;
 }
 
@@ -94,11 +97,13 @@ StmtNode * StmtNode::createForNodeFromBlockStmt(VarDeclaration* iterator, ExprNo
 }
 
 StmtNode * StmtNode::createForNodeFromSingleStmtWithSeveralId(VarDeclarationList *list, ExprNode *range, StmtNode *cycleStmt) {
+    StmtListNode *listNode = new StmtListNode(cycleStmt);
+
     StmtNode* node = new StmtNode();
     node->type = _FOR;
     node->forIteratorList = list;
     node->cond = range;
-    node->cycleSingleStmt = cycleStmt;
+    node->blockStmts = listNode;
     return node;
 }
 
@@ -141,7 +146,6 @@ string StmtNode::toDot() const {
     addDotChild(dot, cond, "condition");
     addDotChild(dot, trueStmtList, "true_branch");
     addDotChild(dot, falseStmtList, "false_branch");
-    addDotChild(dot, cycleSingleStmt, "cycle");
     addDotChild(dot, blockStmts, "block");
     addDotChild(dot, expr, "expr");
     addDotChild(dot, varDeclaration, "variable declaration");

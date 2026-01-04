@@ -15,7 +15,6 @@ class StmtNode : public Node {
 public:
     StmtType type;
     ExprNode *cond;
-    StmtNode *cycleSingleStmt;
     StmtListNode *blockStmts;
     ExprNode *expr;
     VarDeclaration *varDeclaration;

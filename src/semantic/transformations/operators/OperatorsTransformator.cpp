@@ -70,9 +70,6 @@ void OperatorsTransformator::replaceOperatorsInStatement(StmtNode *stmt) {
             if (stmt->cond)
                 replaceOperatorsInExpression(stmt->cond);
 
-            if (stmt->cycleSingleStmt)
-                replaceOperatorsInStatement(stmt->cycleSingleStmt);
-
             if (stmt->blockStmts && stmt->blockStmts->stmts)
                 replaceOperatorsInStatements(*stmt->blockStmts->stmts);
             break;
@@ -86,9 +83,6 @@ void OperatorsTransformator::replaceOperatorsInStatement(StmtNode *stmt) {
 
             if (stmt->cond)
                 replaceOperatorsInExpression(stmt->cond);
-
-            if (stmt->cycleSingleStmt)
-                replaceOperatorsInStatement(stmt->cycleSingleStmt);
 
             if (stmt->blockStmts && stmt->blockStmts->stmts)
                 replaceOperatorsInStatements(*stmt->blockStmts->stmts);
