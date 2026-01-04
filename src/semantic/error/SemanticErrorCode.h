@@ -3,6 +3,8 @@
 
 
 enum SemanticErrorCode {
+    EMPTY_AST_TREE = 1000,
+
     REDEFINITION = 1001,
     UNDEFINED_CLASS = 1002,
     INVALID_INHERITANCE = 1003,

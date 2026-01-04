@@ -2,6 +2,19 @@
 
 #include "StmtListNode.h"
 
+ExprNode::ExprNode()
+    : left(nullptr),
+      right(nullptr),
+      intValue(0),
+      floatValue(0.0f),
+      doubleValue(0.0),
+      boolValue(false),
+      charValue('\0'),
+      params(nullptr),
+      elements(nullptr),
+      typeElements(nullptr)
+{}
+
 ExprNode* ExprNode::createIntNode(int value) {
     ExprNode* node = new ExprNode();
     node->type = _INTEGER_LITERAL;

@@ -111,6 +111,8 @@ add_executable(kotlin_parser
         src/semantic/tables/variables/LocalVariableTable.h
         src/semantic/tables/variables/TypeNodeType.h
         src/semantic/tables/variables/NodeDescription.h
-        src/semantic/trasformations/literals/LiteralsTransformator.cpp
-        src/semantic/trasformations/literals/LiteralsTransformator.h
+        src/semantic/transformations/literals/LiteralsTransformator.cpp
+        src/semantic/transformations/literals/LiteralsTransformator.h
+        src/semantic/transformations/operators/OperatorsTransformator.cpp
+        src/semantic/transformations/operators/OperatorsTransformator.h
 )

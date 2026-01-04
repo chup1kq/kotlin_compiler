@@ -1,6 +1,8 @@
 #include "SemanticError.h"
 #include <iostream>
 
+#include "SemanticErrorCode.h"
+
 SemanticError::SemanticError(int code, const std::string& message)
     : code(code), message(message) {
 }
@@ -10,6 +12,13 @@ const char* SemanticError::what() const noexcept {
 }
 
 // ---------- factory methods ----------
+
+SemanticError SemanticError::emptyTree() {
+    return SemanticError(
+        EMPTY_AST_TREE,
+        "AST tree is empty"
+    );
+}
 
 SemanticError SemanticError::redefinition(const std::string &name) {
     return SemanticError(

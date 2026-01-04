@@ -24,6 +24,8 @@ public:
     ExprListNode* elements;
     TypeNode* typeElements;
 
+    ExprNode();
+
     static ExprNode* createIntNode(int value);
     static ExprNode* createFloatNode(float value);
     static ExprNode* createDoubleNode(double value);

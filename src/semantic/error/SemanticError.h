@@ -14,6 +14,8 @@ public:
     const char* what() const noexcept override;
 
     // ---------- factory methods ----------
+    static SemanticError emptyTree();
+
     static SemanticError redefinition(const std::string &name);
     static SemanticError undefinedClass(const std::string& name);
     static SemanticError invalidInheritance(const std::string &cls, const std::string &parent);

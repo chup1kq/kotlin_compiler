@@ -2,6 +2,20 @@
 
 #include "VarDeclarationList.h"
 
+StmtNode::StmtNode()
+    : type(_EMPTY),
+      cond(nullptr),
+      cycleSingleStmt(nullptr),
+      blockStmts(nullptr),
+      expr(nullptr),
+      varDeclaration(nullptr),
+      forIterator(nullptr),
+      forIteratorList(nullptr),
+      varModifiers(nullptr),
+      trueStmtList(nullptr),
+      falseStmtList(nullptr)
+{}
+
 // создать while и do_while
 StmtNode * StmtNode::createCycleNodeFromSingleStmt(StmtType type, ExprNode *cycleCond, StmtNode *cycleStmt) {
     StmtNode* node = new StmtNode();

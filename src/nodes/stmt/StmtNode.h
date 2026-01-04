@@ -24,6 +24,8 @@ public:
     ModifierMap* varModifiers;
     StmtListNode *trueStmtList, *falseStmtList;
 
+    StmtNode();
+
     static StmtNode* createIfNode(ExprNode* ifCond, StmtListNode* trueB, StmtListNode* falseB);
     static StmtNode* createCycleNodeFromSingleStmt(StmtType type, ExprNode* cycleCond, StmtNode* cycleStmt);
     static StmtNode* createCycleNodeFromBlockStmt(StmtType type, ExprNode* cycleCond, StmtListNode* cycleStmt);

@@ -4,6 +4,7 @@
 #include "lexer-build/parser.hpp"
 #include "src/nodes/topLevel/KotlinFileNode.h"
 #include "src/semantic/tables/constant/ConstantTable.h"
+#include "src/semantic/transformations/operators/OperatorsTransformator.h"
 
 void createDotTree(KotlinFileNode* root, const std::string& filename);
 void constTableToCsv(ConstantTable constantTable, const std::string& filename);
@@ -22,9 +23,9 @@ int main() {
 
     createDotTree(root, "ast_tree.txt");
 
-    ConstantTable globalTable;
+    OperatorsTransformator::replaceOperators(root);
 
-    constTableToCsv(globalTable, "constant_table.csv");
+    createDotTree(root, "after_transform.txt");
 
     return 0;
 }

@@ -18,7 +18,7 @@ ExprListNode *ExprListNode::addExprToList(ExprListNode *list, ExprNode *expr) {
 
 
 string ExprListNode::getDotLabel() const {
-    return "StmtListNode";
+    return "ExprListNode";
 }
 
 string ExprListNode::toDot() const {
