@@ -29,6 +29,7 @@ ExprNode* ExprNode::clone() const {
 
     copy->left = this->left ? this->left->clone() : nullptr;
     copy->right = this->right ? this->right->clone() : nullptr;
+    copy->fromLiteral = this->fromLiteral;
 
     copy->params = nullptr;
     if (this->params && this->params->exprs) {
