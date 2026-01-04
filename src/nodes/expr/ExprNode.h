@@ -24,6 +24,8 @@ public:
     ExprListNode* elements;
     TypeNode* typeElements;
 
+    BaseLiteral fromLiteral;
+
     ExprNode();
     ExprNode* clone() const;
 
