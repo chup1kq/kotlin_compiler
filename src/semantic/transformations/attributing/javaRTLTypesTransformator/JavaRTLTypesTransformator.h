@@ -12,9 +12,10 @@ private:
     static void replaceToRTLInFunctions(std::list<FunNode*> functions);
 
     static void replaceToRTLInStatements(std::list<StmtNode*> stmts);
-
     static void replaceToRTLInStatement(StmtNode* stmt);
+
     static void replaceToRTLInVarDeclarations(std::list<VarDeclaration*> decls);
+    static void replaceToRTLInVarDeclaration(VarDeclaration* decl);
 
     static void replaceToRTLInTypeNode(TypeNode* typeNode);
 };

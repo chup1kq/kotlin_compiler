@@ -12,7 +12,7 @@ public:
     ModifierMap* modifiers;
     ConstructorArgs* args;
     StmtListNode* stmts;
-    ExprType prevConstructorType;
+    ExprType prevConstructorType; // _THIS or _SUPER
     VarDeclarationList* prevConstructorArgs;
 
     static Constructor* createPrimaryConstructor(ModifierMap* modifiers, ConstructorArgs* args, StmtListNode* stmts);

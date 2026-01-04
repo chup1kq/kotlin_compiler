@@ -1,112 +1,15 @@
 #include "OperatorsTransformator.h"
 
+#include <ios>
+
 #include "../../error/SemanticError.h"
 
-void OperatorsTransformator::replaceOperators(KotlinFileNode *root) {
-    if (root == nullptr ||
-        root->topLevelList == nullptr ||
-        (root->topLevelList->classList->empty() &&
-        root->topLevelList->functionList->empty())
-    ) {
-        throw SemanticError::emptyTree();
-    }
-
-    replaceOperatorsInFunctions(*root->topLevelList->functionList);
-    replaceOperatorsInClasses(*root->topLevelList->classList);
+void OperatorsTransformator::transformVarDeclaration(VarDeclaration* decl) {
+    if (decl && decl->defaultValue)
+        transformExpression(decl->defaultValue);
 }
 
-void OperatorsTransformator::replaceOperatorsInClasses(std::list<ClassNode*> classes) {
-    for (auto& cls : classes) {
-        // TODO добавить обработку полей и конструкторов класса
-        if (!cls || !cls->body || !cls->body->methods)
-            continue;
-
-        replaceOperatorsInFunctions(*cls->body->methods);
-    }
-}
-
-
-void OperatorsTransformator::replaceOperatorsInFunctions(std::list<FunNode*> functions) {
-    for (auto& function : functions ) {
-        if (!function || !function->body || !function->body->stmts)
-            continue;
-
-        replaceOperatorsInStatements(*function->body->stmts);
-    }
-}
-
-
-void OperatorsTransformator::replaceOperatorsInStatements(std::list<StmtNode*> stmts) {
-    for (auto& stmt : stmts) {
-        if (stmt)
-            replaceOperatorsInStatement(stmt);
-    }
-}
-
-
-void OperatorsTransformator::replaceOperatorsInStatement(StmtNode *stmt) {
-    if (!stmt) return;
-
-    switch (stmt->type) {
-
-        case _IF_STMT:
-            if (stmt->cond)
-                replaceOperatorsInExpression(stmt->cond);
-
-            if (stmt->trueStmtList && stmt->trueStmtList->stmts)
-                replaceOperatorsInStatements(*stmt->trueStmtList->stmts);
-
-            if (stmt->falseStmtList && stmt->falseStmtList->stmts)
-                replaceOperatorsInStatements(*stmt->falseStmtList->stmts);
-            break;
-
-        case _EXPRESSION:
-            if (stmt->expr)
-                replaceOperatorsInExpression(stmt->expr);
-            break;
-
-        case _WHILE:
-        case _DO_WHILE:
-            if (stmt->cond)
-                replaceOperatorsInExpression(stmt->cond);
-
-            if (stmt->blockStmts && stmt->blockStmts->stmts)
-                replaceOperatorsInStatements(*stmt->blockStmts->stmts);
-            break;
-
-        case _FOR:
-            if (stmt->forIterator && stmt->forIterator->defaultValue)
-                replaceOperatorsInExpression(stmt->forIterator->defaultValue);
-
-            if (stmt->forIteratorList && stmt->forIteratorList->decls)
-                replaceOperatorsInVarDeclarations(*stmt->forIteratorList->decls);
-
-            if (stmt->cond)
-                replaceOperatorsInExpression(stmt->cond);
-
-            if (stmt->blockStmts && stmt->blockStmts->stmts)
-                replaceOperatorsInStatements(*stmt->blockStmts->stmts);
-            break;
-
-        case _VAR:
-        case _VAL:
-            if (stmt->varDeclaration && stmt->varDeclaration->defaultValue)
-                replaceOperatorsInExpression(stmt->varDeclaration->defaultValue);
-            break;
-
-        case _RETURN:
-            if (stmt->expr)
-                replaceOperatorsInExpression(stmt->expr);
-            break;
-
-        case _EMPTY:
-        case _BREAK:
-        case _CONTINUE:
-            break;
-    }
-}
-
-void OperatorsTransformator::replaceOperatorsInExpression(ExprNode *expr) {
+void OperatorsTransformator::transformExpression(ExprNode* expr) {
     if (!expr) return;
 
     // ----------------------- унарные операции -----------------------
@@ -295,31 +198,11 @@ void OperatorsTransformator::replaceOperatorsInExpression(ExprNode *expr) {
     }
 
     if (expr->left)
-        replaceOperatorsInExpression(expr->left);
+        transformExpression(expr->left);
 
     if (expr->right)
-        replaceOperatorsInExpression(expr->right);
+        transformExpression(expr->right);
 
-    if (expr->params && expr->params->exprs)
-        replaceOperatorsInExpressions(expr->params);
+    if (expr->params)
+        transformExpressions(expr->params);
 }
-
-
-void OperatorsTransformator::replaceOperatorsInVarDeclarations(std::list<VarDeclaration*> decls) {
-    for (auto& decl : decls) {
-        if (decl && decl->defaultValue)
-            replaceOperatorsInExpression(decl->defaultValue);
-    }
-}
-
-
-void OperatorsTransformator::replaceOperatorsInExpressions(ExprListNode *exprs) {
-    if (!exprs || !exprs->exprs)
-        return;
-
-    for (auto& expr : *exprs->exprs) {
-        if (expr)
-            replaceOperatorsInExpression(expr);
-    }
-}
-

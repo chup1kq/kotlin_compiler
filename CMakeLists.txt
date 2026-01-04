@@ -117,4 +117,6 @@ add_executable(kotlin_parser
         src/semantic/transformations/operators/OperatorsTransformator.h
         src/semantic/transformations/attributing/javaRTLTypesTransformator/JavaRTLTypesTransformator.cpp
         src/semantic/transformations/attributing/javaRTLTypesTransformator/JavaRTLTypesTransformator.h
+        src/semantic/transformations/baseTransformer/ASTTransformer.cpp
+        src/semantic/transformations/baseTransformer/ASTTransformer.h
 )

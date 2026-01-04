@@ -46,11 +46,11 @@ void JavaRTLTypesTransformator::replaceToRTLInStatement(StmtNode *stmt) {
     if (!stmt)
         return;
 
-    if (stmt->varDeclaration && stmt->varDeclaration->varType)
-        replaceToRTLInTypeNode(stmt->varDeclaration->varType);
+    if (stmt->varDeclaration)
+        replaceToRTLInVarDeclaration(stmt->varDeclaration);
 
-    if (stmt->forIterator && stmt->forIterator->varType)
-        replaceToRTLInTypeNode(stmt->forIterator->varType);
+    if (stmt->forIterator)
+        replaceToRTLInVarDeclaration(stmt->forIterator);
 
     if (stmt->forIteratorList && stmt->forIteratorList->decls)
         replaceToRTLInVarDeclarations(*stmt->forIteratorList->decls);
@@ -94,7 +94,13 @@ void JavaRTLTypesTransformator::replaceToRTLInTypeNode(TypeNode *typeNode) {
 
 void JavaRTLTypesTransformator::replaceToRTLInVarDeclarations(std::list<VarDeclaration *> decls) {
     for (auto& decl : decls) {
-        if (decl && decl->varType)
-            replaceToRTLInTypeNode(decl->varType);
+        if (decl)
+            replaceToRTLInVarDeclaration(decl);
     }
 }
+
+void JavaRTLTypesTransformator::replaceToRTLInVarDeclaration(VarDeclaration *decl) {
+    if (decl->varType)
+        replaceToRTLInTypeNode(decl->varType);
+}
+
