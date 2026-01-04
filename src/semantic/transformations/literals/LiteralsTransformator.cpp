@@ -4,10 +4,6 @@
 void LiteralsTransformator::transformVarDeclarationBody(VarDeclaration *decl) {}
 
 void LiteralsTransformator::transformExpressionBody(ExprNode* expr) {
-    if (expr->type == _FUNC_CALL && expr->params != nullptr) {
-        transformExpressions(expr->params);
-    }
-
     if (expr->left != nullptr) transformExpression(expr->left);
     if (expr->right != nullptr) transformExpression(expr->right);
 
@@ -36,6 +32,4 @@ void LiteralsTransformator::transformExpressionBody(ExprNode* expr) {
         expr->identifierName = "String";
         expr->fromLiteral = _FROM_STRING;
     }
-
-    if (expr->elements != nullptr) transformExpressions(expr->elements);
 }

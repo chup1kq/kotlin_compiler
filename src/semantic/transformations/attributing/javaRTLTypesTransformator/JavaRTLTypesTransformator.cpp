@@ -1,64 +1,19 @@
 #include "JavaRTLTypesTransformator.h"
 
+#include <iostream>
+
 #include "../../../error/SemanticError.h"
 
-void JavaRTLTypesTransformator::replaceTypesToJavaRTL(KotlinFileNode *root) {
-    if (root == nullptr ||
-        root->topLevelList == nullptr ||
-        (root->topLevelList->classList->empty() &&
-        root->topLevelList->functionList->empty())
-    ) {
-        throw SemanticError::emptyTree();
-    }
-
-    replaceToRTLInFunctions(*root->topLevelList->functionList);
-    replaceToRTLInClasses(*root->topLevelList->classList);
+void JavaRTLTypesTransformator::transformVarDeclarationBody(VarDeclaration *decl) {
+    if (decl->varType)
+        replaceToRTLInTypeNode(decl->varType);
 }
 
-void JavaRTLTypesTransformator::replaceToRTLInClasses(std::list<ClassNode*> classes) {
-    for (auto& cls : classes) {
-        // TODO добавить обработку полей и конструкторов класса
-        if (!cls || !cls->body || !cls->body->methods)
-            continue;
-
-        replaceToRTLInFunctions(*cls->body->methods);
-    }
-}
-
-
-void JavaRTLTypesTransformator::replaceToRTLInFunctions(std::list<FunNode*> functions) {
-    for (auto& function : functions ) {
-        if (!function || !function->body || !function->body->stmts)
-            continue;
-
-        replaceToRTLInStatements(*function->body->stmts);
-    }
-}
-
-void JavaRTLTypesTransformator::replaceToRTLInStatements(std::list<StmtNode *> stmts) {
-    for (auto& stmt : stmts) {
-        if (stmt)
-            replaceToRTLInStatement(stmt);
-    }
-}
-
-void JavaRTLTypesTransformator::replaceToRTLInStatement(StmtNode *stmt) {
-    if (!stmt)
-        return;
-
-    if (stmt->varDeclaration)
-        replaceToRTLInVarDeclaration(stmt->varDeclaration);
-
-    if (stmt->forIterator)
-        replaceToRTLInVarDeclaration(stmt->forIterator);
-
-    if (stmt->forIteratorList && stmt->forIteratorList->decls)
-        replaceToRTLInVarDeclarations(*stmt->forIteratorList->decls);
-}
-
+void JavaRTLTypesTransformator::transformExpressionBody(ExprNode* expr) {}
 
 void JavaRTLTypesTransformator::replaceToRTLInTypeNode(TypeNode *typeNode) {
     if (typeNode->type == _ARRAY) {
+        std::cout << "In Array" << std::endl;
         replaceToRTLInTypeNode(typeNode->arrayType);
         return;
     }
@@ -66,6 +21,7 @@ void JavaRTLTypesTransformator::replaceToRTLInTypeNode(TypeNode *typeNode) {
     switch (typeNode->type) {
         case _INT:
             typeNode->customName = "JavaRTL/Int";
+            std::cout << "In Int" << std::endl;
             break;
         case _FLOAT:
             typeNode->customName = "JavaRTL/Float";
@@ -89,18 +45,4 @@ void JavaRTLTypesTransformator::replaceToRTLInTypeNode(TypeNode *typeNode) {
         default:
             break;
     }
-
 }
-
-void JavaRTLTypesTransformator::replaceToRTLInVarDeclarations(std::list<VarDeclaration *> decls) {
-    for (auto& decl : decls) {
-        if (decl)
-            replaceToRTLInVarDeclaration(decl);
-    }
-}
-
-void JavaRTLTypesTransformator::replaceToRTLInVarDeclaration(VarDeclaration *decl) {
-    if (decl->varType)
-        replaceToRTLInTypeNode(decl->varType);
-}
-

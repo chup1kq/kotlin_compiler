@@ -4,11 +4,11 @@
 #include "../types.h"
 
 class TypeNode : public Node {
-    public:
-        Type type;
-        std::string customName;
-        bool isNull;
-        TypeNode* arrayType;
+public:
+    Type type;
+    std::string customName;
+    bool isNull;
+    TypeNode* arrayType = nullptr;
 
     static TypeNode* createType(Type type, bool isNull, std::string customName = "");
     static TypeNode* createArrayType(bool isNull, TypeNode* arrayType);

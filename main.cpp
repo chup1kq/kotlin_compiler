@@ -25,9 +25,11 @@ int main() {
 
     createDotTree(root, "ast_tree.txt");
 
-    // JavaRTLTypesTransformator::replaceTypesToJavaRTL(root);
+    JavaRTLTypesTransformator *RTLTypesTransformator = new JavaRTLTypesTransformator();
+    RTLTypesTransformator->transform(root);
 
-    // LiteralsTransformator::replaceLiteralsToObjects(root);
+    LiteralsTransformator *LiteralsTransformation = new LiteralsTransformator();
+    LiteralsTransformation->transform(root);
 
     OperatorsTransformator *operatorsTransformator = new OperatorsTransformator();
     operatorsTransformator->transform(root);

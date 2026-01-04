@@ -30,11 +30,17 @@ void ASTTransformer::transformClasses(std::list<ClassNode*> classes) {
 
 void ASTTransformer::transformFunctions(std::list<FunNode*> functions) {
     for (auto* fun : functions) {
-        if (!fun || !fun->body || !fun->body->stmts)
+        if (!fun)
             continue;
 
-        transformStatements(*fun->body->stmts);
+        if (fun->body && fun->body->stmts)
+            transformStatements(*fun->body->stmts);
+
+        if (fun->args)
+            transformVarDeclarations(*fun->args->decls);
+
     }
+
 }
 
 
@@ -92,13 +98,12 @@ void ASTTransformer::transformStatement(StmtNode* stmt) {
 
         case _FOR:
             transformVarDeclaration(stmt->forIterator);
+            transformExpression(stmt->cond);
             if (stmt->forIteratorList)
                 transformVarDeclarations(*stmt->forIteratorList->decls);
-            transformExpression(stmt->cond);
             if (stmt->blockStmts)
                 transformStatements(*stmt->blockStmts->stmts);
             break;
-
         case _VAR:
         case _VAL:
             transformVarDeclaration(stmt->varDeclaration);
@@ -126,6 +131,9 @@ void ASTTransformer::transformExpression(ExprNode* expr) {
 
     if (expr->params)
         transformExpressions(expr->params);
+
+    if (expr->elements)
+        transformExpressions(expr->elements);
 }
 
 void ASTTransformer::transformExpressions(ExprListNode* exprs) {

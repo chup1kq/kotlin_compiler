@@ -12,7 +12,6 @@ public:
     string name;
     VarDeclarationList* args;
     StmtListNode* body;
-    ExprNode* singleExpr;
 
     static FunNode * createFunNode(TypeNode* returnType, ModifierMap* modifiers, string name, VarDeclarationList* args, StmtListNode* body);
     static FunNode * createFunNodeFromExpr(TypeNode* returnType, ModifierMap* modifiers, string name, VarDeclarationList* args, ExprNode* single);

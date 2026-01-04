@@ -11,13 +11,13 @@ FunNode * FunNode::createFunNode(TypeNode* returnType, ModifierMap* modifiers, s
 }
 
 FunNode * FunNode::createFunNodeFromExpr(TypeNode* returnType, ModifierMap* modifiers, string name, VarDeclarationList* args, ExprNode* singleExpr) {
-    FunNode* funNode = new FunNode();
-    funNode->type = returnType;
-    funNode->modifiers = modifiers;
-    funNode->name = name;
-    funNode->args = args;
-    funNode->singleExpr = singleExpr;
-    return funNode;
+    return createFunNode(
+        returnType,
+        modifiers,
+        name,
+        args,
+        StmtListNode::addExprToStmtList(nullptr, singleExpr)
+    );
 }
 
 string FunNode::getDotLabel() const {
@@ -32,7 +32,6 @@ string FunNode::toDot() const {
     addDotChild(dot, modifiers, "modifiers");
     addDotChild(dot, args, "args");
     addDotChild(dot, body, "body");
-    addDotChild(dot, singleExpr, "singleExpr");
 
     return dot;
 }
