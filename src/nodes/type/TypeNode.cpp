@@ -1,8 +1,9 @@
 #include "TypeNode.h"
 
-TypeNode * TypeNode::createType(Type type, bool isNull) {
+TypeNode * TypeNode::createType(Type type, bool isNull, std::string customName) {
     TypeNode* typeNode = new TypeNode();
     typeNode->type = type;
+    typeNode->customName = customName;
     typeNode->isNull = isNull;
     return typeNode;
 }
@@ -25,7 +26,9 @@ string TypeNode::getDotLabel() const {
         return typeToString(type) + "<" + this->arrayType->getDotLabel() + ">";
     }
 
-    return typeToString(type) + (isNull ? " nullable" : " not-nullable");
+    const std::string returnString = customName.empty() ? typeToString(type) : customName;
+
+    return returnString + (isNull ? " nullable" : " not-nullable");
 }
 
 string TypeNode::toDot() const {

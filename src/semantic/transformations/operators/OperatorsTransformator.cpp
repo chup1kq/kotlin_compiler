@@ -17,6 +17,7 @@ void OperatorsTransformator::replaceOperators(KotlinFileNode *root) {
 
 void OperatorsTransformator::replaceOperatorsInClasses(std::list<ClassNode*> classes) {
     for (auto& cls : classes) {
+        // TODO добавить обработку полей и конструкторов класса
         if (!cls || !cls->body || !cls->body->methods)
             continue;
 
@@ -114,6 +115,29 @@ void OperatorsTransformator::replaceOperatorsInStatement(StmtNode *stmt) {
 void OperatorsTransformator::replaceOperatorsInExpression(ExprNode *expr) {
     if (!expr) return;
 
+    // ----------------------- унарные операции -----------------------
+
+    if (expr->left) {
+        if (expr->type == _UNARY_PLUS) {
+            ExprNode* operand = expr->left;
+            expr->type = _FUNC_ACCESS;
+            expr->identifierName = "uPlus";
+            expr->left = operand;
+            expr->params = new ExprListNode();
+            expr->right = nullptr;
+        }
+        else if (expr->type == _UNARY_MINUS) {
+            ExprNode* operand = expr->left;
+            expr->type = _FUNC_ACCESS;
+            expr->identifierName = "uMinus";
+            expr->left = operand;
+            expr->params = new ExprListNode();
+            expr->right = nullptr;
+        }
+    }
+
+    // ----------------------- бинарные операции -----------------------
+
     if (expr->right) {
 
         // ----------------------- математические операции -----------------------
@@ -146,21 +170,6 @@ void OperatorsTransformator::replaceOperatorsInExpression(ExprNode *expr) {
             expr->type = _FUNC_ACCESS;
             expr->identifierName =  "mod";
             expr->params = new ExprListNode(expr->right);
-            expr->right = nullptr;
-        }
-
-        else if (expr->type == _UNARY_PLUS) {
-            expr->type = _FUNC_ACCESS;
-            expr->identifierName = "uPlus";
-            expr->left = expr->right;
-            expr->params = new ExprListNode();
-            expr->right = nullptr;
-        }
-        else if (expr->type == _UNARY_MINUS) {
-            expr->type = _FUNC_ACCESS;
-            expr->identifierName = "uMinus";
-            expr->left = expr->right;
-            expr->params = new ExprListNode();
             expr->right = nullptr;
         }
 

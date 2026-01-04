@@ -279,7 +279,7 @@ type: INT_TYPE { $$ = TypeNode::createType(_INT, false); }
     | STRING_TYPE { $$ = TypeNode::createType(_STRING, false); }
     | CHAR_TYPE { $$ = TypeNode::createType(_CHAR, false); }
     | BOOLEAN_TYPE { $$ = TypeNode::createType(_BOOLEAN, false); }
-    | ID { $$ = TypeNode::createType(_ID, false); }
+    | ID { $$ = TypeNode::createType(_ID, false, $1); }
     | ARRAY ele '<' ele nullable_type ele '>' { $$ = TypeNode::createArrayType(false, $5); }
     | ARRAY ele '<' ele type ele '>' { $$ = TypeNode::createArrayType(true, $5); }
     ;
@@ -398,13 +398,13 @@ class_allowed_declaration_params: ele { $$ = new ConstructorArgs(); }
 			        | ele class_declaration_argument_list ele ',' ele { $$ = $2; }
 			        ;
 
-fun_declaration: fun ele ID ele '(' allowed_declaration_params ')' ele stmt_block ele { $$ = FunNode::createFunNode(TypeNode::createType(_VOID, false), $1, $3, $6, $9); }
+fun_declaration: fun ele ID ele '(' allowed_declaration_params ')' ele stmt_block ele { $$ = FunNode::createFunNode(TypeNode::createType(_UNIT, false), $1, $3, $6, $9); }
 	       | fun ele ID ele '(' allowed_declaration_params ')' ele ':' ele nullable_type ele stmt_block ele { $$ = FunNode::createFunNode($11, $1, $3, $6, $13); }
 	       | fun ele ID ele '(' allowed_declaration_params ')' ele ':' ele type ele stmt_block ele { $$ = FunNode::createFunNode($11, $1, $3, $6, $13); }
-	       | fun ele ID ele '(' allowed_declaration_params ')' ele '=' ele expr end_of_stmt { $$ = FunNode::createFunNodeFromExpr(TypeNode::createType(_VOID, false), $1, $3, $6, $11); }
+	       | fun ele ID ele '(' allowed_declaration_params ')' ele '=' ele expr end_of_stmt { $$ = FunNode::createFunNodeFromExpr(TypeNode::createType(_UNDEFINED, false), $1, $3, $6, $11); }
 	       | fun ele ID ele '(' allowed_declaration_params ')' ele ':' ele nullable_type ele '=' ele expr end_of_stmt { $$ = FunNode::createFunNodeFromExpr($11, $1, $3, $6, $15); }
 	       | fun ele ID ele '(' allowed_declaration_params ')' ele ':' ele type ele '=' ele expr end_of_stmt { $$ = FunNode::createFunNodeFromExpr($11, $1, $3, $6, $15); }
-	       | fun ele ID ele '(' allowed_declaration_params ')' ele '=' ele expr { $$ = FunNode::createFunNodeFromExpr(TypeNode::createType(_VOID, false), $1, $3, $6, $11); }
+	       | fun ele ID ele '(' allowed_declaration_params ')' ele '=' ele expr { $$ = FunNode::createFunNodeFromExpr(TypeNode::createType(_UNDEFINED, false), $1, $3, $6, $11); }
 	       | fun ele ID ele '(' allowed_declaration_params ')' ele ':' ele nullable_type ele '=' ele expr { $$ = FunNode::createFunNodeFromExpr($11, $1, $3, $6, $15); }
 	       | fun ele ID ele '(' allowed_declaration_params ')' ele ':' ele type ele '=' ele expr { $$ = FunNode::createFunNodeFromExpr($11, $1, $3, $6, $15); }
 	       ;

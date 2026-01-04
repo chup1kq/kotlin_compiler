@@ -96,7 +96,7 @@ std::string typeToString(Type t) {
         case _ARRAY:     return "ARRAY";
         case _ID:        return "ID";
         case _UNDEFINED: return "UNDEFINED";
-        case _VOID:      return "VOID";
+        case _UNIT:      return "UNIT";
         default:         return "UNKNOWN_TYPE";
     }
 }

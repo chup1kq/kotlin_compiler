@@ -6,10 +6,11 @@
 class TypeNode : public Node {
     public:
         Type type;
+        std::string customName;
         bool isNull;
         TypeNode* arrayType;
 
-    static TypeNode* createType(Type type, bool isNull);
+    static TypeNode* createType(Type type, bool isNull, std::string customName = "");
     static TypeNode* createArrayType(bool isNull, TypeNode* arrayType);
     static TypeNode* makeNullableType(TypeNode* typeNode);
 

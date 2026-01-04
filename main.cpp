@@ -4,6 +4,8 @@
 #include "lexer-build/parser.hpp"
 #include "src/nodes/topLevel/KotlinFileNode.h"
 #include "src/semantic/tables/constant/ConstantTable.h"
+#include "src/semantic/transformations/attributing/javaRTLTypesTransformator/JavaRTLTypesTransformator.h"
+#include "src/semantic/transformations/literals/LiteralsTransformator.h"
 #include "src/semantic/transformations/operators/OperatorsTransformator.h"
 
 void createDotTree(KotlinFileNode* root, const std::string& filename);
@@ -23,6 +25,8 @@ int main() {
 
     createDotTree(root, "ast_tree.txt");
 
+    JavaRTLTypesTransformator::replaceTypesToJavaRTL(root);
+    // LiteralsTransformator::replaceLiteralsToObjects(root);
     OperatorsTransformator::replaceOperators(root);
 
     createDotTree(root, "after_transform.txt");

@@ -57,6 +57,10 @@ static void _replaceLiteralsToObjectsInExpression(ExprNode * root) {
         root->type = _FUNC_CALL;
         root->identifierName = "Int";
         root->fromLiteral = _FROM_INT;
+    } else if (root->type == _FLOAT_LITERAL) {
+        root->type = _FUNC_CALL;
+        root->identifierName = "Float";
+        root->fromLiteral = _FROM_FLOAT;
     } else if (root->type == _DOUBLE_LITERAL) {
         root->type = _FUNC_CALL;
         root->identifierName = "Double";

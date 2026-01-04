@@ -88,12 +88,12 @@ enum Type {
     _ARRAY,
     _ID,
     _UNDEFINED,
-    _VOID
+    _UNIT
 };
 
 enum BaseLiteral {
-    _FROM_NONE,
     _FROM_INT,
+    _FROM_FLOAT,
     _FROM_DOUBLE,
     _FROM_BOOLEAN,
     _FROM_CHAR,
