@@ -91,6 +91,16 @@ enum Type {
     _VOID
 };
 
+enum BaseLiteral {
+    _FROM_NONE,
+    _FROM_INT,
+    _FROM_DOUBLE,
+    _FROM_BOOLEAN,
+    _FROM_CHAR,
+    _FROM_STRING,
+    _FROM_UNIT,
+};
+
 
 std::string modifierToString(ModifierType m);
 std::string exprTypeToString(ExprType t);
