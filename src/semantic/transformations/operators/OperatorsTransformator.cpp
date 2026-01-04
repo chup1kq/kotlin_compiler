@@ -4,13 +4,9 @@
 
 #include "../../error/SemanticError.h"
 
-void OperatorsTransformator::transformVarDeclaration(VarDeclaration* decl) {
-    if (decl && decl->defaultValue)
-        transformExpression(decl->defaultValue);
-}
+void OperatorsTransformator::transformVarDeclarationBody(VarDeclaration *decl) {}
 
-void OperatorsTransformator::transformExpression(ExprNode* expr) {
-    if (!expr) return;
+void OperatorsTransformator::transformExpressionBody(ExprNode* expr) {
 
     // ----------------------- унарные операции -----------------------
 
@@ -196,13 +192,4 @@ void OperatorsTransformator::transformExpression(ExprNode* expr) {
             expr->right = nullptr;
         }
     }
-
-    if (expr->left)
-        transformExpression(expr->left);
-
-    if (expr->right)
-        transformExpression(expr->right);
-
-    if (expr->params)
-        transformExpressions(expr->params);
 }

@@ -10,8 +10,8 @@ public:
     void transform(KotlinFileNode* root);
 
 protected:
-    virtual void transformExpression(ExprNode* expr) = 0;
-    virtual void transformVarDeclaration(VarDeclaration* decl) = 0;
+    virtual void transformExpressionBody(ExprNode* expr) = 0;
+    virtual void transformVarDeclarationBody(VarDeclaration* decl) = 0;
 
 
     void transformClasses(std::list<ClassNode*> classes);
@@ -24,8 +24,10 @@ protected:
     void transformStatement(StmtNode* stmt);
 
     void transformExpressions(ExprListNode* exprs);
+    void transformExpression(ExprNode* expr);
 
     void transformVarDeclarations(std::list<VarDeclaration*> decls);
+    void transformVarDeclaration(VarDeclaration* decl);
 };
 
 #endif

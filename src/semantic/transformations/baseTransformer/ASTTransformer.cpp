@@ -113,6 +113,20 @@ void ASTTransformer::transformStatement(StmtNode* stmt) {
     }
 }
 
+void ASTTransformer::transformExpression(ExprNode* expr) {
+    if (!expr) return;
+
+    transformExpressionBody(expr);
+
+    if (expr->left)
+        transformExpression(expr->left);
+
+    if (expr->right)
+        transformExpression(expr->right);
+
+    if (expr->params)
+        transformExpressions(expr->params);
+}
 
 void ASTTransformer::transformExpressions(ExprListNode* exprs) {
     if (!exprs || !exprs->exprs) return;
@@ -124,4 +138,13 @@ void ASTTransformer::transformExpressions(ExprListNode* exprs) {
 void ASTTransformer::transformVarDeclarations(std::list<VarDeclaration*> decls) {
     for (auto* d : decls)
         if (d) transformVarDeclaration(d);
+}
+
+void ASTTransformer::transformVarDeclaration(VarDeclaration* decl) {
+    if (!decl) return;
+
+    transformVarDeclarationBody(decl);
+
+    if (decl->defaultValue)
+        transformExpression(decl->defaultValue);
 }

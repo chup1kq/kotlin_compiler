@@ -6,8 +6,8 @@
 
 class OperatorsTransformator : public ASTTransformer {
 protected:
-    void transformExpression(ExprNode* expr) override;
-    void transformVarDeclaration(VarDeclaration* decl) override;
+    void transformExpressionBody(ExprNode* expr) override;
+    void transformVarDeclarationBody(VarDeclaration* decl) override;
 };
 
 
