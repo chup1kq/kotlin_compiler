@@ -6,6 +6,7 @@
 #include "ClassTableElement.h"
 #include "topLevel/KotlinFileNode.h"
 #include "../../error/SemanticError.h"
+#include "../variables/TypeTable.h"
 
 
 class ClassTable {
@@ -23,6 +24,9 @@ public:
 
     // Получить имя класса для top-level (свободных) функций
     static std::string makeTopLevelClassName(const std::string& fileName);
+
+    // Сгенерировать таблицу методанных
+    static ClassTable initStdClasses();
 };
 
 #endif //KOTLIN_COMPILER_CLASSTABLE_H

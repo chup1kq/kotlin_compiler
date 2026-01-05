@@ -3,6 +3,8 @@
 #include "ClassTableElement.h"
 #include "../constant/ConstantTable.h"
 
+class FuncParam;
+
 ClassTable::ClassTable() {
     this->items = std::map<std::string, ClassTableElement*>();
 }
@@ -70,4 +72,69 @@ std::string ClassTable::makeTopLevelClassName(const std::string& fileName) {
     path.erase(sep, 1);
 
     return path;
+}
+
+ClassTable ClassTable::initStdClasses() {
+    ClassTable *classTable = new ClassTable();
+    TypeTable * returnValue = nullptr;
+
+    auto addClass = [&](const std::string& name) {
+        classTable->items[name] = new ClassTableElement();
+        classTable->items[name]->clsName = name;
+        classTable->items[name]->isOpen = 0;
+        return classTable->items[name];
+    };
+    auto addMethod = [&](
+        const std::string& nameClass,
+        const std::string& nameMethod,
+        TypeNodeType type,
+        const std::string& desk,
+        int methodName,
+        int descriptorName,
+        std::string strDesc,
+        StmtListNode *start){
+        classTable->items[nameClass]->methods->methods[nameMethod] =
+            std::map<std::string, class MethodTableElement*>();
+        returnValue = new TypeTable();
+        returnValue->className = classTable->items[nameClass]->clsName;
+        returnValue->type = type;
+        classTable->items[nameClass]->methods->methods[nameMethod][desk] =
+            new MethodTableElement(
+                methodName,
+                descriptorName,
+                nameMethod,
+                strDesc,
+                start,
+                returnValue,
+                std::vector<FuncParam>());
+        return classTable->items[nameClass];
+    };
+
+    /* 1.0 Инициализация класса Int */
+    addClass("JavaRTL/Int");
+    /* 1.1 Конструктор */
+    addMethod("JavaRTL/Int", "<init>", TypeNodeType::__CLASS, "(I)", 0, 0, "(I)V", nullptr);
+    /* 1.2 Сложение */
+    addMethod("JavaRTL/Int", "plus", TypeNodeType::__CLASS, "(LJavaRTL/Int;)", 0, 0, "(LJavaRTL/Int;)LJavaRTL/Int;", nullptr);
+    /* 1.3 Вычитание */
+    /* 1.4 Умножение */
+    /* 1.5 Деление */
+    /* 1.6 Унарный плюс */
+    /* 1.7 Унарный минус */
+    /* 1.8 Массив */
+    /* 1.9 Больше */
+    /* 1.10 Меньше */
+    /* 1.11 Больше равно */
+    /* 1.12 Меньше равно */
+    /* 1.13 Равно */
+    /* 1.14 Не равно */
+
+    /* 2.0 Инициализация класса Float */
+    addClass("JavaRTL/Float");
+
+    /* 3.0 Инициализация класса Double */
+    addClass("JavaRTL/Double");
+
+
+    return *classTable;
 }

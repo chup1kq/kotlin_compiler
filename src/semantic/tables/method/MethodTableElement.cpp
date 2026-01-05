@@ -16,3 +16,14 @@ MethodTableElement::MethodTableElement(
       isFirst(0)
 {
 }
+
+MethodTableElement::MethodTableElement(int methodName, int descriptorName, std::string strName, std::string strDesc,
+    StmtListNode *start, TypeTable *retType, vector<FuncParam> params) {
+    this->methodName = methodName;
+    this->descriptor = descriptorName;
+    this->strName = std::move(strName);
+    this->strDesc = std::move(strDesc);
+    this->start = start;
+    this->retType = retType;
+    this->params = std::move(params);
+}

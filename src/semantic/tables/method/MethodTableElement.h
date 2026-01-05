@@ -23,6 +23,14 @@ public:
         int descConst,
         std::string name,
         std::string strName);
+
+    MethodTableElement(int methodName,
+        int descriptorName,
+        std::string strName,
+        std::string strDesc,
+        StmtListNode* start,
+        TypeTable* retType,
+        vector<FuncParam> params);
 };
 
 #endif //KOTLIN_COMPILER_METHODTABLEELEMENT_H
