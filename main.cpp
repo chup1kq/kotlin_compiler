@@ -10,7 +10,8 @@
 #include "src/semantic/transformations/operators/OperatorsTransformator.h"
 
 void createDotTree(KotlinFileNode* root, const std::string& filename);
-void constantTableToCsv(ConstantTable constantTable, const std::string& filename);
+void constantTableToCsv(ConstantTable* constantTable, const std::string& filename);
+void classTableToCSV(ClassTable* classTable, const std::string& rootDir);
 
 int main() {
     KotlinFileNode* root = nullptr;
@@ -38,8 +39,9 @@ int main() {
     createDotTree(root, "after_transform.txt");
 
     ClassTable *classTable = new ClassTable();
-    classTable->buildClassTable(root, "KotlinFile");
+    classTable->buildClassTable(root, "BaseClass");
 
+    classTableToCSV(classTable, "tables");
 
     return 0;
 }
