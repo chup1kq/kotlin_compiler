@@ -124,8 +124,6 @@ void ASTTransformer::transformStatement(StmtNode* stmt) {
 void ASTTransformer::transformExpression(ExprNode* expr) {
     if (!expr) return;
 
-    transformExpressionBody(expr);
-
     if (expr->left)
         transformExpression(expr->left);
 
@@ -137,6 +135,8 @@ void ASTTransformer::transformExpression(ExprNode* expr) {
 
     if (expr->elements)
         transformExpressions(expr->elements);
+
+    transformExpressionBody(expr);
 }
 
 void ASTTransformer::transformExpressions(ExprListNode* exprs) {
@@ -154,8 +154,8 @@ void ASTTransformer::transformVarDeclarations(std::list<VarDeclaration*> decls) 
 void ASTTransformer::transformVarDeclaration(VarDeclaration* decl) {
     if (!decl) return;
 
-    transformVarDeclarationBody(decl);
-
     if (decl->defaultValue)
         transformExpression(decl->defaultValue);
+
+    transformVarDeclarationBody(decl);
 }

@@ -13,7 +13,6 @@ void JavaRTLTypesTransformator::transformExpressionBody(ExprNode* expr) {}
 
 void JavaRTLTypesTransformator::replaceToRTLInTypeNode(TypeNode *typeNode) {
     if (typeNode->type == _ARRAY) {
-        std::cout << "In Array" << std::endl;
         replaceToRTLInTypeNode(typeNode->arrayType);
         return;
     }
@@ -21,7 +20,6 @@ void JavaRTLTypesTransformator::replaceToRTLInTypeNode(TypeNode *typeNode) {
     switch (typeNode->type) {
         case _INT:
             typeNode->customName = "JavaRTL/Int";
-            std::cout << "In Int" << std::endl;
             break;
         case _FLOAT:
             typeNode->customName = "JavaRTL/Float";

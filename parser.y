@@ -360,6 +360,7 @@ enum_body: '{' ele '}' { $$ = new ClassBodyNode(); }
          ;
 
 enum_entry: ele ID ele { $$ = EnumEntry::createEnumEntry($2, nullptr); }
+          | ele ID ele '(' ')' ele { $$ = EnumEntry::createEnumEntry($2, nullptr); }
           | ele ID ele '(' argument_list ')' ele { $$ = EnumEntry::createEnumEntry($2, $5); }
           | ele ID ele '(' argument_list ',' ')' ele { $$ = EnumEntry::createEnumEntry($2, $5); }
           ;
