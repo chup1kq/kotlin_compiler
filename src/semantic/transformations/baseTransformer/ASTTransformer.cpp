@@ -21,6 +21,9 @@ void ASTTransformer::transformClasses(std::list<ClassNode*> classes) {
                 transformStatements(*cls->body->fields->stmts);
             if (cls->body->constructors)
                 transformConstructors(*cls->body->constructors);
+            if (cls->isEnum && cls->body->enumEntries && cls->body->enumEntries->enumEntries)
+                for (auto* e : *cls->body->enumEntries->enumEntries)
+                    transformExpressions(e->params);
         }
 
         if (cls->primaryConstructor)
