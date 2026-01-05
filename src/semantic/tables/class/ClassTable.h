@@ -12,7 +12,7 @@ class ClassTable {
 public:
     std::map<std::string, ClassTableElement*> items;
 
-    SemanticError* buildClassTable(KotlinFileNode* root, const std::string& fileName);
+    void buildClassTable(KotlinFileNode* root, const std::string& fileName);
 
     ClassTable();
 

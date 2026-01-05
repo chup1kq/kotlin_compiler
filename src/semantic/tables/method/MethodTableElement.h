@@ -1,5 +1,7 @@
 #ifndef KOTLIN_COMPILER_METHODTABLEELEMENT_H
 #define KOTLIN_COMPILER_METHODTABLEELEMENT_H
+#include <vector>
+
 #include "StmtListNode.h"
 #include "../variables/FuncParam.h"
 #include "../variables/TypeTable.h"
@@ -13,7 +15,7 @@ public:
     std::string strDesc;
     StmtListNode * start;
     TypeTable * retType = nullptr;
-    std::vector<FuncParam> params;
+    vector<FuncParam> params;
     LocalVariableTable * localVarTable = nullptr;
     int isFirst = NULL;
 

@@ -8,6 +8,8 @@
 class MethodTable {
 public:
     std::map<std::string, std::map<std::string, MethodTableElement *>> methods;
+
+    MethodTable();
 };
 
 #endif //KOTLIN_COMPILER_METHODTABLE_H

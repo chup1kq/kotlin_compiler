@@ -4,7 +4,7 @@
 #include "../../semantic/tables/constant/ConstantTable.h"
 #include "../../semantic/tables/constant/ConstantTableElement.h"
 
-void constTableToCsv(ConstantTable constantTable, const std::string& filename) {
+void constantTableToCsv(ConstantTable* constantTable, const std::string& filename) {
     std::ofstream out(filename);
     if (!out) {
         std::cerr << "Cannot open file: " << filename << "\n";
@@ -13,7 +13,7 @@ void constTableToCsv(ConstantTable constantTable, const std::string& filename) {
 
     out << "id,type,utf8String,intValue,doubleValue,firstRef,secondRef\n";
 
-    for (const auto& pair : constantTable.items) {
+    for (const auto& pair : constantTable->items) {
         ConstantTableElement* el = pair.second;
         if (!el) continue;
 

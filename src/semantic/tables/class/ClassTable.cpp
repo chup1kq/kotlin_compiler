@@ -8,7 +8,7 @@ ClassTable::ClassTable() {
 }
 
 
-SemanticError* ClassTable::buildClassTable(KotlinFileNode* root, const std::string& fileName) {
+void ClassTable::buildClassTable(KotlinFileNode* root, const std::string& fileName) {
 
     // имя класса для top-level функций
     std::string topLevelClassName = makeTopLevelClassName(fileName);
@@ -19,12 +19,20 @@ SemanticError* ClassTable::buildClassTable(KotlinFileNode* root, const std::stri
 
     int topLevelUtf8 = topLevelFunctionsClass->constants->findOrAddConstant(UTF8, topLevelClassName);
     int cls = topLevelFunctionsClass->constants->findOrAddConstant(Class, "" ,0, 0, topLevelUtf8);
+
     topLevelFunctionsClass->name = topLevelUtf8;
     topLevelFunctionsClass->thisClass = cls;
 
+    int parent = topLevelFunctionsClass->constants->findOrAddConstant(UTF8, "java/lang/Object");
+    int parentClass = topLevelFunctionsClass->constants->findOrAddConstant(Class, "", 0, 0, parent);
+
+    topLevelFunctionsClass->superName = parent;
+    topLevelFunctionsClass->superClass = parentClass;
+
+    this->items[topLevelClassName] = topLevelFunctionsClass;
+
     // TODO дописать
 
-    return nullptr;
 }
 
 

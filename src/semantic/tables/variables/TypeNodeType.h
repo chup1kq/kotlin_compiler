@@ -2,8 +2,8 @@
 #define KOTLIN_COMPILER_TYPENODETYPE_H
 
 enum TypeNodeType {
-    _ARRAY, // Шаблонизированный массив
-    _CLASS // Пользовательский класс
+    __ARRAY, // Шаблонизированный массив
+    __CLASS // Пользовательский класс
 };
 
 #endif //KOTLIN_COMPILER_TYPENODETYPE_H

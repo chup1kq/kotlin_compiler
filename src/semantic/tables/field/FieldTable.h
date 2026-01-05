@@ -7,6 +7,8 @@
 class FieldTable {
 public:
     std::map<std::string, FieldTableElement*> fields;
+
+    FieldTable();
 };
 
 #endif //KOTLIN_COMPILER_FIELDTABLE_H

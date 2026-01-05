@@ -1,8 +1,10 @@
 #ifndef KOTLIN_COMPILER_TYPE_H
 #define KOTLIN_COMPILER_TYPE_H
 #include "TypeNodeType.h"
-#include "../class/ClassTableElement.h"
 #include "NodeDescription.h"
+#include "types.h"
+
+class ClassTableElement;
 
 class TypeTable {
 public:
@@ -12,10 +14,11 @@ public:
     int arraySize;
 
     bool isReplaceable(Type & other) const;
+
     NodeDescription * toDescriptionNode;
 
-    Type();
-    Type(NodeDescription * description);
+    TypeTable();
+    TypeTable(NodeDescription * description);
 };
 
 #endif //KOTLIN_COMPILER_TYPE_H

@@ -102,7 +102,7 @@ add_executable(kotlin_parser
         src/semantic/tables/constant/ConstantTable.h
         src/semantic/tables/constant/ConstantTableElement.cpp
         src/semantic/tables/constant/ConstantTableElement.h
-        src/utils/output/constTableToCsv.cpp
+        src/utils/output/tablesToCsv.cpp
         src/utils/math/math.cpp
         src/semantic/tables/method/MethodTable.h
         src/semantic/tables/method/MethodTableElement.h
@@ -119,4 +119,9 @@ add_executable(kotlin_parser
         src/semantic/transformations/attributing/javaRTLTypesTransformator/JavaRTLTypesTransformator.h
         src/semantic/transformations/baseTransformer/ASTTransformer.cpp
         src/semantic/transformations/baseTransformer/ASTTransformer.h
+        src/semantic/tables/field/FieldTable.cpp
+        src/semantic/tables/field/FieldTableElement.cpp
+        src/semantic/tables/method/MethodTable.cpp
+        src/semantic/tables/method/MethodTableElement.cpp
+        src/semantic/tables/variables/TypeTable.cpp
 )

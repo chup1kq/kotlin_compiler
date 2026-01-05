@@ -1,5 +1,7 @@
 #ifndef KOTLIN_COMPILER_LOCALVARIABLETABLE_H
 #define KOTLIN_COMPILER_LOCALVARIABLETABLE_H
+#include "map"
+
 
 class LocalVariableTable {
 public:

@@ -3,13 +3,14 @@
 
 #include "lexer-build/parser.hpp"
 #include "src/nodes/topLevel/KotlinFileNode.h"
+#include "src/semantic/tables/class/ClassTable.h"
 #include "src/semantic/tables/constant/ConstantTable.h"
 #include "src/semantic/transformations/attributing/javaRTLTypesTransformator/JavaRTLTypesTransformator.h"
 #include "src/semantic/transformations/literals/LiteralsTransformator.h"
 #include "src/semantic/transformations/operators/OperatorsTransformator.h"
 
 void createDotTree(KotlinFileNode* root, const std::string& filename);
-void constTableToCsv(ConstantTable constantTable, const std::string& filename);
+void constantTableToCsv(ConstantTable constantTable, const std::string& filename);
 
 int main() {
     KotlinFileNode* root = nullptr;
@@ -35,6 +36,10 @@ int main() {
     operatorsTransformator->transform(root);
 
     createDotTree(root, "after_transform.txt");
+
+    ClassTable *classTable = new ClassTable();
+    classTable->buildClassTable(root, "KotlinFile");
+
 
     return 0;
 }
