@@ -81,3 +81,7 @@ void classTableToCSV(ClassTable* classTable, const std::string& rootDir) {
 
     std::cout << "All constant tables dumped to directory: " << rootDir << "\n";
 }
+
+void methodTableToCSV(MethodTable* methodTable, const std::string& rootDir) {
+
+}

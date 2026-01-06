@@ -10,20 +10,25 @@ SemanticType::SemanticType()
 
 
 SemanticType::SemanticType(TypeNode* typeNode)
-    : isNullable(typeNode->isNullable),
+    : isNullable(false),
       classTableElement(nullptr),
       className(""),
       elementType(nullptr)
 {
+    isNullable = typeNode->isNullable;
+
     if (typeNode->isArray) {
-        // рекурсивно создаём тип элемента
         elementType = new SemanticType(typeNode->arrayType);
     } else {
-        // обычный (не массив)
         className = typeNode->customName.empty()
             ? typeToString(typeNode->type)
             : typeNode->customName;
     }
+}
+
+
+bool SemanticType::isArray() const {
+    return elementType != nullptr;
 }
 
 int SemanticType::arrayDimension() const {

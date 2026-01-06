@@ -123,4 +123,5 @@ add_executable(kotlin_parser
         src/semantic/tables/method/MethodTableElement.cpp
         src/semantic/tables/type/SemanticType.cpp
         src/semantic/tables/variables/LocalVariableTableElement.h
+        src/semantic/tables/params/FuncParam.cpp
 )

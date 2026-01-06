@@ -13,6 +13,7 @@ public:
     TypeNode* arrayType = nullptr;
 
     static TypeNode* createType(Type type, bool isNullable, std::string customName = "");
+    static TypeNode* createUndefinedType();
     static TypeNode* createArrayType(bool isNullable, TypeNode* arrayType);
     static TypeNode* makeNullableType(TypeNode* typeNode);
 

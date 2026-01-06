@@ -289,12 +289,12 @@ nullable_type: type '?' { $$ = TypeNode::makeNullableType($1); }
 
 var_body: var ele var_declaration { $$ = StmtNode::createVarOrValStmtNode($1, _VAR, $3); }
         | var ele var_declaration_default_value { $$ = StmtNode::createVarOrValStmtNode($1, _VAR, $3); }
-        | var ele ID '=' ele expr { $$ = StmtNode::createVarOrValStmtNode($1, _VAR, VarDeclaration::createVarDeclaration($3, NULL, $6)); }
+        | var ele ID '=' ele expr { $$ = StmtNode::createVarOrValStmtNode($1, _VAR, VarDeclaration::createVarDeclaration($3, TypeNode::createUndefinedType(), $6)); }
         ;
 
 val_body: val ele var_declaration { $$ = StmtNode::createVarOrValStmtNode($1, _VAL, $3); }
         | val ele var_declaration_default_value { $$ = StmtNode::createVarOrValStmtNode($1, _VAL, $3); }
-        | val ele ID '=' ele expr { $$ = StmtNode::createVarOrValStmtNode($1, _VAL, VarDeclaration::createVarDeclaration($3, NULL, $6)); }
+        | val ele ID '=' ele expr { $$ = StmtNode::createVarOrValStmtNode($1, _VAL, VarDeclaration::createVarDeclaration($3, TypeNode::createUndefinedType(), $6)); }
         ;
 
 var_declaration: ID ele ':' ele nullable_type { $$ = VarDeclaration::createVarDeclaration($1, $5, NULL); }
@@ -305,9 +305,9 @@ var_declaration_default_value: ID ele ':' ele nullable_type '=' ele expr { $$ = 
 			     | ID ele ':' ele type '=' ele expr { $$ = VarDeclaration::createVarDeclaration($1, $5, $8); }
 			     ;
 
-var_declaration_list: ID { $$ = VarDeclarationList::addVarDeclarationToList(nullptr, VarDeclaration::createVarDeclaration($1, NULL, NULL)); }
+var_declaration_list: ID { $$ = VarDeclarationList::addVarDeclarationToList(nullptr, VarDeclaration::createVarDeclaration($1, TypeNode::createUndefinedType(), NULL)); }
 		    | var_declaration { $$ = VarDeclarationList::addVarDeclarationToList(nullptr, $1); }
-		    | var_declaration_list ',' ID { $$ = VarDeclarationList::addVarDeclarationToList($1, VarDeclaration::createVarDeclaration($3, NULL, NULL)); }
+		    | var_declaration_list ',' ID { $$ = VarDeclarationList::addVarDeclarationToList($1, VarDeclaration::createVarDeclaration($3, TypeNode::createUndefinedType(), NULL)); }
 		    | var_declaration_list ',' var_declaration { $$ = VarDeclarationList::addVarDeclarationToList($1, $3); }
 		    ;
 
@@ -328,8 +328,8 @@ while_stmt: WHILE condition_expr stmt_block end_of_stmt { $$ = StmtNode::createC
 	  | WHILE condition_expr stmt { $$ = StmtNode::createCycleNodeFromSingleStmt(_WHILE, $2, $3); }
           ;
 
-for_stmt: FOR ele '(' ID IN expr ')' ele stmt_block end_of_stmt { $$ = StmtNode::createForNodeFromBlockStmt(VarDeclaration::createVarDeclaration($4, NULL, NULL), $6, $9); }
-        | FOR ele '(' ID IN expr ')' ele stmt { $$ = StmtNode::createForNodeFromSingleStmt(VarDeclaration::createVarDeclaration($4, NULL, NULL), $6, $9); }
+for_stmt: FOR ele '(' ID IN expr ')' ele stmt_block end_of_stmt { $$ = StmtNode::createForNodeFromBlockStmt(VarDeclaration::createVarDeclaration($4, TypeNode::createUndefinedType(), NULL), $6, $9); }
+        | FOR ele '(' ID IN expr ')' ele stmt { $$ = StmtNode::createForNodeFromSingleStmt(VarDeclaration::createVarDeclaration($4, TypeNode::createUndefinedType(), NULL), $6, $9); }
 	| FOR ele '(' var_declaration IN expr ')' ele stmt_block end_of_stmt { $$ = StmtNode::createForNodeFromBlockStmt( $4, $6, $9); }
         | FOR ele '(' var_declaration IN expr ')' ele stmt { $$ = StmtNode::createForNodeFromSingleStmt( $4, $6, $9); }
 	| FOR ele '(' '(' var_declaration_list ')' IN expr ')' ele stmt_block end_of_stmt { $$ = StmtNode::createForNodeFromBlockStmtWithSeveralId($5, $8, $11); }

@@ -12,7 +12,7 @@ ClassTable::ClassTable() {
 
 void ClassTable::buildClassTable(KotlinFileNode* root, const std::string& fileName) {
     // Описываем все базовые классы
-    items = ClassTable::initStdClasses()->items;
+    initStdClasses();
 
     // Создаем имя класса для top-level функций
     std::string topLevelClassName = makeTopLevelClassName(fileName);
@@ -98,21 +98,24 @@ void ClassTable::addTopLevelFunctionsToBaseClass(ClassTableElement *baseClass, s
         SemanticType* retVal = new SemanticType(func->type);
 
         // Параметры метода
+        vector<FuncParam> params;
+        if (func->args && func->args->decls) {
+            for (auto* arg : *func->args->decls) {
+                if (!arg)
+                    continue;
+
+                params.push_back(FuncParam(arg->varId, new SemanticType(arg->varType)));
+            }
+        }
 
         // TODO дописать
-        // vector<FuncParam*> params;
-        // for (auto* p : *func->args->decls) {
-        //     params.push_back(new FuncParam(p->varId, new SemanticType(p->varType)));
-        // }
-
 
     }
 }
 
 
-ClassTable* ClassTable::initStdClasses() {
+void ClassTable::initStdClasses() {
     ClassTable *classTable = new ClassTable();
-    SemanticType * returnValue = nullptr;
 
     auto makeClassType = [&](const std::string& className) {
         SemanticType* t = new SemanticType();
@@ -139,12 +142,9 @@ ClassTable* ClassTable::initStdClasses() {
         const std::string& desk,
         const std::string& strDesc
     ) {
-        auto& methodMap = classTable->items[nameClass]->methods->methods;
-
-        if (!methodMap.count(nameMethod))
-            methodMap[nameMethod] = {};
-
-        methodMap[nameMethod][desk] =
+        classTable->items[nameClass]->methods->addMethod(
+            nameMethod,
+            desk,
             new MethodTableElement(
                 0,
                 0,
@@ -153,8 +153,10 @@ ClassTable* ClassTable::initStdClasses() {
                 nullptr,
                 returnType,
                 {}
-            );
+            )
+        );
     };
+
 
     /* 1.0 Инициализация класса Int */
     addClass("JavaRTL/Int");
@@ -266,5 +268,5 @@ ClassTable* ClassTable::initStdClasses() {
     // readLine
     addMethod("JavaRTL/InputOutput", "readLine", makeClassType("JavaRTL/String"), "()", "()LJavaRTL/String;");
 
-    return classTable;
+     this->items = classTable->items;
 }

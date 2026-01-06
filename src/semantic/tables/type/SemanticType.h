@@ -16,13 +16,8 @@ public:
     // Если массив
     SemanticType* elementType = nullptr; // тип элемента массива
 
-    bool isArray() const {
-        return elementType != nullptr;
-    }
-
+    bool isArray() const;
     int arrayDimension() const;
-
-
     bool isReplaceable(const SemanticType& other) const;
 
     SemanticType();

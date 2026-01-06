@@ -10,6 +10,10 @@ TypeNode * TypeNode::createType(Type type, bool isNullable, std::string customNa
     return typeNode;
 }
 
+TypeNode* TypeNode::createUndefinedType() {
+    return createType(_UNDEFINED, false, "");
+}
+
 TypeNode * TypeNode::createArrayType(bool isNullable, TypeNode* arrayType) {
     TypeNode* typeNode = new TypeNode();
     typeNode->type = _ARRAY;

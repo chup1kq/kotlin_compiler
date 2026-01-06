@@ -88,7 +88,8 @@ enum Type {
     _ARRAY,
     _ID,
     _UNDEFINED,
-    _UNIT
+    _UNIT,
+    _ANY
 };
 
 enum BaseLiteral {

@@ -29,7 +29,7 @@ public:
     static void addTopLevelFunctionsToBaseClass(ClassTableElement* baseClass, std::list<FunNode*> funcList);
 
     // Сгенерировать таблицу методанных
-    static ClassTable* initStdClasses();
+    void initStdClasses();
 };
 
 #endif //KOTLIN_COMPILER_CLASSTABLE_H
