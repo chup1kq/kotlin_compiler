@@ -26,7 +26,9 @@ public:
     static std::string makeTopLevelClassName(const std::string& fileName);
 
     void addBaseClass(const std::string& fileName);
+
     static void addTopLevelFunctionsToBaseClass(ClassTableElement* baseClass, std::list<FunNode*> funcList);
+    static std::string createMethodDescriptor(vector<FuncParam*> params, SemanticType* returnType);
 
     // Сгенерировать таблицу методанных
     void initStdClasses();

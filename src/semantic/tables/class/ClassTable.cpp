@@ -1,5 +1,7 @@
 #include "ClassTable.h"
 
+#include <iostream>
+
 #include "ClassTableElement.h"
 #include "../constant/ConstantTable.h"
 
@@ -87,8 +89,6 @@ std::string ClassTable::makeTopLevelClassName(const std::string& fileName) {
     return path;
 }
 
-
-
 void ClassTable::addTopLevelFunctionsToBaseClass(ClassTableElement *baseClass, std::list<FunNode *> funcList) {
     for (auto& func : funcList) {
         // Имя  метода
@@ -98,19 +98,48 @@ void ClassTable::addTopLevelFunctionsToBaseClass(ClassTableElement *baseClass, s
         SemanticType* retVal = new SemanticType(func->type);
 
         // Параметры метода
-        vector<FuncParam> params;
+        vector<FuncParam*> params;
         if (func->args && func->args->decls) {
             for (auto* arg : *func->args->decls) {
                 if (!arg)
                     continue;
 
-                params.push_back(FuncParam(arg->varId, new SemanticType(arg->varType)));
+                params.push_back(new FuncParam(arg->varId, new SemanticType(arg->varType)));
             }
         }
+
+        std::string descriptor = createMethodDescriptor(params, retVal);
 
         // TODO дописать
 
     }
+}
+
+std::string ClassTable::createMethodDescriptor(vector<FuncParam*> params, SemanticType* returnType) {
+    std::string desc = "(";
+
+    for (auto* param : params) {
+        if (!param->type->isArray())
+            desc += "L";
+        else
+            desc += "[L";
+
+        desc += param->type->className;
+        desc += ";";
+    }
+    desc += ")";
+
+    if (!returnType->isArray())
+        desc += "L";
+    else
+        desc += "[L";
+
+    desc += returnType->className;
+    desc += ";";
+
+    // TODO удалить cout
+    std::cout << desc << std::endl;
+    return desc;
 }
 
 

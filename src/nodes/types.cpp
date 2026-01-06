@@ -87,16 +87,16 @@ std::string stmtTypeToString(StmtType t) {
 
 std::string typeToString(Type t) {
     switch (t) {
-        case _INT:       return "INT";
-        case _FLOAT:     return "FLOAT";
-        case _DOUBLE:    return "DOUBLE";
-        case _CHAR:      return "CHAR";
-        case _STRING:    return "STRING";
-        case _BOOLEAN:   return "BOOLEAN";
-        case _ARRAY:     return "ARRAY";
+        case _INT:       return "Int";
+        case _FLOAT:     return "Float";
+        case _DOUBLE:    return "Double";
+        case _CHAR:      return "Char";
+        case _STRING:    return "String";
+        case _BOOLEAN:   return "Boolean";
+        case _ARRAY:     return "Array";
         case _ID:        return "ID";
         case _UNDEFINED: return "UNDEFINED";
-        case _UNIT:      return "UNIT";
+        case _UNIT:      return "Unit";
         default:         return "UNKNOWN_TYPE";
     }
 }
