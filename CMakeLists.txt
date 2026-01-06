@@ -124,4 +124,6 @@ add_executable(kotlin_parser
         src/semantic/tables/type/SemanticType.cpp
         src/semantic/tables/variables/LocalVariableTableElement.h
         src/semantic/tables/params/FuncParam.cpp
+        src/semantic/transformations/attributing/baseTypes/BaseTypesAttributing.cpp
+        src/semantic/transformations/attributing/baseTypes/BaseTypesAttributing.h
 )

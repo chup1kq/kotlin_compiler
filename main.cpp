@@ -6,6 +6,7 @@
 #include "src/semantic/tables/class/ClassTable.h"
 #include "src/semantic/tables/constant/ConstantTable.h"
 #include "src/semantic/transformations/attributing/javaRTLTypesTransformator/JavaRTLTypesTransformator.h"
+#include "src/semantic/transformations/attributing/baseTypes/BaseTypesAttributing.h"
 #include "src/semantic/transformations/literals/LiteralsTransformator.h"
 #include "src/semantic/transformations/operators/OperatorsTransformator.h"
 
@@ -35,6 +36,9 @@ int main() {
 
     OperatorsTransformator *operatorsTransformator = new OperatorsTransformator();
     operatorsTransformator->transform(root);
+
+    BaseTypesAttributing *baseTypesAttributing = new BaseTypesAttributing();
+    baseTypesAttributing->transform(root);
 
     createDotTree(root, "after_transform.txt");
 
