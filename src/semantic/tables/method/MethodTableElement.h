@@ -3,8 +3,8 @@
 #include <vector>
 
 #include "StmtListNode.h"
-#include "../variables/FuncParam.h"
-#include "../variables/TypeTable.h"
+#include "../params/FuncParam.h"
+#include "../type/SemanticType.h"
 #include "../variables/LocalVariableTable.h"
 
 class MethodTableElement {
@@ -14,8 +14,8 @@ public:
     std::string strName;
     std::string strDesc;
     StmtListNode * start;
-    TypeTable * retType = nullptr;
-    vector<FuncParam> params;
+    SemanticType * retType = nullptr;
+    vector<FuncParam*> params;
     LocalVariableTable * localVarTable = nullptr;
     int isFirst = NULL;
 
@@ -29,8 +29,8 @@ public:
         std::string strName,
         std::string strDesc,
         StmtListNode* start,
-        TypeTable* retType,
-        vector<FuncParam> params);
+        SemanticType* retType,
+        vector<FuncParam*> params);
 };
 
 #endif //KOTLIN_COMPILER_METHODTABLEELEMENT_H

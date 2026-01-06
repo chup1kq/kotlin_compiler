@@ -18,7 +18,7 @@ MethodTableElement::MethodTableElement(
 }
 
 MethodTableElement::MethodTableElement(int methodName, int descriptorName, std::string strName, std::string strDesc,
-    StmtListNode *start, TypeTable *retType, vector<FuncParam> params) {
+    StmtListNode *start, SemanticType *retType, vector<FuncParam*> params) {
     this->methodName = methodName;
     this->descriptor = descriptorName;
     this->strName = std::move(strName);

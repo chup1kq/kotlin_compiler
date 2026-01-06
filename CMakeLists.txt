@@ -106,11 +106,9 @@ add_executable(kotlin_parser
         src/utils/math/math.cpp
         src/semantic/tables/method/MethodTable.h
         src/semantic/tables/method/MethodTableElement.h
-        src/semantic/tables/variables/TypeTable.h
-        src/semantic/tables/variables/FuncParam.h
+        src/semantic/tables/type/SemanticType.h
+        src/semantic/tables/params/FuncParam.h
         src/semantic/tables/variables/LocalVariableTable.h
-        src/semantic/tables/variables/TypeNodeType.h
-        src/semantic/tables/variables/NodeDescription.h
         src/semantic/transformations/literals/LiteralsTransformator.cpp
         src/semantic/transformations/literals/LiteralsTransformator.h
         src/semantic/transformations/operators/OperatorsTransformator.cpp
@@ -123,5 +121,6 @@ add_executable(kotlin_parser
         src/semantic/tables/field/FieldTableElement.cpp
         src/semantic/tables/method/MethodTable.cpp
         src/semantic/tables/method/MethodTableElement.cpp
-        src/semantic/tables/variables/TypeTable.cpp
+        src/semantic/tables/type/SemanticType.cpp
+        src/semantic/tables/variables/LocalVariableTableElement.h
 )

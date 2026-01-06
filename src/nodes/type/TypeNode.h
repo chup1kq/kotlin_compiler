@@ -6,12 +6,14 @@
 class TypeNode : public Node {
 public:
     Type type;
+    bool isCustomType;
     std::string customName;
-    bool isNull;
+    bool isNullable;
+    bool isArray;
     TypeNode* arrayType = nullptr;
 
-    static TypeNode* createType(Type type, bool isNull, std::string customName = "");
-    static TypeNode* createArrayType(bool isNull, TypeNode* arrayType);
+    static TypeNode* createType(Type type, bool isNullable, std::string customName = "");
+    static TypeNode* createArrayType(bool isNullable, TypeNode* arrayType);
     static TypeNode* makeNullableType(TypeNode* typeNode);
 
     string toDot() const override;

@@ -6,7 +6,7 @@
 #include "ClassTableElement.h"
 #include "topLevel/KotlinFileNode.h"
 #include "../../error/SemanticError.h"
-#include "../variables/TypeTable.h"
+#include "../type/SemanticType.h"
 
 
 class ClassTable {
@@ -25,8 +25,11 @@ public:
     // Получить имя класса для top-level (свободных) функций
     static std::string makeTopLevelClassName(const std::string& fileName);
 
+    void addBaseClass(const std::string& fileName);
+    static void addTopLevelFunctionsToBaseClass(ClassTableElement* baseClass, std::list<FunNode*> funcList);
+
     // Сгенерировать таблицу методанных
-    static ClassTable initStdClasses();
+    static ClassTable* initStdClasses();
 };
 
 #endif //KOTLIN_COMPILER_CLASSTABLE_H

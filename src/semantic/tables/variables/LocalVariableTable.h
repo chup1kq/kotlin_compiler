@@ -1,18 +1,16 @@
 #ifndef KOTLIN_COMPILER_LOCALVARIABLETABLE_H
 #define KOTLIN_COMPILER_LOCALVARIABLETABLE_H
 #include "map"
-
-
-class LocalVariableTableElement;
+#include "LocalVariableTableElement.h"
 
 class LocalVariableTable {
 public:
     int maxId = 0;
-    std::map<std::string, LocalVariableTableElement> items;
+    std::map<std::string, LocalVariableTableElement*> items;
     int findOrAddLocalVar(std::string name,
-        TypeTable * type,
+        SemanticType * type,
         int isConst,
-        int isInit);
+        int isInitialized);
 };
 
 #endif //KOTLIN_COMPILER_LOCALVARIABLETABLE_H

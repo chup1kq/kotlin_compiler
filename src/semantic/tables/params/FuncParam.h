@@ -1,15 +1,16 @@
 #ifndef KOTLIN_COMPILER_FUNCPARAM_H
 #define KOTLIN_COMPILER_FUNCPARAM_H
-#include "TypeTable.h"
+#include "../type/SemanticType.h"
 
 class FuncParam {
 public:
     std::string name;
-    TypeTable * type;
+    SemanticType * type;
+    // TODO добавить обработку параметров по умолчанию
     bool operator==(const FuncParam &) const;
     bool operator<(const FuncParam &) const;
 
-    FuncParam(std::string name, TypeTable * type);
+    FuncParam(std::string name, SemanticType * type);
 };
 
 #endif //KOTLIN_COMPILER_FUNCPARAM_H

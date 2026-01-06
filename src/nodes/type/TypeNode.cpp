@@ -1,23 +1,26 @@
 #include "TypeNode.h"
 
-TypeNode * TypeNode::createType(Type type, bool isNull, std::string customName) {
+TypeNode * TypeNode::createType(Type type, bool isNullable, std::string customName) {
     TypeNode* typeNode = new TypeNode();
     typeNode->type = type;
     typeNode->customName = customName;
-    typeNode->isNull = isNull;
+    typeNode->isNullable = isNullable;
+    typeNode->isArray = false;
+    typeNode->isCustomType = !customName.empty();
     return typeNode;
 }
 
-TypeNode * TypeNode::createArrayType(bool isNull, TypeNode* arrayType) {
+TypeNode * TypeNode::createArrayType(bool isNullable, TypeNode* arrayType) {
     TypeNode* typeNode = new TypeNode();
     typeNode->type = _ARRAY;
-    typeNode->isNull = isNull;
+    typeNode->isNullable = isNullable;
     typeNode->arrayType = arrayType;
+    typeNode->isArray = true;
     return typeNode;
 }
 
 TypeNode * TypeNode::makeNullableType(TypeNode* typeNode) {
-    typeNode->isNull = true;
+    typeNode->isNullable = true;
     return typeNode;
 }
 
@@ -28,7 +31,7 @@ string TypeNode::getDotLabel() const {
 
     const std::string returnString = customName.empty() ? typeToString(type) : customName;
 
-    return returnString + (isNull ? " nullable" : " not-nullable");
+    return returnString + (isNullable ? " nullable" : " not-nullable");
 }
 
 string TypeNode::toDot() const {
