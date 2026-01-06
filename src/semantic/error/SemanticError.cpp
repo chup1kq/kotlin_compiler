@@ -47,3 +47,10 @@ SemanticError SemanticError::finalClassInheritance(const std::string &cls) {
         "Cannot inherit from final class '" + cls + "'"
     );
 }
+
+SemanticError SemanticError::methodAlreadyExists(const std::string &desc) {
+    return SemanticError(
+        METHOD_ALREADY_EXISTS,
+        "Method '" + desc + "' already exists"
+    );
+}

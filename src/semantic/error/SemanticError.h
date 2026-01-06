@@ -20,6 +20,7 @@ public:
     static SemanticError undefinedClass(const std::string& name);
     static SemanticError invalidInheritance(const std::string &cls, const std::string &parent);
     static SemanticError finalClassInheritance(const std::string &cls);
+    static SemanticError methodAlreadyExists(const std::string &desc);
 };
 
 #endif //KOTLIN_COMPILER_SEMANTIC_ERROR_H

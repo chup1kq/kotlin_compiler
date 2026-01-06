@@ -110,7 +110,26 @@ void ClassTable::addTopLevelFunctionsToBaseClass(ClassTableElement *baseClass, s
 
         std::string descriptor = createMethodDescriptor(params, retVal);
 
-        // TODO дописать
+        if (baseClass->methods->methods.contains(ident)) {
+            if (baseClass->methods->methods[ident].contains(descriptor) ) {
+                throw SemanticError::methodAlreadyExists(ident);
+            }
+
+            int methodName = baseClass->constants->findOrAddConstant(UTF8, ident);
+            int methodDesc = baseClass->constants->findOrAddConstant(UTF8, descriptor);
+
+            baseClass->methods->methods.find(ident)->second[descriptor] = new MethodTableElement(methodName, methodDesc, ident, descriptor, func->body, retVal, params);
+            // тут еще он добавляет в FunctionTable
+        }
+        else {
+            int methodName = baseClass->constants->findOrAddConstant(UTF8, ident);
+            int methodDesc = baseClass->constants->findOrAddConstant(UTF8, descriptor);
+
+            baseClass->methods->methods[ident] = std::map<std::string, MethodTableElement*>();
+            baseClass->methods->methods.find(ident)->second[descriptor] = new MethodTableElement(methodName, methodDesc, ident, descriptor, func->body, retVal, params);
+        }
+
+        // TODO дописать заполение таблицы локальных переменных
 
     }
 }
