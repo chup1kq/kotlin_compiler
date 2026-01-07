@@ -22,7 +22,8 @@ public:
     static SemanticError finalClassInheritance(const std::string &cls);
     static SemanticError methodAlreadyExists(const std::string &desc);
     static SemanticError classAlreadyExists(const std::string &name);
-    static SemanticError topLevelMethodAlreayExists(const std::string &name);
+    static SemanticError topLevelMethodAlreadyExists(const std::string &name);
+    static SemanticError constructorAlreadyExists(const std::string &name);
 };
 
 #endif //KOTLIN_COMPILER_SEMANTIC_ERROR_H

@@ -62,9 +62,16 @@ SemanticError SemanticError::classAlreadyExists(const std::string &name) {
     );
 }
 
-SemanticError SemanticError::topLevelMethodAlreayExists(const std::string &name) {
+SemanticError SemanticError::topLevelMethodAlreadyExists(const std::string &name) {
     return SemanticError(
         TOP_LEVEL_METHOD_WITH_THIS_NAME_ALREADY_EXIST,
         "Can not create class '" + name + "'. Top level method '" + name + "' aleady exists"
+    );
+}
+
+SemanticError SemanticError::constructorAlreadyExists(const std::string &name) {
+    return SemanticError(
+        CONSTRUCTOR_ALREADY_EXISTS,
+        "Constructor '" + name + "' with this params already exists"
     );
 }
