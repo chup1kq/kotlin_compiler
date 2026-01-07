@@ -2,6 +2,7 @@
 #define KOTLIN_COMPILER_CLASSGENERATIONHANDLER_H
 #include <vector>
 #include <cstdint>
+#include <stdexcept>
 
 enum class IfCommandType { EQ, NE, LT, LE, GT, GE };
 
