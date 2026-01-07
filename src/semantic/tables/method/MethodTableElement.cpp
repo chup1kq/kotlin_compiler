@@ -12,7 +12,7 @@ MethodTableElement::MethodTableElement(
       strDesc(std::move(desc)),
       start(nullptr),
       retType(nullptr),
-      localVarTable(nullptr),
+      localVarTable(new LocalVariableTable()),
       isFirst(0)
 {
 }
@@ -25,5 +25,6 @@ MethodTableElement::MethodTableElement(int methodName, int descriptorName, std::
     this->strDesc = std::move(strDesc);
     this->start = start;
     this->retType = retType;
+    this->localVarTable = new LocalVariableTable();
     this->params = std::move(params);
 }

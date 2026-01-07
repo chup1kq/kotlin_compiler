@@ -127,9 +127,13 @@ void ClassTable::addTopLevelFunctionsToBaseClass(ClassTableElement *baseClass, s
 
             baseClass->methods->methods[ident] = std::map<std::string, MethodTableElement*>();
             baseClass->methods->methods.find(ident)->second[descriptor] = new MethodTableElement(methodName, methodDesc, ident, descriptor, func->body, retVal, params);
+            // тут еще он добавляет в FunctionTable
         }
 
-        // TODO дописать заполение таблицы локальных переменных
+        for (auto& param : params) {
+            // тут еще он добавляет в FunctionTable
+            baseClass->methods->methods.find(ident)->second[descriptor]->localVarTable->findOrAddLocalVar("", param->type, 1, 1);
+        }
 
     }
 }

@@ -1,5 +1,7 @@
 #ifndef KOTLIN_COMPILER_LOCALVARIABLETABLEELEMENT_H
 #define KOTLIN_COMPILER_LOCALVARIABLETABLEELEMENT_H
+#include <string>
+#include <../semantic/tables/type/SemanticType.h>
 
 class LocalVariableTableElement {
 public:
