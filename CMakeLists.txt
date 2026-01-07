@@ -128,4 +128,8 @@ add_executable(kotlin_parser
         src/semantic/transformations/attributing/baseTypes/BaseTypesAttributing.h
         src/semantic/tables/variables/LocalVariableTable.cpp
         src/semantic/tables/variables/LocalVariableTableElement.cpp
+        src/generation/ClassGeneration.cpp
+        src/generation/ClassGeneration.h
+        src/generation/BytecodeGenerator.cpp
+        src/generation/BytecodeGenerator.h
 )
