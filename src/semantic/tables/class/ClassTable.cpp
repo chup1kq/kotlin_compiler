@@ -24,7 +24,7 @@ void ClassTable::buildClassTable(KotlinFileNode* root, const std::string& fileNa
 
     // Добавляем методы все top level методы в базовый класс файла
     if (root->topLevelList->functionList)
-        addTopLevelFunctionsToBaseClass(items[topLevelClassName], *root->topLevelList->functionList);
+        items[topLevelClassName]->addMethodsToTable(*root->topLevelList->functionList);
 
     // Добавляем все классы из файла в таблицу классов
     if (root->topLevelList->classList)
@@ -58,16 +58,6 @@ void ClassTable::addBaseClass(const std::string &baseClassName) {
     items[baseClassName] = topLevelFunctionsClass;
 }
 
-
-bool ClassTable::exists(const std::string& name) {
-    return items.find(name) != items.end();
-}
-
-
-void ClassTable::add(const std::string& name, ClassTableElement* elem) {
-    items[name] = elem;
-}
-
 std::string ClassTable::makeTopLevelClassName(const std::string& fileName) {
     if (fileName.empty())
         return "";
@@ -93,89 +83,6 @@ std::string ClassTable::makeTopLevelClassName(const std::string& fileName) {
 
     return path;
 }
-
-void ClassTable::addTopLevelFunctionsToBaseClass(ClassTableElement *baseClass, std::list<FunNode *> funcList) {
-    for (auto& func : funcList) {
-        // Имя  метода
-        std::string ident = func->name;
-
-        // Возвращаемое значение
-        SemanticType* retVal = new SemanticType(func->type);
-
-        // Параметры метода
-        vector<FuncParam*> params;
-        if (func->args && func->args->decls) {
-            for (auto* arg : *func->args->decls) {
-                if (!arg)
-                    continue;
-
-                params.push_back(new FuncParam(arg->varId, new SemanticType(arg->varType)));
-            }
-        }
-
-        std::string descriptor = createMethodDescriptor(params, retVal);
-
-        if (baseClass->methods->methods.contains(ident)) {
-            if (baseClass->methods->methods[ident].contains(descriptor) ) {
-                throw SemanticError::methodAlreadyExists(ident);
-            }
-
-            int methodName = baseClass->constants->findOrAddConstant(UTF8, ident);
-            int methodDesc = baseClass->constants->findOrAddConstant(UTF8, descriptor);
-
-            baseClass->methods->methods.find(ident)->second[descriptor] = new MethodTableElement(methodName, methodDesc, ident, descriptor, func->body, retVal, params);
-            // тут еще он добавляет в FunctionTable
-        }
-        else {
-            int methodName = baseClass->constants->findOrAddConstant(UTF8, ident);
-            int methodDesc = baseClass->constants->findOrAddConstant(UTF8, descriptor);
-
-            baseClass->methods->methods[ident] = std::map<std::string, MethodTableElement*>();
-            baseClass->methods->methods.find(ident)->second[descriptor] = new MethodTableElement(methodName, methodDesc, ident, descriptor, func->body, retVal, params);
-            // тут еще он добавляет в FunctionTable
-        }
-
-        for (auto& param : params) {
-            // тут еще он добавляет в FunctionTable
-            baseClass->methods->methods.find(ident)->second[descriptor]->localVarTable->findOrAddLocalVar("", param->type, 1, 1);
-        }
-
-    }
-}
-
-std::string ClassTable::createMethodDescriptor(vector<FuncParam*> params, SemanticType* returnType) {
-    std::string desc = addParamsToMethodDescriptor(params);
-
-    if (!returnType->isArray())
-        desc += "L";
-    else
-        desc += "[L";
-
-    desc += returnType->className;
-    desc += ";";
-
-    // TODO удалить cout
-    std::cout << desc << std::endl;
-    return desc;
-}
-
-std::string ClassTable::addParamsToMethodDescriptor(vector<FuncParam *> params) {
-    std::string desc = "(";
-
-    for (auto* param : params) {
-        if (!param->type->isArray())
-            desc += "L";
-        else
-            desc += "[L";
-
-        desc += param->type->className;
-        desc += ";";
-    }
-    desc += ")";
-
-    return desc;
-}
-
 
 void ClassTable::addClassesToClassTable(ClassTableElement *baseClass, std::list<ClassNode *> classList) {
     for (auto* classNode : classList) {
@@ -204,13 +111,15 @@ void ClassTable::addClassesToClassTable(ClassTableElement *baseClass, std::list<
         // TODO добавить primary конструктор
         addPrimaryConstructor(newClass, classNode);
         // TODO заполнить поля
+
+
         // TODO заполнить методы
+        newClass->addMethodsToTable(*classNode->body->methods);
     }
 }
 
 void ClassTable::addPrimaryConstructor(ClassTableElement* cls, ClassNode *classNode) {
-    std::string methodName = "<init>"; // Имя конструктора для класса
-    std::string descriptor;
+    std::string ident = "<init>"; // Имя конструктора для класса
 
     SemanticType* retVal = SemanticType::classType(cls->clsName);
 
@@ -219,6 +128,9 @@ void ClassTable::addPrimaryConstructor(ClassTableElement* cls, ClassNode *classN
     if (classNode->primaryConstructor) {
         if (classNode->primaryConstructor->args) {
             for (auto* arg : classNode->primaryConstructor->args->args) {
+                if (!arg)
+                    continue;
+
                 std::string ident;
                 SemanticType* type;
 
@@ -234,30 +146,20 @@ void ClassTable::addPrimaryConstructor(ClassTableElement* cls, ClassNode *classN
                 params.push_back(new FuncParam(ident, type));
             }
         }
-        descriptor = addParamsToMethodDescriptor(params);
 
-        std::string descKey = descriptor;
-        descriptor += "V";
+        std::string descriptor = ClassTableElement::createVoidMethodDescriptor(params);
 
-        if (cls->methods->methods.contains(methodName)) {
-            if (cls->methods->methods[methodName].contains(descKey) ) {
-                throw SemanticError::constructorAlreadyExists(descKey);
-            }
+        if (cls->methods->methods.contains(ident)) {
+            if (cls->methods->methods[ident].contains(descriptor) )
+                throw SemanticError::constructorAlreadyExists(descriptor);
+        } else
+            cls->methods->methods[ident] = std::map<std::string, MethodTableElement*>();
 
-            int name = cls->constants->findOrAddConstant(UTF8, methodName);
-            int desc = cls->constants->findOrAddConstant(UTF8, descriptor);
+        int methodNameNumber = cls->constants->findOrAddConstant(UTF8, ident);
+        int methodDescNumber = cls->constants->findOrAddConstant(UTF8, descriptor);
 
-            cls->methods->methods.find(methodName)->second[descriptor] = new MethodTableElement(name, desc, methodName, descriptor, classNode->primaryConstructor->stmts, retVal, params);
-        }
-        else {
-            int name = cls->constants->findOrAddConstant(UTF8, methodName);
-            int desc = cls->constants->findOrAddConstant(UTF8, descriptor);
-
-            cls->methods->methods[methodName] = std::map<std::string, MethodTableElement*>();
-            cls->methods->methods.find(methodName)->second[descriptor] = new MethodTableElement(name, desc, methodName, descriptor, classNode->primaryConstructor->stmts, retVal, params);
-        }
+        cls->methods->methods.find(ident)->second[descriptor] = new MethodTableElement(methodNameNumber, methodDescNumber, ident, descriptor, classNode->primaryConstructor->stmts, retVal, params);
     }
-    // TODO доделать
 }
 
 

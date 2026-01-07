@@ -26,6 +26,13 @@ public:
     std::string clsName;
 
     ClassTableElement();
+
+    void addMethodsToTable(std::list<FunNode *> funcList);
+    void addMethodToTable(FunNode* method);
+
+    static std::string createMethodDescriptor(vector<FuncParam*> params, SemanticType* returnType);
+    static std::string createVoidMethodDescriptor(vector<FuncParam*> params);
+    static std::string addParamsToMethodDescriptor(vector<FuncParam*> params);
 };
 
 #endif //KOTLIN_COMPILER_CLASSTABLEELEMENT_H
