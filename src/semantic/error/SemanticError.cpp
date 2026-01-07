@@ -48,9 +48,23 @@ SemanticError SemanticError::finalClassInheritance(const std::string &cls) {
     );
 }
 
-SemanticError SemanticError::methodAlreadyExists(const std::string &desc) {
+SemanticError SemanticError::methodAlreadyExists(const std::string &name) {
     return SemanticError(
         METHOD_ALREADY_EXISTS,
-        "Method '" + desc + "' already exists"
+        "Method '" + name + "' already exists"
+    );
+}
+
+SemanticError SemanticError::classAlreadyExists(const std::string &name) {
+    return SemanticError(
+        CLASS_ALREADY_EXISTS,
+        "Class '" + name + "' already exists"
+    );
+}
+
+SemanticError SemanticError::topLevelMethodAlreayExists(const std::string &name) {
+    return SemanticError(
+        TOP_LEVEL_METHOD_WITH_THIS_NAME_ALREADY_EXIST,
+        "Can not create class '" + name + "'. Top level method '" + name + "' aleady exists"
     );
 }

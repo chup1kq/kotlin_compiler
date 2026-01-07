@@ -26,8 +26,11 @@ void ClassTable::buildClassTable(KotlinFileNode* root, const std::string& fileNa
     if (root->topLevelList->functionList)
         addTopLevelFunctionsToBaseClass(items[topLevelClassName], *root->topLevelList->functionList);
 
-    // TODO дописать
+    // Добавляем все классы из файла в таблицу классов
+    if (root->topLevelList->classList)
+        addClassesToClassTable(items[topLevelClassName], *root->topLevelList->classList);
 
+    // TODO дописать
 }
 
 void ClassTable::addBaseClass(const std::string &baseClassName) {
@@ -36,6 +39,7 @@ void ClassTable::addBaseClass(const std::string &baseClassName) {
     topLevelFunctionsClass->clsName = baseClassName;
 
     // Добавляем название и связываем его с классом
+    // TODO вот это дублируется с методом addClassesToClassTable
     int topLevelUtf8 = topLevelFunctionsClass->constants->findOrAddConstant(UTF8, baseClassName);
     int cls = topLevelFunctionsClass->constants->findOrAddConstant(Class, "" ,0, 0, topLevelUtf8);
 
@@ -165,21 +169,49 @@ std::string ClassTable::createMethodDescriptor(vector<FuncParam*> params, Semant
     return desc;
 }
 
+void ClassTable::addClassesToClassTable(ClassTableElement *baseClass, std::list<ClassNode *> classList) {
+    for (auto* classNode : classList) {
+        std::string className = classNode->name;
+
+        if (this->items.find(className) != this->items.end()) {
+            throw SemanticError::classAlreadyExists(className);
+        }
+
+        if (baseClass->methods->methods.contains(className)) {
+            throw SemanticError::topLevelMethodAlreayExists(className);
+        }
+
+        ClassTableElement* newClass = new ClassTableElement();
+        newClass->isOpen = classNode->modifiers->modifiers->at("inheritance") == OPEN; // по умолчанию final
+        newClass->clsName = className;
+
+        int utf8 = newClass->constants->findOrAddConstant(UTF8, className);
+        int cls = newClass->constants->findOrAddConstant(Class, "", 0, 0, utf8);
+
+        newClass->name = utf8;
+        newClass->thisClass = cls;
+
+        this->items.insert(std::pair<std::string, ClassTableElement*>(className, newClass));
+
+        // TODO добавить primary конструктор
+        // TODO заполнить поля
+        // TODO заполнить методы
+    }
+}
+
+void ClassTable::addPrimaryConstructor(ClassTableElement cls, ClassNode *classNode) {
+    std::string methodName = "<init>"; // Имя конструктора для класса
+    std::string descriptor = "(";
+
+    SemanticType* retVal = SemanticType::classType(cls.clsName);
+
+    // TODO доделать
+
+}
+
 
 void ClassTable::initStdClasses() {
     ClassTable *classTable = new ClassTable();
-
-    auto makeClassType = [&](const std::string& className) {
-        SemanticType* t = new SemanticType();
-        t->className = className;
-        return t;
-    };
-
-    auto makeArrayType = [&](SemanticType* elementType) {
-        SemanticType* t = new SemanticType();
-        t->elementType = elementType;
-        return t;
-    };
 
     auto addClass = [&](const std::string& name, bool isOpen = false) {
         classTable->items[name] = new ClassTableElement();
@@ -213,86 +245,86 @@ void ClassTable::initStdClasses() {
     /* 1.0 Инициализация класса Int */
     addClass("JavaRTL/Int");
     /* 1.1 Конструктор */
-    addMethod("JavaRTL/Int", "<init>", makeClassType("JavaRTL/Unit"), "(I)", "(I)V");
+    addMethod("JavaRTL/Int", "<init>", SemanticType::classType("JavaRTL/Unit"), "(I)", "(I)V");
     /* 1.2 Арифметические операции */
-    addMethod("JavaRTL/Int", "plus", makeClassType("JavaRTL/Int"), "(LJavaRTL/Int;)", "(LJavaRTL/Int;)LJavaRTL/Int;");
-    addMethod("JavaRTL/Int", "minus", makeClassType("JavaRTL/Int"), "(LJavaRTL/Int;)", "(LJavaRTL/Int;)LJavaRTL/Int;");
-    addMethod("JavaRTL/Int", "times", makeClassType("JavaRTL/Int"), "(LJavaRTL/Int;)", "(LJavaRTL/Int;)LJavaRTL/Int;");
-    addMethod("JavaRTL/Int", "div", makeClassType("JavaRTL/Int"), "(LJavaRTL/Int;)", "(LJavaRTL/Int;)LJavaRTL/Int;");
+    addMethod("JavaRTL/Int", "plus", SemanticType::classType("JavaRTL/Int"), "(LJavaRTL/Int;)", "(LJavaRTL/Int;)LJavaRTL/Int;");
+    addMethod("JavaRTL/Int", "minus", SemanticType::classType("JavaRTL/Int"), "(LJavaRTL/Int;)", "(LJavaRTL/Int;)LJavaRTL/Int;");
+    addMethod("JavaRTL/Int", "times", SemanticType::classType("JavaRTL/Int"), "(LJavaRTL/Int;)", "(LJavaRTL/Int;)LJavaRTL/Int;");
+    addMethod("JavaRTL/Int", "div", SemanticType::classType("JavaRTL/Int"), "(LJavaRTL/Int;)", "(LJavaRTL/Int;)LJavaRTL/Int;");
     /* 1.3 Унарные операции */
-    addMethod("JavaRTL/Int", "uPlus", makeClassType("JavaRTL/Int"), "()", "()LJavaRTL/Int;");
-    addMethod("JavaRTL/Int", "uMinus", makeClassType("JavaRTL/Int"), "()", "()LJavaRTL/Int;");
+    addMethod("JavaRTL/Int", "uPlus", SemanticType::classType("JavaRTL/Int"), "()", "()LJavaRTL/Int;");
+    addMethod("JavaRTL/Int", "uMinus", SemanticType::classType("JavaRTL/Int"), "()", "()LJavaRTL/Int;");
     /* 1.4 Массив */
-    addMethod("JavaRTL/Int", "rangeTo", makeArrayType(makeClassType("JavaRTL/Int")), "(LJavaRTL/Int;)", "(LJavaRTL/Int;)[LJavaRTL/Int;");
+    addMethod("JavaRTL/Int", "rangeTo", SemanticType::arrayType(SemanticType::classType("JavaRTL/Int")), "(LJavaRTL/Int;)", "(LJavaRTL/Int;)[LJavaRTL/Int;");
     /* 1.5 Сравнение */
-    addMethod("JavaRTL/Int", "greater", makeClassType("JavaRTL/Boolean"), "(LJavaRTL/Int;)", "(LJavaRTL/Int;)LJavaRTL/Boolean;");
-    addMethod("JavaRTL/Int", "less", makeClassType("JavaRTL/Boolean"), "(LJavaRTL/Int;)", "(LJavaRTL/Int;)LJavaRTL/Boolean;");
-    addMethod("JavaRTL/Int", "greaterEquals", makeClassType("JavaRTL/Boolean"), "(LJavaRTL/Int;)", "(LJavaRTL/Int;)LJavaRTL/Boolean;");
-    addMethod("JavaRTL/Int", "lessEquals", makeClassType("JavaRTL/Boolean"), "(LJavaRTL/Int;)", "(LJavaRTL/Int;)LJavaRTL/Boolean;");
-    addMethod("JavaRTL/Int", "equals", makeClassType("JavaRTL/Boolean"), "(LJavaRTL/Int;)", "(LJavaRTL/Int;)LJavaRTL/Boolean;");
-    addMethod("JavaRTL/Int", "notEquals", makeClassType("JavaRTL/Boolean"), "(LJavaRTL/Int;)", "(LJavaRTL/Int;)LJavaRTL/Boolean;");
+    addMethod("JavaRTL/Int", "greater", SemanticType::classType("JavaRTL/Boolean"), "(LJavaRTL/Int;)", "(LJavaRTL/Int;)LJavaRTL/Boolean;");
+    addMethod("JavaRTL/Int", "less", SemanticType::classType("JavaRTL/Boolean"), "(LJavaRTL/Int;)", "(LJavaRTL/Int;)LJavaRTL/Boolean;");
+    addMethod("JavaRTL/Int", "greaterEquals", SemanticType::classType("JavaRTL/Boolean"), "(LJavaRTL/Int;)", "(LJavaRTL/Int;)LJavaRTL/Boolean;");
+    addMethod("JavaRTL/Int", "lessEquals", SemanticType::classType("JavaRTL/Boolean"), "(LJavaRTL/Int;)", "(LJavaRTL/Int;)LJavaRTL/Boolean;");
+    addMethod("JavaRTL/Int", "equals", SemanticType::classType("JavaRTL/Boolean"), "(LJavaRTL/Int;)", "(LJavaRTL/Int;)LJavaRTL/Boolean;");
+    addMethod("JavaRTL/Int", "notEquals", SemanticType::classType("JavaRTL/Boolean"), "(LJavaRTL/Int;)", "(LJavaRTL/Int;)LJavaRTL/Boolean;");
 
     /* 2.0 Инициализация класса Float */
     addClass("JavaRTL/Float");
     /* 2.1 Конструктор */
-    addMethod("JavaRTL/Float", "<init>", makeClassType("JavaRTL/Unit"), "(F)", "(F)V");
+    addMethod("JavaRTL/Float", "<init>", SemanticType::classType("JavaRTL/Unit"), "(F)", "(F)V");
     /* 2.2 Арифметические операции */
-    addMethod("JavaRTL/Float", "plus", makeClassType("JavaRTL/Float"), "(LJavaRTL/Float;)", "(LJavaRTL/Int;)LJavaRTL/Float;");
-    addMethod("JavaRTL/Float", "minus", makeClassType("JavaRTL/Float"), "(LJavaRTL/Float;)", "(LJavaRTL/Int;)LJavaRTL/Float;");
-    addMethod("JavaRTL/Float", "times", makeClassType("JavaRTL/Float"), "(LJavaRTL/Float;)", "(LJavaRTL/Int;)LJavaRTL/Float;");
-    addMethod("JavaRTL/Float", "div", makeClassType("JavaRTL/Float"), "(LJavaRTL/Float;)", "(LJavaRTL/Int;)LJavaRTL/Float;");
+    addMethod("JavaRTL/Float", "plus", SemanticType::classType("JavaRTL/Float"), "(LJavaRTL/Float;)", "(LJavaRTL/Int;)LJavaRTL/Float;");
+    addMethod("JavaRTL/Float", "minus", SemanticType::classType("JavaRTL/Float"), "(LJavaRTL/Float;)", "(LJavaRTL/Int;)LJavaRTL/Float;");
+    addMethod("JavaRTL/Float", "times", SemanticType::classType("JavaRTL/Float"), "(LJavaRTL/Float;)", "(LJavaRTL/Int;)LJavaRTL/Float;");
+    addMethod("JavaRTL/Float", "div", SemanticType::classType("JavaRTL/Float"), "(LJavaRTL/Float;)", "(LJavaRTL/Int;)LJavaRTL/Float;");
     /* 2.3 Унарные операции */
-    addMethod("JavaRTL/Float", "uPlus", makeClassType("JavaRTL/Float"), "()", "()LJavaRTL/Float;");
-    addMethod("JavaRTL/Float", "uMinus", makeClassType("JavaRTL/Float"), "()", "()LJavaRTL/Float;");
+    addMethod("JavaRTL/Float", "uPlus", SemanticType::classType("JavaRTL/Float"), "()", "()LJavaRTL/Float;");
+    addMethod("JavaRTL/Float", "uMinus", SemanticType::classType("JavaRTL/Float"), "()", "()LJavaRTL/Float;");
     /* 2.4 Сравнение */
-    addMethod("JavaRTL/Float", "greater", makeClassType("JavaRTL/Boolean"), "(LJavaRTL/Float;)", "(LJavaRTL/Float;)LJavaRTL/Boolean;");
-    addMethod("JavaRTL/Float", "less", makeClassType("JavaRTL/Boolean"), "(LJavaRTL/Float;)", "(LJavaRTL/Float;)LJavaRTL/Boolean;");
-    addMethod("JavaRTL/Float", "greaterEquals", makeClassType("JavaRTL/Boolean"), "(LJavaRTL/Float;)", "(LJavaRTL/Float;)LJavaRTL/Boolean;");
-    addMethod("JavaRTL/Float", "lessEquals", makeClassType("JavaRTL/Boolean"), "(LJavaRTL/Float;)", "(LJavaRTL/Float;)LJavaRTL/Boolean;");
-    addMethod("JavaRTL/Float", "equals", makeClassType("JavaRTL/Boolean"), "(LJavaRTL/Float;)", "(LJavaRTL/Float;)LJavaRTL/Boolean;");
-    addMethod("JavaRTL/Float", "notEquals", makeClassType("JavaRTL/Boolean"), "(LJavaRTL/Float;)", "(LJavaRTL/Float;)LJavaRTL/Boolean;");
+    addMethod("JavaRTL/Float", "greater", SemanticType::classType("JavaRTL/Boolean"), "(LJavaRTL/Float;)", "(LJavaRTL/Float;)LJavaRTL/Boolean;");
+    addMethod("JavaRTL/Float", "less", SemanticType::classType("JavaRTL/Boolean"), "(LJavaRTL/Float;)", "(LJavaRTL/Float;)LJavaRTL/Boolean;");
+    addMethod("JavaRTL/Float", "greaterEquals", SemanticType::classType("JavaRTL/Boolean"), "(LJavaRTL/Float;)", "(LJavaRTL/Float;)LJavaRTL/Boolean;");
+    addMethod("JavaRTL/Float", "lessEquals", SemanticType::classType("JavaRTL/Boolean"), "(LJavaRTL/Float;)", "(LJavaRTL/Float;)LJavaRTL/Boolean;");
+    addMethod("JavaRTL/Float", "equals", SemanticType::classType("JavaRTL/Boolean"), "(LJavaRTL/Float;)", "(LJavaRTL/Float;)LJavaRTL/Boolean;");
+    addMethod("JavaRTL/Float", "notEquals", SemanticType::classType("JavaRTL/Boolean"), "(LJavaRTL/Float;)", "(LJavaRTL/Float;)LJavaRTL/Boolean;");
 
 
     /* 3.0 Инициализация класса Double */
     addClass("JavaRTL/Double");
     /* 3.1 Конструктор */
-    addMethod("JavaRTL/Double", "<init>", makeClassType("JavaRTL/Unit"), "(D)", "(D)V");
+    addMethod("JavaRTL/Double", "<init>", SemanticType::classType("JavaRTL/Unit"), "(D)", "(D)V");
     /* 3.2 Арифметические операции */
-    addMethod("JavaRTL/Double", "plus", makeClassType("JavaRTL/Double"), "(LJavaRTL/Double;)", "(LJavaRTL/Double;)LJavaRTL/Double;");
-    addMethod("JavaRTL/Double", "minus", makeClassType("JavaRTL/Double"), "(LJavaRTL/Double;)", "(LJavaRTL/Double;)LJavaRTL/Double;");
-    addMethod("JavaRTL/Double", "times", makeClassType("JavaRTL/Double"), "(LJavaRTL/Double;)", "(LJavaRTL/Double;)LJavaRTL/Double;");
-    addMethod("JavaRTL/Double", "div", makeClassType("JavaRTL/Double"), "(LJavaRTL/Double;)", "(LJavaRTL/Double;)LJavaRTL/Double;");
+    addMethod("JavaRTL/Double", "plus", SemanticType::classType("JavaRTL/Double"), "(LJavaRTL/Double;)", "(LJavaRTL/Double;)LJavaRTL/Double;");
+    addMethod("JavaRTL/Double", "minus", SemanticType::classType("JavaRTL/Double"), "(LJavaRTL/Double;)", "(LJavaRTL/Double;)LJavaRTL/Double;");
+    addMethod("JavaRTL/Double", "times", SemanticType::classType("JavaRTL/Double"), "(LJavaRTL/Double;)", "(LJavaRTL/Double;)LJavaRTL/Double;");
+    addMethod("JavaRTL/Double", "div", SemanticType::classType("JavaRTL/Double"), "(LJavaRTL/Double;)", "(LJavaRTL/Double;)LJavaRTL/Double;");
     /* 3.3 Унарные операции */
-    addMethod("JavaRTL/Double", "uPlus", makeClassType("JavaRTL/Double"), "()", "()LJavaRTL/Double;");
-    addMethod("JavaRTL/Double", "uMinus", makeClassType("JavaRTL/Double"), "()", "()LJavaRTL/Double;");
+    addMethod("JavaRTL/Double", "uPlus", SemanticType::classType("JavaRTL/Double"), "()", "()LJavaRTL/Double;");
+    addMethod("JavaRTL/Double", "uMinus", SemanticType::classType("JavaRTL/Double"), "()", "()LJavaRTL/Double;");
     /* 2.4 Сравнение */
-    addMethod("JavaRTL/Double", "greater", makeClassType("JavaRTL/Boolean"), "(LJavaRTL/Double;)", "(LJavaRTL/Double;)LJavaRTL/Boolean;");
-    addMethod("JavaRTL/Double", "less", makeClassType("JavaRTL/Boolean"), "(LJavaRTL/Double;)", "(LJavaRTL/Double;)LJavaRTL/Boolean;");
-    addMethod("JavaRTL/Double", "greaterEquals",makeClassType("JavaRTL/Boolean"), "(LJavaRTL/Double;)", "(LJavaRTL/Double;)LJavaRTL/Boolean;");
-    addMethod("JavaRTL/Double", "lessEquals", makeClassType("JavaRTL/Boolean"), "(LJavaRTL/Double;)", "(LJavaRTL/Double;)LJavaRTL/Boolean;");
-    addMethod("JavaRTL/Double", "equals",makeClassType("JavaRTL/Boolean"), "(LJavaRTL/Double;)", "(LJavaRTL/Double;)LJavaRTL/Boolean;");
-    addMethod("JavaRTL/Double", "notEquals",makeClassType("JavaRTL/Boolean"), "(LJavaRTL/Double;)", "(LJavaRTL/Double;)LJavaRTL/Boolean;");
+    addMethod("JavaRTL/Double", "greater", SemanticType::classType("JavaRTL/Boolean"), "(LJavaRTL/Double;)", "(LJavaRTL/Double;)LJavaRTL/Boolean;");
+    addMethod("JavaRTL/Double", "less", SemanticType::classType("JavaRTL/Boolean"), "(LJavaRTL/Double;)", "(LJavaRTL/Double;)LJavaRTL/Boolean;");
+    addMethod("JavaRTL/Double", "greaterEquals",SemanticType::classType("JavaRTL/Boolean"), "(LJavaRTL/Double;)", "(LJavaRTL/Double;)LJavaRTL/Boolean;");
+    addMethod("JavaRTL/Double", "lessEquals", SemanticType::classType("JavaRTL/Boolean"), "(LJavaRTL/Double;)", "(LJavaRTL/Double;)LJavaRTL/Boolean;");
+    addMethod("JavaRTL/Double", "equals",SemanticType::classType("JavaRTL/Boolean"), "(LJavaRTL/Double;)", "(LJavaRTL/Double;)LJavaRTL/Boolean;");
+    addMethod("JavaRTL/Double", "notEquals",SemanticType::classType("JavaRTL/Boolean"), "(LJavaRTL/Double;)", "(LJavaRTL/Double;)LJavaRTL/Boolean;");
 
     /* 4. Инициализация класса String */
     addClass("JavaRTL/String");
 
-    addMethod("JavaRTL/String", "toInt", makeClassType("JavaRTL/Int"), "()", "()LJavaRTL/Int;");
-    addMethod("JavaRTL/String", "toFloat", makeClassType("JavaRTL/Float"), "()", "()LJavaRTL/Float;");
-    addMethod("JavaRTL/String", "toDouble", makeClassType("JavaRTL/Double"), "()", "()LJavaRTL/Double;");
-    addMethod("JavaRTL/String", "length", makeClassType("JavaRTL/Int"), "()", "()I");
+    addMethod("JavaRTL/String", "toInt", SemanticType::classType("JavaRTL/Int"), "()", "()LJavaRTL/Int;");
+    addMethod("JavaRTL/String", "toFloat", SemanticType::classType("JavaRTL/Float"), "()", "()LJavaRTL/Float;");
+    addMethod("JavaRTL/String", "toDouble", SemanticType::classType("JavaRTL/Double"), "()", "()LJavaRTL/Double;");
+    addMethod("JavaRTL/String", "length", SemanticType::classType("JavaRTL/Int"), "()", "()I");
 
     /* 5. Инициализация класса Char */
     addClass("JavaRTL/Char");
-    addMethod("JavaRTL/Char", "<init>", makeClassType("JavaRTL/Unit"), "(C)", "(C)V");
+    addMethod("JavaRTL/Char", "<init>", SemanticType::classType("JavaRTL/Unit"), "(C)", "(C)V");
 
     /* 6. Инициализация класса Boolean */
     addClass("JavaRTL/Boolean");
-    addMethod("JavaRTL/Boolean", "<init>", makeClassType("JavaRTL/Unit"), "(I)", "(I)V");  // true/false как 1/0
-    addMethod("JavaRTL/Boolean", "not", makeClassType("JavaRTL/Boolean"), "()", "()LJavaRTL/Boolean;");
-    addMethod("JavaRTL/Boolean", "and", makeClassType("JavaRTL/Boolean"), "(LJavaRTL/Boolean;)", "(LJavaRTL/Boolean;)LJavaRTL/Boolean;");
-    addMethod("JavaRTL/Boolean", "or", makeClassType("JavaRTL/Boolean"), "(LJavaRTL/Boolean;)", "(LJavaRTL/Boolean;)LJavaRTL/Boolean;");
-    addMethod("JavaRTL/Boolean", "equals", makeClassType("JavaRTL/Boolean"), "(LJavaRTL/Boolean;)", "(LJavaRTL/Boolean;)LJavaRTL/Boolean;");
-    addMethod("JavaRTL/Boolean", "notEquals", makeClassType("JavaRTL/Boolean"), "(LJavaRTL/Boolean;)", "(LJavaRTL/Boolean;)LJavaRTL/Boolean;");
+    addMethod("JavaRTL/Boolean", "<init>", SemanticType::classType("JavaRTL/Unit"), "(I)", "(I)V");  // true/false как 1/0
+    addMethod("JavaRTL/Boolean", "not", SemanticType::classType("JavaRTL/Boolean"), "()", "()LJavaRTL/Boolean;");
+    addMethod("JavaRTL/Boolean", "and", SemanticType::classType("JavaRTL/Boolean"), "(LJavaRTL/Boolean;)", "(LJavaRTL/Boolean;)LJavaRTL/Boolean;");
+    addMethod("JavaRTL/Boolean", "or", SemanticType::classType("JavaRTL/Boolean"), "(LJavaRTL/Boolean;)", "(LJavaRTL/Boolean;)LJavaRTL/Boolean;");
+    addMethod("JavaRTL/Boolean", "equals", SemanticType::classType("JavaRTL/Boolean"), "(LJavaRTL/Boolean;)", "(LJavaRTL/Boolean;)LJavaRTL/Boolean;");
+    addMethod("JavaRTL/Boolean", "notEquals", SemanticType::classType("JavaRTL/Boolean"), "(LJavaRTL/Boolean;)", "(LJavaRTL/Boolean;)LJavaRTL/Boolean;");
 
     /* 7. Инициализация класса Any и Unit */
     addClass("JavaRTL/Any", true);
@@ -302,23 +334,23 @@ void ClassTable::initStdClasses() {
     addClass("JavaRTL/InputOutput");
 
     // print для всех типов
-    addMethod("JavaRTL/InputOutput", "print", makeClassType("JavaRTL/Unit"), "(LJavaRTL/Int;)", "(LJavaRTL/Int;)LJavaRTL/Unit;");
-    addMethod("JavaRTL/InputOutput", "print", makeClassType("JavaRTL/Unit"), "(LJavaRTL/Float;)", "(LJavaRTL/Float;)LJavaRTL/Unit;");
-    addMethod("JavaRTL/InputOutput", "print", makeClassType("JavaRTL/Unit"), "(LJavaRTL/Double;)", "(LJavaRTL/Double;)LJavaRTL/Unit;");
-    addMethod("JavaRTL/InputOutput", "print", makeClassType("JavaRTL/Unit"), "(LJavaRTL/String;)", "(LJavaRTL/String;)LJavaRTL/Unit;");
-    addMethod("JavaRTL/InputOutput", "print", makeClassType("JavaRTL/Unit"), "(LJavaRTL/Char;)", "(LJavaRTL/Char;)LJavaRTL/Unit;");
-    addMethod("JavaRTL/InputOutput", "print", makeClassType("JavaRTL/Unit"), "(LJavaRTL/Boolean;)", "(LJavaRTL/Boolean;)LJavaRTL/Unit;");
+    addMethod("JavaRTL/InputOutput", "print", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Int;)", "(LJavaRTL/Int;)LJavaRTL/Unit;");
+    addMethod("JavaRTL/InputOutput", "print", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Float;)", "(LJavaRTL/Float;)LJavaRTL/Unit;");
+    addMethod("JavaRTL/InputOutput", "print", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Double;)", "(LJavaRTL/Double;)LJavaRTL/Unit;");
+    addMethod("JavaRTL/InputOutput", "print", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/String;)", "(LJavaRTL/String;)LJavaRTL/Unit;");
+    addMethod("JavaRTL/InputOutput", "print", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Char;)", "(LJavaRTL/Char;)LJavaRTL/Unit;");
+    addMethod("JavaRTL/InputOutput", "print", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Boolean;)", "(LJavaRTL/Boolean;)LJavaRTL/Unit;");
 
     // println для всех типов
-    addMethod("JavaRTL/InputOutput", "println", makeClassType("JavaRTL/Unit"), "(LJavaRTL/Int;)", "(LJavaRTL/Int;)LJavaRTL/Unit;");
-    addMethod("JavaRTL/InputOutput", "println", makeClassType("JavaRTL/Unit"), "(LJavaRTL/Float;)", "(LJavaRTL/Float;)LJavaRTL/Unit;");
-    addMethod("JavaRTL/InputOutput", "println", makeClassType("JavaRTL/Unit"), "(LJavaRTL/Double;)", "(LJavaRTL/Double;)LJavaRTL/Unit;");
-    addMethod("JavaRTL/InputOutput", "println", makeClassType("JavaRTL/Unit"), "(LJavaRTL/String;)", "(LJavaRTL/String;)LJavaRTL/Unit;");
-    addMethod("JavaRTL/InputOutput", "println", makeClassType("JavaRTL/Unit"), "(LJavaRTL/Char;)", "(LJavaRTL/Char;)LJavaRTL/Unit;");
-    addMethod("JavaRTL/InputOutput", "println", makeClassType("JavaRTL/Unit"), "(LJavaRTL/Boolean;)", "(LJavaRTL/Boolean;)LJavaRTL/Unit;");
+    addMethod("JavaRTL/InputOutput", "println", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Int;)", "(LJavaRTL/Int;)LJavaRTL/Unit;");
+    addMethod("JavaRTL/InputOutput", "println", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Float;)", "(LJavaRTL/Float;)LJavaRTL/Unit;");
+    addMethod("JavaRTL/InputOutput", "println", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Double;)", "(LJavaRTL/Double;)LJavaRTL/Unit;");
+    addMethod("JavaRTL/InputOutput", "println", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/String;)", "(LJavaRTL/String;)LJavaRTL/Unit;");
+    addMethod("JavaRTL/InputOutput", "println", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Char;)", "(LJavaRTL/Char;)LJavaRTL/Unit;");
+    addMethod("JavaRTL/InputOutput", "println", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Boolean;)", "(LJavaRTL/Boolean;)LJavaRTL/Unit;");
 
     // readLine
-    addMethod("JavaRTL/InputOutput", "readLine", makeClassType("JavaRTL/String"), "()", "()LJavaRTL/String;");
+    addMethod("JavaRTL/InputOutput", "readLine", SemanticType::classType("JavaRTL/String"), "()", "()LJavaRTL/String;");
 
      this->items = classTable->items;
 }

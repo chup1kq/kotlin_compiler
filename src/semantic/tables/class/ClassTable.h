@@ -30,6 +30,9 @@ public:
     static void addTopLevelFunctionsToBaseClass(ClassTableElement *baseClass, std::list<FunNode*> funcList);
     static std::string createMethodDescriptor(vector<FuncParam*> params, SemanticType* returnType);
 
+    void addClassesToClassTable(ClassTableElement *baseClass, std::list<ClassNode*> classList);
+    void addPrimaryConstructor(ClassTableElement cls, ClassNode* classNode);
+
     // Сгенерировать таблицу методанных
     void initStdClasses();
 };

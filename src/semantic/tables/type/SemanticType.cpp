@@ -49,5 +49,16 @@ bool SemanticType::isReplaceable(const SemanticType& other) const {
     return className == other.className;
 }
 
+SemanticType* SemanticType::classType(const std::string& className, bool nullable) {
+    SemanticType* t = new SemanticType();
+    t->className = className;
+    t->isNullable = nullable;
+    return t;
+}
 
-
+SemanticType* SemanticType::arrayType(SemanticType* elementType, bool nullable) {
+    SemanticType* t = new SemanticType();
+    t->elementType = elementType;
+    t->isNullable = nullable;
+    return t;
+}
