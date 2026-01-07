@@ -9,15 +9,15 @@
 
 class MethodTableElement {
 public:
-    int methodName = NULL;
-    int descriptor = NULL;
+    int methodName;
+    int descriptor;
     std::string strName;
     std::string strDesc;
     StmtListNode * start;
     SemanticType * retType = nullptr;
     vector<FuncParam*> params;
     LocalVariableTable * localVarTable = nullptr;
-    int isFirst = NULL;
+    int isFirst;
 
     MethodTableElement(int nameConst,
         int descConst,
