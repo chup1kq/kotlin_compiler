@@ -35,7 +35,8 @@ void ClassGeneration::writeHeader() {
     // 2 байта: major_version = 65 (Java 21)
     writeU2(0x0041);
 
-    // 2 байта: constant_pool_count (ЗАМЕНИМ после writeConstantPool())
+    /* TODO (ЗАМЕНИМ после writeConstantPool()) */
+    // 2 байта: constant_pool_count
     writeU2(0);
 }
 
@@ -49,6 +50,22 @@ void ClassGeneration::writeFields() {
 }
 
 void ClassGeneration::writeMethods() {
+    uint16_t count = 0;
+
+    for (const auto& namePair : m_class->methods->methods) {
+        count += namePair.second.size();
+    }
+
+    writeU2(count);
+
+    for (const auto& namePair : m_class->methods->methods) {
+        for (const auto& descPair : namePair.second) {
+            MethodTableElement* method = descPair.second;
+
+            auto bytes = generateMethod(method);
+            m_buffer.insert(m_buffer.end(), bytes.begin(), bytes.end());
+        }
+    }
 }
 
 void ClassGeneration::writeToFile() {
