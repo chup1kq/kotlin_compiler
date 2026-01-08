@@ -27,6 +27,8 @@ public:
 
     ClassTableElement();
 
+    void addPrimaryConstructor(Constructor* primaryConstructor);
+
     void addMethodsToTable(std::list<FunNode *> funcList);
     void addMethodToTable(FunNode* method);
 

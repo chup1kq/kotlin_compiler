@@ -8,6 +8,8 @@
 class MethodTable {
 public:
     // Вложенная map для поддержки перегрузки
+    // Первый string - имя метода
+    // Второй string - дескриптор
     std::map<std::string, std::map<std::string, MethodTableElement *>> methods;
 
     MethodTable();

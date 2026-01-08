@@ -30,6 +30,9 @@ void ClassTable::buildClassTable(KotlinFileNode* root, const std::string& fileNa
     if (root->topLevelList->classList)
         addClassesToClassTable(items[topLevelClassName], *root->topLevelList->classList);
 
+    // Проверяем и заполняем локальные переменные в top level функциях
+
+
 
     // TODO дописать
 }
@@ -109,7 +112,7 @@ void ClassTable::addClassesToClassTable(ClassTableElement *baseClass, std::list<
         this->items.insert(std::pair<std::string, ClassTableElement*>(className, newClass));
 
         // TODO добавить primary конструктор
-        addPrimaryConstructor(newClass, classNode);
+        newClass->addPrimaryConstructor(classNode->primaryConstructor);
         // TODO заполнить поля
 
 
@@ -117,51 +120,6 @@ void ClassTable::addClassesToClassTable(ClassTableElement *baseClass, std::list<
         newClass->addMethodsToTable(*classNode->body->methods);
     }
 }
-
-void ClassTable::addPrimaryConstructor(ClassTableElement* cls, ClassNode *classNode) {
-    std::string ident = "<init>"; // Имя конструктора для класса
-
-    SemanticType* retVal = SemanticType::classType(cls->clsName);
-
-    // TODO вот тут есть дублирование с методом addTopLevelFunctionsToBaseClass, посмотреть, может что-то вынести
-    std::vector<FuncParam*> params;
-    if (classNode->primaryConstructor) {
-        if (classNode->primaryConstructor->args) {
-            for (auto* arg : classNode->primaryConstructor->args->args) {
-                if (!arg)
-                    continue;
-
-                std::string ident;
-                SemanticType* type;
-
-                if (auto* v = dynamic_cast<VarDeclaration*>(arg)) {
-                    ident = v->varId;
-                    type = new SemanticType(v->varType);
-                }
-
-                else if (auto* s = dynamic_cast<StmtNode*>(arg)) {
-                    // TODO если был передан параметр как поле, то его нужно добавить к полям
-                }
-
-                params.push_back(new FuncParam(ident, type));
-            }
-        }
-
-        std::string descriptor = ClassTableElement::createVoidMethodDescriptor(params);
-
-        if (cls->methods->methods.contains(ident)) {
-            if (cls->methods->methods[ident].contains(descriptor) )
-                throw SemanticError::constructorAlreadyExists(descriptor);
-        } else
-            cls->methods->methods[ident] = std::map<std::string, MethodTableElement*>();
-
-        int methodNameNumber = cls->constants->findOrAddConstant(UTF8, ident);
-        int methodDescNumber = cls->constants->findOrAddConstant(UTF8, descriptor);
-
-        cls->methods->methods.find(ident)->second[descriptor] = new MethodTableElement(methodNameNumber, methodDescNumber, ident, descriptor, classNode->primaryConstructor->stmts, retVal, params);
-    }
-}
-
 
 void ClassTable::initStdClasses() {
     ClassTable *classTable = new ClassTable();
