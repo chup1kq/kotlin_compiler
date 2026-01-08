@@ -22,6 +22,17 @@ enum SemanticErrorCode {
     VAL_REASSIGNMENT = 1015,
     ASSIGNMENT_TYPES_MISMATCH = 1016,
     INVALID_ARRAY_ASSIGNMENT = 1017,
+    MULTIVAR_FOR_LOOP = 1018,               // многопеременный for
+    FOR_LOOP_NOT_ARRAY = 1019,              // for работает только с массивами
+    CONDITION_NOT_BOOLEAN = 1020,           // if/while условие не Boolean
+    BREAK_OUTSIDE_LOOP = 1021,              // break вне цикла
+    CONTINUE_OUTSIDE_LOOP = 1022,           // continue вне цикла
+    UNEXPECTED_RETURN = 1023,               // return в неожидаемом месте
+    FUNCTION_ALREADY_EXISTS = 1024,         // функция с таким именем уже существует
+    FIELD_ALREADY_EXISTS = 1025,            // поле с таким именем уже существует
+    INVALID_CAST = 1026,                    // недопустимое приведение типов
+    NULL_POINTER_ACCESS = 1027,             // обращение к null
+    INVALID_OPERATOR = 1028,                // оператор применён к несовместимым типам
     UNDEFINED_ARRAY_ELEMENTS_TYPE = 1029,
 };
 

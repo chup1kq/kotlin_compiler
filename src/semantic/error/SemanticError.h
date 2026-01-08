@@ -33,6 +33,8 @@ public:
     static SemanticError valReassignment(const std::string &name);
     static SemanticError assignmentTypeMismatch(const std::string &leftName, const std::string &rightName);
     static SemanticError invalidArrayAssignment(const std::string &name);
+    static SemanticError multivarForLoop(const std::string &name);
+    static SemanticError forLoopNotArray(const std::string &name);
     static SemanticError undefinedArrayElementType();
 };
 

@@ -169,8 +169,49 @@ void ClassTable::attributeCycle(MethodTableElement *method, StmtNode *stmt) {
     // TODO дописать
 }
 
+/* TODO переделать на forIteratorList */
 void ClassTable::attributeFor(MethodTableElement *method, StmtNode *stmt) {
-    // TODO дописать
+    int varDeclCount = stmt->forIteratorList->decls->size();
+
+    if (varDeclCount > 1) {
+        throw SemanticError::multivarForLoop(method->strName + method->strDesc);
+    }
+
+    attributeExpression(method, stmt->cond);
+
+    if (stmt->cond->semanticType == nullptr || stmt->cond->type != _ARRAY_EXPR) {
+        throw SemanticError::forLoopNotArray(method->strName + method->strDesc);
+    }
+
+    VarDeclaration* iter = stmt->forIterator;
+
+    if (iter != nullptr) {
+        if (iter->varType != nullptr) {
+            SemanticType declaredType(iter->varType);
+            SemanticType arrayType(*stmt->cond->semanticType);
+            SemanticType elementType = *arrayType.elementType;
+
+            if (!declaredType.isReplaceable(elementType)) {
+                throw SemanticError::returnTypeMismatch(method->strName + method->strDesc);
+            }
+
+            method->localVarTable->findOrAddLocalVar(iter->varType->customName, new SemanticType(declaredType), false, true);
+        }
+        else {
+            SemanticType elementType = *stmt->cond->semanticType;
+            method->localVarTable->findOrAddLocalVar(iter->varType->customName, new SemanticType(elementType), false, true);
+        }
+
+        std::string imageVar = "$" + iter->varType->customName;
+
+        method->localVarTable->findOrAddLocalVar(imageVar, new SemanticType(), false, true);
+    }
+
+    if (stmt->blockStmts != nullptr) {
+        for (auto* s : *stmt->blockStmts->stmts) {
+            attributeAndFillLocalsInStatement(method, s);
+        }
+    }
 }
 
 void ClassTable::attributeReturn(MethodTableElement *method, StmtNode *stmt) {
@@ -182,7 +223,7 @@ void ClassTable::attributeReturn(MethodTableElement *method, StmtNode *stmt) {
 
     // return;
     if (stmt->expr == nullptr) {
-        if (retType->className != "Unit") {
+        if (!isUnitMethod(retType->className)) {
             throw SemanticError::missingReturnValue(method->strName + method->strDesc);
         }
         return;
@@ -191,7 +232,7 @@ void ClassTable::attributeReturn(MethodTableElement *method, StmtNode *stmt) {
     attributeExpression(method, stmt->expr);
 
     // return expr;
-    if (retType->className == "Unit") {
+    if (isUnitMethod(retType->className)) {
         throw SemanticError::returnFromVoid(method->strName + method->strDesc);
     }
 
@@ -490,4 +531,10 @@ void ClassTable::initStdClasses() {
     addMethod("JavaRTL/InputOutput", "readLine", SemanticType::classType("JavaRTL/String"), "()", "()LJavaRTL/String;");
 
      this->items = classTable->items;
+}
+
+bool ClassTable::isUnitMethod(const std::string& signature) {
+    size_t pos = signature.rfind(')');
+    if (pos == std::string::npos) return false;
+    return signature.substr(pos + 1) == "LUnit;";
 }

@@ -138,6 +138,20 @@ SemanticError SemanticError::invalidArrayAssignment(const std::string &name) {
     );
 }
 
+SemanticError SemanticError::multivarForLoop(const std::string &name) {
+    return SemanticError(
+        MULTIVAR_FOR_LOOP,
+        "Multivar for loops are not supported in this version '" + name + "'"
+    );
+}
+
+SemanticError SemanticError::forLoopNotArray(const std::string &name) {
+    return SemanticError(
+        FOR_LOOP_NOT_ARRAY,
+        "Only arrays allowed in for loops '" + name + "'"
+    );
+}
+
 SemanticError SemanticError::undefinedArrayElementType() {
     return SemanticError(
         UNDEFINED_ARRAY_ELEMENTS_TYPE,

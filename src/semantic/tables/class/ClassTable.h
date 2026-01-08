@@ -44,6 +44,9 @@ public:
 
     // Сгенерировать таблицу методанных
     void initStdClasses();
+
+private:
+    bool isUnitMethod(const std::string& signature);
 };
 
 #endif //KOTLIN_COMPILER_CLASSTABLE_H
