@@ -145,8 +145,15 @@ void ClassTable::attributeAndFillLocalsInStatement(MethodTableElement *method, S
         case (_VAL):
         case (_VAR):
             attributeVarOrValStmt(method, stmt);
-        // TODO дописать switch-case
-
+        case (_IF_STMT):
+            attributeIfStmt(method, stmt);
+        case (_WHILE):
+        case (_DO_WHILE):
+            attributeCycle(method, stmt);
+        case (_FOR):
+            attributeFor(method, stmt);
+        case (_RETURN):
+            attributeReturn(method, stmt);
     }
 }
 
@@ -155,6 +162,22 @@ void ClassTable::attributeExpression(MethodTableElement *method, ExprNode *expr)
 }
 
 void ClassTable::attributeVarOrValStmt(MethodTableElement *method, StmtNode *stmt) {
+    // TODO дописать
+}
+
+void ClassTable::attributeIfStmt(MethodTableElement *method, StmtNode *stmt) {
+    // TODO дописать
+}
+
+void ClassTable::attributeCycle(MethodTableElement *method, StmtNode *stmt) {
+    // TODO дописать
+}
+
+void ClassTable::attributeFor(MethodTableElement *method, StmtNode *stmt) {
+    // TODO дописать
+}
+
+void ClassTable::attributeReturn(MethodTableElement *method, StmtNode *stmt) {
     // TODO дописать
 }
 

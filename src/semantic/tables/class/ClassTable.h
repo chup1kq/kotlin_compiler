@@ -29,8 +29,13 @@ public:
     void attributeAndFillLocalsInBaseClass(const std::string& topLevelClassName);
     void attributeAndFillLocals(MethodTableElement* method);
     void attributeAndFillLocalsInStatement(MethodTableElement* method, StmtNode* stmt);
+
     void attributeExpression(MethodTableElement* method, ExprNode* expr);
     void attributeVarOrValStmt(MethodTableElement* method, StmtNode* stmt);
+    void attributeIfStmt(MethodTableElement* method, StmtNode* stmt);
+    void attributeCycle(MethodTableElement* method, StmtNode* stmt);
+    void attributeFor(MethodTableElement* method, StmtNode* stmt);
+    void attributeReturn(MethodTableElement* method, StmtNode* stmt);
 
     // Сгенерировать таблицу методанных
     void initStdClasses();
