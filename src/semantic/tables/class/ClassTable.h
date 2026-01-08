@@ -40,6 +40,7 @@ public:
 
     void attributeIdentifierExpr(LocalVariableTable *table, ExprNode* expr);
     void attributeAssignmentExpr(LocalVariableTable *table, ExprNode* expr);
+    void attributeArrayCreatingExpr(LocalVariableTable *table, ExprNode* expr);
 
     // Сгенерировать таблицу методанных
     void initStdClasses();

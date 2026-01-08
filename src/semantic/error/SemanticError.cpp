@@ -137,3 +137,10 @@ SemanticError SemanticError::invalidArrayAssignment(const std::string &name) {
         "Invalid assignment to array '" + name + "'"
     );
 }
+
+SemanticError SemanticError::undefinedArrayElementType() {
+    return SemanticError(
+        UNDEFINED_ARRAY_ELEMENTS_TYPE,
+        "Undefined types in array creation"
+    );
+}

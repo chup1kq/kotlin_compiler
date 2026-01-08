@@ -33,6 +33,7 @@ public:
     static SemanticError valReassignment(const std::string &name);
     static SemanticError assignmentTypeMismatch(const std::string &leftName, const std::string &rightName);
     static SemanticError invalidArrayAssignment(const std::string &name);
+    static SemanticError undefinedArrayElementType();
 };
 
 #endif //KOTLIN_COMPILER_SEMANTIC_ERROR_H

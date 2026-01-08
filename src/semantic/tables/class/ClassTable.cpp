@@ -238,6 +238,10 @@ void ClassTable::attributeExpression(MethodTableElement *method, ExprNode *expr,
             attributeAssignmentExpr(method->localVarTable, expr);
             return;
         }
+        case _ARRAY_EXPR : {
+            attributeArrayCreatingExpr(method->localVarTable, expr);
+            return;
+        }
 
 
 
@@ -262,7 +266,8 @@ void ClassTable::attributeAssignmentExpr(LocalVariableTable *table, ExprNode* ex
     ExprNode* left = expr->left;
     ExprNode* right = expr->right;
 
-    if (!left || !right) return; // защита от nullptr
+    if (!left || !right)
+        return;
 
     // --- CASE: присваивание массиву ---
     if (left->type == _ARRAY_ACCESS) {
@@ -271,8 +276,8 @@ void ClassTable::attributeAssignmentExpr(LocalVariableTable *table, ExprNode* ex
             throw SemanticError::invalidArrayAssignment(left->identifierName);
         }
 
-        // Проверяем, что тип справа совместим с элементом массива
-        if (!right->semanticType->isReplaceable(*left->semanticType->elementType)) {
+        // Просто проверяем, что right можно присвоить elementType массива
+        if (!left->semanticType->elementType->isReplaceable(*right->semanticType)) {
             throw SemanticError::assignmentTypeMismatch(
                 left->semanticType->elementType->className,
                 right->semanticType->className
@@ -318,6 +323,29 @@ void ClassTable::attributeAssignmentExpr(LocalVariableTable *table, ExprNode* ex
     // --- CASE: недопустимый l-value ---
     throw SemanticError::unallowedAssignment();
 }
+
+void ClassTable::attributeArrayCreatingExpr(LocalVariableTable* table, ExprNode* expr) {
+    // expr->typeElements содержит TypeNode для типа элементов массива
+    if (!expr->typeElements) {
+        throw SemanticError::undefinedArrayElementType();
+    }
+
+    SemanticType* elementType = new SemanticType(expr->typeElements);
+
+    // Если есть элементы (arrayOf(expr_list)), нужно проверить их типы
+    if (expr->elements) {
+        for (auto& elem : *expr->elements->exprs) {
+            attributeExpression(nullptr, elem, false); // рекурсивно атрибутируем элементы
+            if (!elementType->isReplaceable(*elem->semanticType)) {
+                throw SemanticError::assignmentTypeMismatch(elementType->className, elem->semanticType->className);
+            }
+        }
+    }
+
+    // Устанавливаем тип массива
+    expr->semanticType = SemanticType::arrayType(elementType);
+}
+
 
 void ClassTable::initStdClasses() {
     ClassTable *classTable = new ClassTable();
