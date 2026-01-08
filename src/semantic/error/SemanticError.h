@@ -36,6 +36,7 @@ public:
     static SemanticError multivarForLoop(const std::string &name);
     static SemanticError forLoopNotArray(const std::string &name);
     static SemanticError undefinedArrayElementType();
+    static SemanticError conditionNotBoolean(const std::string &name);
 };
 
 #endif //KOTLIN_COMPILER_SEMANTIC_ERROR_H

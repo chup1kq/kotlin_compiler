@@ -46,7 +46,7 @@ public:
     void initStdClasses();
 
 private:
-    bool isUnitMethod(const std::string& signature);
+    bool isNeededType(const std::string& signature, const std::string& type);
 };
 
 #endif //KOTLIN_COMPILER_CLASSTABLE_H

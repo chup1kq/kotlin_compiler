@@ -166,7 +166,29 @@ void ClassTable::attributeIfStmt(MethodTableElement *method, StmtNode *stmt) {
 }
 
 void ClassTable::attributeCycle(MethodTableElement *method, StmtNode *stmt) {
-    // TODO дописать
+    if (stmt->cond == nullptr) {
+        throw SemanticError::returnTypeMismatch(
+            method->strName + method->strDesc
+        );
+    }
+
+    attributeExpression(method, stmt->cond);
+
+    if (stmt->cond->semanticType == nullptr) {
+        throw SemanticError::returnTypeMismatch(
+            method->strName + method->strDesc
+        );
+    }
+
+    if (!isNeededType("LJavaRTL/Boolean", stmt->cond->semanticType->className)) {
+        throw SemanticError::conditionNotBoolean(method->strName + method->strDesc);
+    }
+
+    if (stmt->blockStmts != nullptr) {
+        for (auto* stmt : *stmt->blockStmts->stmts) {
+            attributeAndFillLocalsInStatement(method, stmt);
+        }
+    }
 }
 
 /* TODO переделать на forIteratorList */
@@ -223,7 +245,7 @@ void ClassTable::attributeReturn(MethodTableElement *method, StmtNode *stmt) {
 
     // return;
     if (stmt->expr == nullptr) {
-        if (!isUnitMethod(retType->className)) {
+        if (!isNeededType("LUnit", retType->className)) {
             throw SemanticError::missingReturnValue(method->strName + method->strDesc);
         }
         return;
@@ -232,7 +254,7 @@ void ClassTable::attributeReturn(MethodTableElement *method, StmtNode *stmt) {
     attributeExpression(method, stmt->expr);
 
     // return expr;
-    if (isUnitMethod(retType->className)) {
+    if (isNeededType("LUnit", retType->className)) {
         throw SemanticError::returnFromVoid(method->strName + method->strDesc);
     }
 
@@ -533,8 +555,8 @@ void ClassTable::initStdClasses() {
      this->items = classTable->items;
 }
 
-bool ClassTable::isUnitMethod(const std::string& signature) {
-    size_t pos = signature.rfind(')');
+bool ClassTable::isNeededType(const std::string& signature, const std::string& type) {
+    size_t pos = type.rfind(')');
     if (pos == std::string::npos) return false;
-    return signature.substr(pos + 1) == "LUnit;";
+    return type.substr(pos + 1) == signature;
 }

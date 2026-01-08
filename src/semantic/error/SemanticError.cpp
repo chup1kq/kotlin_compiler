@@ -158,3 +158,10 @@ SemanticError SemanticError::undefinedArrayElementType() {
         "Undefined types in array creation"
     );
 }
+
+SemanticError SemanticError::conditionNotBoolean(const std::string &name) {
+    return SemanticError(
+        CONDITION_NOT_BOOLEAN,
+        "Condition nust be boolean '" + name + "'"
+    );
+}
