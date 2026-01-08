@@ -26,6 +26,12 @@ public:
 
     void addClassesToClassTable(ClassTableElement *baseClass, std::list<ClassNode*> classList);
 
+    void attributeAndFillLocalsInBaseClass(const std::string& topLevelClassName);
+    void attributeAndFillLocals(MethodTableElement* method);
+    void attributeAndFillLocalsInStatement(MethodTableElement* method, StmtNode* stmt);
+    void attributeExpression(MethodTableElement* method, ExprNode* expr);
+    void attributeVarOrValStmt(MethodTableElement* method, StmtNode* stmt);
+
     // Сгенерировать таблицу методанных
     void initStdClasses();
 };

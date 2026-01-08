@@ -31,7 +31,7 @@ void ClassTable::buildClassTable(KotlinFileNode* root, const std::string& fileNa
         addClassesToClassTable(items[topLevelClassName], *root->topLevelList->classList);
 
     // Проверяем и заполняем локальные переменные в top level функциях
-
+    attributeAndFillLocalsInBaseClass(topLevelClassName);
 
 
     // TODO дописать
@@ -120,6 +120,44 @@ void ClassTable::addClassesToClassTable(ClassTableElement *baseClass, std::list<
         newClass->addMethodsToTable(*classNode->body->methods);
     }
 }
+
+void ClassTable::attributeAndFillLocalsInBaseClass(const std::string& topLevelClassName) {
+    ClassTableElement* baseClass = items.at(topLevelClassName);
+
+    for (auto& [methodName, overloads] : baseClass->methods->methods) {
+        for (auto& [descriptor, method] : overloads) {
+            // method имеет тип MethodTableElement*
+            attributeAndFillLocals(method);
+        }
+    }
+}
+
+void ClassTable::attributeAndFillLocals(MethodTableElement *method) {
+    for (auto* stmt : *method->start->stmts) {
+        attributeAndFillLocalsInStatement(method, stmt);
+    }
+}
+
+void ClassTable::attributeAndFillLocalsInStatement(MethodTableElement *method, StmtNode *stmt) {
+    switch (stmt->type) {
+        case (_EXPRESSION):
+            attributeExpression(method, stmt->expr);
+        case (_VAL):
+        case (_VAR):
+            attributeVarOrValStmt(method, stmt);
+        // TODO дописать switch-case
+
+    }
+}
+
+void ClassTable::attributeExpression(MethodTableElement *method, ExprNode *expr) {
+    // TODO дописать
+}
+
+void ClassTable::attributeVarOrValStmt(MethodTableElement *method, StmtNode *stmt) {
+    // TODO дописать
+}
+
 
 void ClassTable::initStdClasses() {
     ClassTable *classTable = new ClassTable();
