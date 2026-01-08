@@ -38,6 +38,9 @@ public:
     void attributeFor(MethodTableElement* method, StmtNode* stmt);
     void attributeReturn(MethodTableElement* method, StmtNode* stmt);
 
+    void attributeIdentifierExpr(LocalVariableTable *table, ExprNode* expr);
+    void attributeAssignmentExpr(LocalVariableTable *table, ExprNode* expr);
+
     // Сгенерировать таблицу методанных
     void initStdClasses();
 };

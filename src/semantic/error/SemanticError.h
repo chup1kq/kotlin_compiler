@@ -30,6 +30,9 @@ public:
     static SemanticError unallowedAssignment();
     static SemanticError undefinedVariable(const std::string &name);
     static SemanticError uninitializedVariable(const std::string &name);
+    static SemanticError valReassignment(const std::string &name);
+    static SemanticError assignmentTypeMismatch(const std::string &leftName, const std::string &rightName);
+    static SemanticError invalidArrayAssignment(const std::string &name);
 };
 
 #endif //KOTLIN_COMPILER_SEMANTIC_ERROR_H

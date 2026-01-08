@@ -90,7 +90,7 @@ SemanticError SemanticError::returnFromVoid(const std::string &name) {
     );
 }
 
- SemanticError SemanticError::returnTypeMismatch(const std::string &name) {
+SemanticError SemanticError::returnTypeMismatch(const std::string &name) {
     return SemanticError(
         RETURN_TYPE_MISMATCH,
         "Return type mismatch in function " + name
@@ -114,5 +114,26 @@ SemanticError SemanticError::uninitializedVariable(const std::string &name) {
     return SemanticError(
         UNINITIALIZED_VARIABLE,
         "Local variable '" + name + "' was not initialized"
+    );
+}
+
+SemanticError SemanticError::valReassignment(const std::string &name) {
+    return SemanticError(
+        VAL_REASSIGNMENT,
+        "Local variable '" + name + "' was not initialized"
+    );
+}
+
+SemanticError SemanticError::assignmentTypeMismatch(const std::string &leftName, const std::string &rightName) {
+    return SemanticError(
+        ASSIGNMENT_TYPES_MISMATCH,
+        "Invalid assignments types. '" + leftName + "' = '" + rightName + "'"
+    );
+}
+
+SemanticError SemanticError::invalidArrayAssignment(const std::string &name) {
+    return SemanticError(
+        INVALID_ARRAY_ASSIGNMENT,
+        "Invalid assignment to array '" + name + "'"
     );
 }

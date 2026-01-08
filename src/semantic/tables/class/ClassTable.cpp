@@ -157,59 +157,6 @@ void ClassTable::attributeAndFillLocalsInStatement(MethodTableElement *method, S
     }
 }
 
-void ClassTable::attributeExpression(MethodTableElement *method, ExprNode *expr, bool isStatementContext) {
-    if (!expr)
-        return;
-
-    // Присваивание может быть только в начале expr, дальше нет
-    if (expr->type == _ASSIGNMENT && !isStatementContext)
-        throw SemanticError::unallowedAssignment();
-
-    // Семантический тип уже был определен
-    if (expr->semanticType)
-        return;
-
-    SemanticType* leftType = nullptr;
-    SemanticType* rightType = nullptr;
-
-    // Рекурсивный обход
-    if (expr->left) {
-        attributeExpression(method, expr->left, false);
-        leftType = expr->left->semanticType;
-    }
-
-    if (expr->right) {
-        attributeExpression(method, expr->right, false);
-        rightType = expr->right->semanticType;
-    }
-
-
-    auto& table = method->localVarTable->items;
-    switch (expr->type) {
-        case _BRACKETS:
-            expr->semanticType = leftType;
-            return;
-        case _IDENTIFIER: {
-            if (!table.contains(expr->identifierName)) {
-                throw SemanticError::undefinedVariable(expr->identifierName);
-            }
-
-            LocalVariableTableElement* var = table[expr->identifierName];
-
-            if (!var->isInitialized) {
-                throw SemanticError::uninitializedVariable(expr->identifierName);
-            }
-
-            expr->semanticType = var->type;
-            return;
-        }
-        case _ASSIGNMENT:
-            // assignment logic
-            return;
-
-    }
-}
-
 void ClassTable::attributeVarOrValStmt(MethodTableElement *method, StmtNode *stmt) {
     // TODO дописать
 }
@@ -253,6 +200,124 @@ void ClassTable::attributeReturn(MethodTableElement *method, StmtNode *stmt) {
     }
 }
 
+void ClassTable::attributeExpression(MethodTableElement *method, ExprNode *expr, bool isStatementContext) {
+    if (!expr)
+        return;
+
+    // Присваивание может быть только в начале expr, дальше нет
+    if (expr->type == _ASSIGNMENT && !isStatementContext)
+        throw SemanticError::unallowedAssignment();
+
+    // Семантический тип уже был определен
+    if (expr->semanticType)
+        return;
+
+    SemanticType* leftType = nullptr;
+    SemanticType* rightType = nullptr;
+
+    // Рекурсивный обход
+    if (expr->left) {
+        attributeExpression(method, expr->left, false);
+        leftType = expr->left->semanticType;
+    }
+
+    if (expr->right) {
+        attributeExpression(method, expr->right, false);
+        rightType = expr->right->semanticType;
+    }
+
+    switch (expr->type) {
+        case _BRACKETS:
+            expr->semanticType = leftType;
+            return;
+        case _IDENTIFIER: {
+            attributeIdentifierExpr(method->localVarTable, expr);
+            return;
+        }
+        case _ASSIGNMENT: {
+            attributeAssignmentExpr(method->localVarTable, expr);
+            return;
+        }
+
+
+
+    }
+}
+
+void ClassTable::attributeIdentifierExpr(LocalVariableTable *table, ExprNode* expr) {
+    if (!table->items.contains(expr->identifierName)) {
+        throw SemanticError::undefinedVariable(expr->identifierName);
+    }
+
+    LocalVariableTableElement* var = table->items[expr->identifierName];
+
+    if (!var->isInitialized) {
+        throw SemanticError::uninitializedVariable(expr->identifierName);
+    }
+
+    expr->semanticType = var->type;
+}
+
+void ClassTable::attributeAssignmentExpr(LocalVariableTable *table, ExprNode* expr) {
+    ExprNode* left = expr->left;
+    ExprNode* right = expr->right;
+
+    if (!left || !right) return; // защита от nullptr
+
+    // --- CASE: присваивание массиву ---
+    if (left->type == _ARRAY_ACCESS) {
+        // Проверяем, что тип слева массив
+        if (!left->semanticType->isArray()) {
+            throw SemanticError::invalidArrayAssignment(left->identifierName);
+        }
+
+        // Проверяем, что тип справа совместим с элементом массива
+        if (!right->semanticType->isReplaceable(*left->semanticType->elementType)) {
+            throw SemanticError::assignmentTypeMismatch(
+                left->semanticType->elementType->className,
+                right->semanticType->className
+            );
+        }
+
+        // Присваивание массива возвращает Unit
+        expr->semanticType = SemanticType::classType("Unit");
+        return;
+    }
+
+    // --- CASE: присваивание идентификатору ---
+    if (left->type == _IDENTIFIER) {
+        auto& vars = table->items;
+
+        if (!vars.contains(left->identifierName)) {
+            throw SemanticError::undefinedVariable(left->identifierName);
+        }
+
+        LocalVariableTableElement* var = vars[left->identifierName];
+
+        // val нельзя переинициализировать
+        if (var->isConst && var->isInitialized) {
+            throw SemanticError::valReassignment(left->identifierName);
+        }
+
+        // Теперь переменная считается инициализированной
+        var->isInitialized = true;
+
+        // Проверка типов
+        if (!left->semanticType->isReplaceable(*right->semanticType)) {
+            throw SemanticError::assignmentTypeMismatch(
+                left->semanticType->className,
+                right->semanticType->className
+            );
+        }
+
+        // Тип результата — Unit
+        expr->semanticType = SemanticType::classType("Unit");
+        return;
+    }
+
+    // --- CASE: недопустимый l-value ---
+    throw SemanticError::unallowedAssignment();
+}
 
 void ClassTable::initStdClasses() {
     ClassTable *classTable = new ClassTable();
