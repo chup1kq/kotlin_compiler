@@ -37,6 +37,9 @@ public:
     static SemanticError forLoopNotArray(const std::string &name);
     static SemanticError undefinedArrayElementType();
     static SemanticError conditionNotBoolean(const std::string &name);
+    static SemanticError classNotFound(const std::string &className, const std::string &methodName);
+    static SemanticError methodNotFound(const std::string &className, const std::string &methodName);
+    static SemanticError methodCandidateNotFound(const std::string &className, const std::string &methodName, const std::string &paramDesc);
 };
 
 #endif //KOTLIN_COMPILER_SEMANTIC_ERROR_H

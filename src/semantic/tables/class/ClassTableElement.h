@@ -35,6 +35,7 @@ public:
     static std::string createMethodDescriptor(vector<FuncParam*> params, SemanticType* returnType);
     static std::string createVoidMethodDescriptor(vector<FuncParam*> params);
     static std::string addParamsToMethodDescriptor(vector<FuncParam*> params);
+    static std::string addParamsToMethodDescriptor(vector<SemanticType*> params);
 };
 
 #endif //KOTLIN_COMPILER_CLASSTABLEELEMENT_H

@@ -150,3 +150,21 @@ std::string ClassTableElement::addParamsToMethodDescriptor(vector<FuncParam *> p
 
     return desc;
 }
+
+std::string ClassTableElement::addParamsToMethodDescriptor(vector<SemanticType *> params) {
+    std::string desc = "(";
+
+    for (SemanticType* t : params) {
+        if (!t->isArray())
+            desc += "L";
+        else
+            desc += "[L";
+
+        desc += t->className;
+        desc += ";";
+    }
+    desc += ")";
+
+    return desc;
+}
+

@@ -42,8 +42,8 @@ int main() {
 
     createDotTree(root, "after_transform.txt");
 
-    ClassTable *classTable = new ClassTable();
-    classTable->buildClassTable(root, "BaseClass");
+    ClassTable *classTable = new ClassTable("BaseClass");
+    classTable->buildClassTable(root);
 
     classTableToCSV(classTable, "tables");
 

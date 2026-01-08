@@ -7,17 +7,18 @@
 
 class FuncParam;
 
-ClassTable::ClassTable() {
+ClassTable::ClassTable(const std::string& fileName) {
     this->items = std::map<std::string, ClassTableElement*>();
+    this->baseClassName = makeTopLevelClassName(fileName);
 }
 
 
-void ClassTable::buildClassTable(KotlinFileNode* root, const std::string& fileName) {
+void ClassTable::buildClassTable(KotlinFileNode* root) {
     // Описываем все базовые классы
     initStdClasses();
 
     // Создаем имя класса для top-level функций
-    std::string topLevelClassName = makeTopLevelClassName(fileName);
+    std::string topLevelClassName = makeTopLevelClassName(this->baseClassName);
 
     // Создаем базовый класс
     addBaseClass(topLevelClassName);
@@ -301,10 +302,17 @@ void ClassTable::attributeExpression(MethodTableElement *method, ExprNode *expr,
             attributeAssignmentExpr(method->localVarTable, expr);
             return;
         }
-        case _ARRAY_EXPR : {
+        case _ARRAY_EXPR: {
             attributeArrayCreatingExpr(method->localVarTable, expr);
             return;
         }
+        case _FUNC_CALL:
+        case _FUNC_ACCESS: {
+            attributeFuncOrMethodCall(method, expr);
+            return;
+        }
+
+        // TODO посмотреть, может что-то еще нужно проатрибутировать
 
 
 
@@ -409,9 +417,46 @@ void ClassTable::attributeArrayCreatingExpr(LocalVariableTable* table, ExprNode*
     expr->semanticType = SemanticType::arrayType(elementType);
 }
 
+void ClassTable::attributeFuncOrMethodCall(MethodTableElement* currentMethod, ExprNode* expr) {
+    std::vector<SemanticType*> paramTypes;
+
+    if (expr->elements) {
+        for (ExprNode* param : *expr->elements->exprs) {
+            attributeExpression(currentMethod, param, false);
+            paramTypes.push_back(param->semanticType);
+        }
+    }
+
+    // Формируем descriptor
+    std::string paramDesc = ClassTableElement::addParamsToMethodDescriptor(paramTypes);
+
+    std::string relatedClassName;
+    if (expr->type == _FUNC_CALL) {
+        relatedClassName = this->baseClassName;
+    }
+    else if (expr->type == _FUNC_ACCESS) {
+        relatedClassName = expr->left->semanticType->className;
+    }
+
+    const std::string& methodName = expr->identifierName;
+    if (!this->items.contains(baseClassName))
+        throw SemanticError::classNotFound(baseClassName, methodName);
+
+    auto& methods = this->items[relatedClassName]->methods->methods;
+
+    if (!methods.contains(methodName))
+        throw SemanticError::methodNotFound(relatedClassName, methodName);
+
+    // TODO Вот тут могут найтись кандидаты из-за параметров по умолчанию
+    if (!methods[methodName].contains(paramDesc))
+        throw SemanticError::methodCandidateNotFound(relatedClassName, methodName, paramDesc);
+
+    expr->semanticType = methods[methodName].find(paramDesc)->second->retType;
+}
+
 
 void ClassTable::initStdClasses() {
-    ClassTable *classTable = new ClassTable();
+    ClassTable *classTable = new ClassTable(this->baseClassName);
 
     auto addClass = [&](const std::string& name, bool isOpen = false) {
         classTable->items[name] = new ClassTableElement();
@@ -552,7 +597,7 @@ void ClassTable::initStdClasses() {
     // readLine
     addMethod("JavaRTL/InputOutput", "readLine", SemanticType::classType("JavaRTL/String"), "()", "()LJavaRTL/String;");
 
-     this->items = classTable->items;
+    this->items = classTable->items;
 }
 
 bool ClassTable::isNeededType(const std::string& signature, const std::string& type) {

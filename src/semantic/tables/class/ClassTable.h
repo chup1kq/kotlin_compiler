@@ -12,10 +12,11 @@
 class ClassTable {
 public:
     std::map<std::string, ClassTableElement*> items;
+    std::string baseClassName;
 
-    void buildClassTable(KotlinFileNode* root, const std::string& fileName);
+    void buildClassTable(KotlinFileNode* root);
 
-    ClassTable();
+    ClassTable(const std::string& fileName);
 
     // ------------------- Helpers -----------------
 
@@ -41,6 +42,8 @@ public:
     void attributeIdentifierExpr(LocalVariableTable *table, ExprNode* expr);
     void attributeAssignmentExpr(LocalVariableTable *table, ExprNode* expr);
     void attributeArrayCreatingExpr(LocalVariableTable *table, ExprNode* expr);
+    void attributeFuncOrMethodCall(MethodTableElement* currentMethod, ExprNode* expr);
+
 
     // Сгенерировать таблицу методанных
     void initStdClasses();

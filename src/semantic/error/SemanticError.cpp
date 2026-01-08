@@ -165,3 +165,24 @@ SemanticError SemanticError::conditionNotBoolean(const std::string &name) {
         "Condition nust be boolean '" + name + "'"
     );
 }
+
+SemanticError SemanticError::classNotFound(const std::string &className, const std::string &methodName) {
+    return SemanticError(
+        CLASS_NOT_FOUND,
+        "Class '" + className + "' not found for method '" + methodName + "'"
+    );
+}
+
+SemanticError SemanticError::methodNotFound(const std::string &className, const std::string &methodName) {
+    return SemanticError(
+        METHOD_NOT_FOUND,
+        "Method '" + methodName + "' not found for class '" + className + "'"
+    );
+}
+
+SemanticError SemanticError::methodCandidateNotFound(const std::string &className, const std::string &methodName, const std::string &paramsDesc) {
+    return SemanticError(
+        METHOD_CANDIDATE_NOT_FOUND,
+        "Not found candidate for desc '" + paramsDesc + "' for method '" + methodName + "' in class '" + className + "'"
+    );
+}

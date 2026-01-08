@@ -34,6 +34,9 @@ enum SemanticErrorCode {
     NULL_POINTER_ACCESS = 1027,             // обращение к null
     INVALID_OPERATOR = 1028,                // оператор применён к несовместимым типам
     UNDEFINED_ARRAY_ELEMENTS_TYPE = 1029,
+    CLASS_NOT_FOUND = 1030,
+    METHOD_NOT_FOUND = 1031,
+    METHOD_CANDIDATE_NOT_FOUND = 1032,
 };
 
 
