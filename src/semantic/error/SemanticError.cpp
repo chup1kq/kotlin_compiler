@@ -76,6 +76,26 @@ SemanticError SemanticError::constructorAlreadyExists(const std::string &name) {
     );
 }
 
+SemanticError SemanticError::missingReturnValue(const std::string &name) {
+    return SemanticError(
+        MISSING_RETURN_VALUE,
+        "Missing return value in function " + name
+    );
+}
+
+SemanticError SemanticError::returnFromVoid(const std::string &name) {
+    return SemanticError(
+            RETURN_FROM_VOID,
+            "Void function cannot return a value: " + name
+    );
+}
+
+ SemanticError SemanticError::returnTypeMismatch(const std::string &name) {
+    return SemanticError(
+        RETURN_TYPE_MISMATCH,
+        "Return type mismatch in function " + name
+    );
+}
 SemanticError SemanticError::unallowedAssignment() {
     return SemanticError(
         UNALLOWED_ASSIGNMENT_CONTEXT,

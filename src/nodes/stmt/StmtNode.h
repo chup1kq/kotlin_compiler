@@ -6,6 +6,7 @@
 #include "../Node.h"
 #include "StmtListNode.h"
 #include "../types.h"
+#include "../../semantic/tables/type/SemanticType.h"
 #include "../varDeclaration/VarDeclaration.h"
 
 
@@ -22,6 +23,8 @@ public:
     VarDeclarationList *forIteratorList;
     ModifierMap* varModifiers;
     StmtListNode *trueStmtList, *falseStmtList;
+
+    SemanticType* semanticType;
 
     StmtNode();
 

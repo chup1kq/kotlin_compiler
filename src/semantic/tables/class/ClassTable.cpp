@@ -227,7 +227,30 @@ void ClassTable::attributeFor(MethodTableElement *method, StmtNode *stmt) {
 }
 
 void ClassTable::attributeReturn(MethodTableElement *method, StmtNode *stmt) {
-    // TODO дописать
+    SemanticType* retType = method->retType;
+
+    if (retType == nullptr) {
+        throw SemanticError::returnTypeMismatch(method->strName + method->strDesc);
+    }
+
+    // return;
+    if (stmt->expr == nullptr) {
+        if (retType->className != "Unit") {
+            throw SemanticError::missingReturnValue(method->strName + method->strDesc);
+        }
+        return;
+    }
+
+    attributeExpression(method, stmt->expr);
+
+    // return expr;
+    if (retType->className == "Unit") {
+        throw SemanticError::returnFromVoid(method->strName + method->strDesc);
+    }
+
+    if (!retType->isReplaceable(*stmt->expr->semanticType)) {
+        throw SemanticError::returnTypeMismatch(method->strName + method->strDesc);
+    }
 }
 
 

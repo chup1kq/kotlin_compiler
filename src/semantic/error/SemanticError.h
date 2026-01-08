@@ -24,6 +24,9 @@ public:
     static SemanticError classAlreadyExists(const std::string &name);
     static SemanticError topLevelMethodAlreadyExists(const std::string &name);
     static SemanticError constructorAlreadyExists(const std::string &name);
+    static SemanticError missingReturnValue(const std::string &name);
+    static SemanticError returnFromVoid(const std::string &name);
+    static SemanticError returnTypeMismatch(const std::string &name);
     static SemanticError unallowedAssignment();
     static SemanticError undefinedVariable(const std::string &name);
     static SemanticError uninitializedVariable(const std::string &name);
