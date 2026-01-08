@@ -3,6 +3,7 @@
 #include "../Node.h"
 #include "../types.h"
 #include "ExprListNode.h"
+#include "../../semantic/tables/type/SemanticType.h"
 #include "../type/TypeNode.h"
 
 
@@ -25,6 +26,8 @@ public:
     TypeNode* typeElements;
 
     BaseLiteral fromLiteral;
+
+    SemanticType* semanticType;
 
     ExprNode();
     ExprNode* clone() const;

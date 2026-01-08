@@ -12,7 +12,8 @@ ExprNode::ExprNode()
       charValue('\0'),
       params(nullptr),
       elements(nullptr),
-      typeElements(nullptr)
+      typeElements(nullptr),
+      semanticType(nullptr)
 {}
 
 ExprNode* ExprNode::clone() const {
@@ -30,6 +31,8 @@ ExprNode* ExprNode::clone() const {
     copy->left = this->left ? this->left->clone() : nullptr;
     copy->right = this->right ? this->right->clone() : nullptr;
     copy->fromLiteral = this->fromLiteral;
+    // TODO тут не простое присваивание
+    copy->semanticType = this->semanticType;
 
     copy->params = nullptr;
     if (this->params && this->params->exprs) {

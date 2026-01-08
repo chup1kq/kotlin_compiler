@@ -141,7 +141,7 @@ void ClassTable::attributeAndFillLocals(MethodTableElement *method) {
 void ClassTable::attributeAndFillLocalsInStatement(MethodTableElement *method, StmtNode *stmt) {
     switch (stmt->type) {
         case (_EXPRESSION):
-            attributeExpression(method, stmt->expr);
+            attributeExpression(method, stmt->expr, true);
         case (_VAL):
         case (_VAR):
             attributeVarOrValStmt(method, stmt);
@@ -157,8 +157,57 @@ void ClassTable::attributeAndFillLocalsInStatement(MethodTableElement *method, S
     }
 }
 
-void ClassTable::attributeExpression(MethodTableElement *method, ExprNode *expr) {
-    // TODO дописать
+void ClassTable::attributeExpression(MethodTableElement *method, ExprNode *expr, bool isStatementContext) {
+    if (!expr)
+        return;
+
+    // Присваивание может быть только в начале expr, дальше нет
+    if (expr->type == _ASSIGNMENT && !isStatementContext)
+        throw SemanticError::unallowedAssignment();
+
+    // Семантический тип уже был определен
+    if (expr->semanticType)
+        return;
+
+    SemanticType* leftType = nullptr;
+    SemanticType* rightType = nullptr;
+
+    // Рекурсивный обход
+    if (expr->left) {
+        attributeExpression(method, expr->left, false);
+        leftType = expr->left->semanticType;
+    }
+
+    if (expr->right) {
+        attributeExpression(method, expr->right, false);
+        rightType = expr->right->semanticType;
+    }
+
+
+    auto& table = method->localVarTable->items;
+    switch (expr->type) {
+        case _BRACKETS:
+            expr->semanticType = leftType;
+            return;
+        case _IDENTIFIER: {
+            if (!table.contains(expr->identifierName)) {
+                throw SemanticError::undefinedVariable(expr->identifierName);
+            }
+
+            LocalVariableTableElement* var = table[expr->identifierName];
+
+            if (!var->isInitialized) {
+                throw SemanticError::uninitializedVariable(expr->identifierName);
+            }
+
+            expr->semanticType = var->type;
+            return;
+        }
+        case _ASSIGNMENT:
+            // assignment logic
+            return;
+
+    }
 }
 
 void ClassTable::attributeVarOrValStmt(MethodTableElement *method, StmtNode *stmt) {

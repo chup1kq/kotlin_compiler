@@ -75,3 +75,24 @@ SemanticError SemanticError::constructorAlreadyExists(const std::string &name) {
         "Constructor '" + name + "' with this params already exists"
     );
 }
+
+SemanticError SemanticError::unallowedAssignment() {
+    return SemanticError(
+        UNALLOWED_ASSIGNMENT_CONTEXT,
+        "Assigments are not allowed in this context. Allowed only on top of expression "
+    );
+}
+
+SemanticError SemanticError::undefinedVariable(const std::string &name) {
+    return SemanticError(
+        UNDEFINED_VARIABLE,
+        "Local variable '" + name + "' is undefined in this scope"
+    );
+}
+
+SemanticError SemanticError::uninitializedVariable(const std::string &name) {
+    return SemanticError(
+        UNINITIALIZED_VARIABLE,
+        "Local variable '" + name + "' was not initialized"
+    );
+}

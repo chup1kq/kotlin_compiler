@@ -30,7 +30,8 @@ public:
     void attributeAndFillLocals(MethodTableElement* method);
     void attributeAndFillLocalsInStatement(MethodTableElement* method, StmtNode* stmt);
 
-    void attributeExpression(MethodTableElement* method, ExprNode* expr);
+    void attributeExpression(MethodTableElement* method, ExprNode* expr, bool isStatementContext = false);
+
     void attributeVarOrValStmt(MethodTableElement* method, StmtNode* stmt);
     void attributeIfStmt(MethodTableElement* method, StmtNode* stmt);
     void attributeCycle(MethodTableElement* method, StmtNode* stmt);
