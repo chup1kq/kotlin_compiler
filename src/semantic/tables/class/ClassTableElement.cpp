@@ -134,6 +134,22 @@ std::string ClassTableElement::createMethodDescriptor(vector<FuncParam*> params,
     return desc;
 }
 
+std::string ClassTableElement::createMethodDescriptor(vector<SemanticType*> params, SemanticType* returnType) {
+    std::string desc = addParamsToMethodDescriptor(params);
+
+    if (!returnType->isArray())
+        desc += "L";
+    else
+        desc += "[L";
+
+    desc += returnType->className;
+    desc += ";";
+
+    // TODO удалить cout
+    std::cout << desc << std::endl;
+    return desc;
+}
+
 std::string ClassTableElement::addParamsToMethodDescriptor(vector<FuncParam *> params) {
     std::string desc = "(";
 

@@ -124,18 +124,12 @@ void ClassTable::addClassesToClassTable(ClassTableElement *baseClass, std::list<
 
 void ClassTable::attributeAndFillLocalsInClasses() {
     // По всем клаасам
-    for (auto& cls : items) {
-        // По всем методам
-        for (auto& [methodName, overloads] : cls.second->methods->methods) {
-            // По всем перегрузкам
-            int i = 0;
+    for (auto& [className, cls] : items) {
+        for (auto& [methodName, overloads] : cls->methods->methods) {
             for (auto& [descriptor, method] : overloads) {
-                std::cout << i++ << std::endl;
-                std::cout << methodName << std::endl;
-                std::cout << descriptor << std::endl;
-                if (!method || !method->start)
-                    continue;
-                attributeAndFillLocals(method);
+                std::cout << "class=" << className
+                          << " method=" << methodName
+                          << " desc=" << descriptor << std::endl;
             }
         }
     }
@@ -532,15 +526,14 @@ void ClassTable::attributeFuncOrMethodCall(MethodTableElement* currentMethod, Ex
         }
     }
 
-    // Формируем descriptor
+    // "(LJavaRTL/String;)"
     std::string paramDesc = ClassTableElement::addParamsToMethodDescriptor(paramTypes);
 
-    // Определяем класс, относительно которого ищем метод
+    // Определяем класс
     std::string relatedClassName;
     if (expr->type == _FUNC_CALL) {
         relatedClassName = this->topLevelClassName;
-    }
-    else if (expr->type == _FUNC_ACCESS) {
+    } else if (expr->type == _FUNC_ACCESS) {
         relatedClassName = expr->left->semanticType->className;
     }
 
@@ -548,29 +541,51 @@ void ClassTable::attributeFuncOrMethodCall(MethodTableElement* currentMethod, Ex
     if (!this->items.contains(relatedClassName))
         throw SemanticError::classNotFound(relatedClassName, methodName);
 
-    auto& methods = this->items[relatedClassName]->methods->methods;
+    auto& methodsMap = this->items[relatedClassName]->methods->methods;
 
-    bool isMethodFound = false;
-    if (!methods.contains(methodName)) {
-        // Если не нашли ни в классах, ни в свободных функциях, то ищем в стандартных
-        std::cout << builtinFunctionClasses.size() << std::endl;
+    bool isMethodFoundInClass = methodsMap.contains(methodName);
+    if (!isMethodFoundInClass) {
+        // Поиск в builtin классах
+        bool foundInBuiltin = false;
         for (auto& builtinClassName : builtinFunctionClasses) {
-            relatedClassName = builtinClassName;
-            methods = this->items[relatedClassName]->methods->methods;
-            if (methods.contains(methodName)) {
-                isMethodFound = true;
+            if (!this->items.contains(builtinClassName))
+                continue;
+            auto& m = this->items[builtinClassName]->methods->methods;
+            if (m.contains(methodName)) {
+                relatedClassName = builtinClassName;
+                methodsMap = m;
+                foundInBuiltin = true;
                 break;
             }
         }
-        if (!isMethodFound)
+        if (!foundInBuiltin)
             throw SemanticError::methodNotFound(relatedClassName, methodName);
     }
 
-    // TODO Вот тут могут найтись кандидаты из-за параметров по умолчанию
-    if (!methods[methodName].contains(paramDesc))
-        throw SemanticError::methodCandidateNotFound(relatedClassName, methodName, paramDesc);
+    auto& overloads = methodsMap[methodName];
 
-    expr->semanticType = methods[methodName].find(paramDesc)->second->retType;
+    // Ищем перегрузку по prefix match полного дескриптора
+    MethodTableElement* chosen = nullptr;
+    std::string chosenDesc;
+
+    for (auto& [fullDesc, methodElem] : overloads) {
+        // fullDesc: "(LJavaRTL/String;)LJavaRTL/Unit;"
+        if (fullDesc.rfind(paramDesc, 0) == 0) { // начинается с paramDesc
+            chosen = methodElem;
+            chosenDesc = fullDesc;
+            break;
+        }
+    }
+
+    if (!chosen) {
+        std::cout << "paramDesc: " << paramDesc << std::endl;
+        for (auto& [fullDesc, _] : overloads) {
+            std::cout << "candidate: " << fullDesc << std::endl;
+        }
+        throw SemanticError::methodCandidateNotFound(relatedClassName, methodName, paramDesc);
+    }
+
+    expr->semanticType = chosen->retType;
 }
 
 
@@ -584,13 +599,31 @@ void ClassTable::initStdClasses() {
         return cls;
     };
 
-    auto addMethod = [&](const std::string& nameClass, const std::string& nameMethod,
-                     SemanticType* returnType, const std::string& desk, const std::string& strDesc) {
-    auto& methodsMap = this->items[nameClass]->methods->methods;
-    if (!methodsMap.contains(nameMethod)) {
-        methodsMap[nameMethod][strDesc] = new MethodTableElement(0,0,nameMethod,strDesc,nullptr,returnType,{});
-    }
+    auto addMethod = [&](const std::string& nameClass,
+                     const std::string& nameMethod,
+                     SemanticType* returnType,
+                     const std::string& paramsDesc,   // "(LJavaRTL/String;)"
+                     const std::string& fullDesc) {   // "(LJavaRTL/String;)LJavaRTL/Unit;"
+        auto& methodsMap = this->items[nameClass]->methods->methods;
+
+        if (!methodsMap.contains(nameMethod)) {
+            methodsMap[nameMethod] = {};
+        }
+
+        // Ключ — ПОЛНЫЙ дескриптор
+        methodsMap[nameMethod][fullDesc] =
+            new MethodTableElement(
+                0,            // methodNameNumber (если нужно — потом заполните из ConstantTable)
+                0,            // methodDescNumber
+                nameMethod,   // strName
+                fullDesc,     // strDesc = полный дескриптор
+                nullptr,      // start
+                returnType,   // retType
+                {}            // params
+            );
     };
+
+
 
     /* 1.0 Инициализация класса Int */
     addClass("JavaRTL/Int");
