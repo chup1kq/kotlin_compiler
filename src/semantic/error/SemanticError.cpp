@@ -186,3 +186,18 @@ SemanticError SemanticError::methodCandidateNotFound(const std::string &classNam
         "Not found candidate for desc '" + paramsDesc + "' for method '" + methodName + "' in class '" + className + "'"
     );
 }
+
+SemanticError SemanticError::nullSemanticTypeForLeftExpr(const ExprType &type, const std::string &name) {
+    return SemanticError(
+        NULL_SEMANTIC_TYPE_FOR_LEFT_EXPR,
+        "Left expr for expr with type " + exprTypeToString(type) + " is undefined in this scope with name '" + name + "'"
+    );
+}
+
+SemanticError SemanticError::nullSemanticType(const ExprType &type, const std::string &name) {
+    return SemanticError(
+        NULL_SEMANTIC_TYPE_FOR_LEFT_EXPR,
+        "Expr with type " + exprTypeToString(type) + " and name '" + name + "' has no SematicType"
+    );
+}
+

@@ -12,7 +12,8 @@
 class ClassTable {
 public:
     std::map<std::string, ClassTableElement*> items;
-    std::string baseClassName;
+    std::string topLevelClassName;
+    std::vector<std::string> builtinFunctionClasses;
 
     void buildClassTable(KotlinFileNode* root);
 
@@ -23,7 +24,7 @@ public:
     // Получить имя класса для top-level (свободных) функций
     static std::string makeTopLevelClassName(const std::string& fileName);
 
-    void addBaseClass(const std::string& fileName);
+    void addBaseClass();
 
     void addClassesToClassTable(ClassTableElement *baseClass, std::list<ClassNode*> classList);
 

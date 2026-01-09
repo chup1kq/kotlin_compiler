@@ -8,8 +8,8 @@
 class FuncParam;
 
 ClassTable::ClassTable(const std::string& fileName) {
-    this->items = std::map<std::string, ClassTableElement*>();
-    this->baseClassName = makeTopLevelClassName(fileName);
+    this->items.clear();
+    this->topLevelClassName = makeTopLevelClassName(fileName);
 }
 
 
@@ -17,11 +17,8 @@ void ClassTable::buildClassTable(KotlinFileNode* root) {
     // Описываем все базовые классы
     initStdClasses();
 
-    // Создаем имя класса для top-level функций
-    std::string topLevelClassName = makeTopLevelClassName(this->baseClassName);
-
     // Создаем базовый класс
-    addBaseClass(topLevelClassName);
+    addBaseClass();
 
     // Добавляем методы все top level методы в базовый класс файла
     if (root->topLevelList->functionList)
@@ -38,14 +35,14 @@ void ClassTable::buildClassTable(KotlinFileNode* root) {
     // TODO дописать
 }
 
-void ClassTable::addBaseClass(const std::string &baseClassName) {
+void ClassTable::addBaseClass() {
     // Cоздание класса для свободных функций
     ClassTableElement* topLevelFunctionsClass = new ClassTableElement();
-    topLevelFunctionsClass->clsName = baseClassName;
+    topLevelFunctionsClass->clsName = topLevelClassName;
 
     // Добавляем название и связываем его с классом
     // TODO вот это дублируется с методом addClassesToClassTable
-    int topLevelUtf8 = topLevelFunctionsClass->constants->findOrAddConstant(UTF8, baseClassName);
+    int topLevelUtf8 = topLevelFunctionsClass->constants->findOrAddConstant(UTF8, topLevelClassName);
     int cls = topLevelFunctionsClass->constants->findOrAddConstant(Class, "" ,0, 0, topLevelUtf8);
 
     topLevelFunctionsClass->name = topLevelUtf8;
@@ -59,7 +56,7 @@ void ClassTable::addBaseClass(const std::string &baseClassName) {
     topLevelFunctionsClass->superClass = parentClass;
 
     // Добавляем базовый класс в таблицу
-    items[baseClassName] = topLevelFunctionsClass;
+    items[topLevelClassName] = topLevelFunctionsClass;
 }
 
 std::string ClassTable::makeTopLevelClassName(const std::string& fileName) {
@@ -137,7 +134,8 @@ void ClassTable::attributeAndFillLocalsInClasses() {
 }
 
 void ClassTable::attributeAndFillLocals(MethodTableElement *method) {
-    if (!method || !method->start || !method->start->stmts) return;
+    if (!method || !method->start || !method->start->stmts)
+        return;
 
     for (auto* stmt : *method->start->stmts) {
         attributeAndFillLocalsInStatement(method, stmt);
@@ -434,9 +432,14 @@ void ClassTable::attributeArrayCreatingExpr(MethodTableElement* method, ExprNode
 void ClassTable::attributeFuncOrMethodCall(MethodTableElement* currentMethod, ExprNode* expr) {
     std::vector<SemanticType*> paramTypes;
 
+    // Атрибутируем аргументы
     if (expr->elements) {
         for (ExprNode* param : *expr->elements->exprs) {
             attributeExpression(currentMethod, param, false);
+
+            if (!param->semanticType)
+                throw SemanticError::nullSemanticType(param->type, param->identifierName);
+
             paramTypes.push_back(param->semanticType);
         }
     }
@@ -444,9 +447,10 @@ void ClassTable::attributeFuncOrMethodCall(MethodTableElement* currentMethod, Ex
     // Формируем descriptor
     std::string paramDesc = ClassTableElement::addParamsToMethodDescriptor(paramTypes);
 
+    // Определяем класс, относительно которого ищем метод
     std::string relatedClassName;
     if (expr->type == _FUNC_CALL) {
-        relatedClassName = this->baseClassName;
+        relatedClassName = this->topLevelClassName;
     }
     else if (expr->type == _FUNC_ACCESS) {
         relatedClassName = expr->left->semanticType->className;
@@ -458,8 +462,19 @@ void ClassTable::attributeFuncOrMethodCall(MethodTableElement* currentMethod, Ex
 
     auto& methods = this->items[relatedClassName]->methods->methods;
 
-    if (!methods.contains(methodName))
-        throw SemanticError::methodNotFound(relatedClassName, methodName);
+    bool isMethodFound = false;
+    if (!methods.contains(methodName)) {
+        // Если не нашли ни в классах, ни в свободных функциях, то ищем в стандартных
+        for (auto& builtinClassName : builtinFunctionClasses) {
+            relatedClassName = builtinClassName;
+            methods = this->items[relatedClassName]->methods->methods;
+            if (methods.contains(methodName)) {
+                isMethodFound = true;
+            }
+        }
+        if (!isMethodFound)
+            throw SemanticError::methodNotFound(relatedClassName, methodName);
+    }
 
     // TODO Вот тут могут найтись кандидаты из-за параметров по умолчанию
     if (!methods[methodName].contains(paramDesc))
@@ -470,7 +485,7 @@ void ClassTable::attributeFuncOrMethodCall(MethodTableElement* currentMethod, Ex
 
 
 void ClassTable::initStdClasses() {
-    ClassTable *classTable = new ClassTable(this->baseClassName);
+    ClassTable *classTable = new ClassTable(this->topLevelClassName);
 
     auto addClass = [&](const std::string& name, bool isOpen = false) {
         classTable->items[name] = new ClassTableElement();
@@ -591,6 +606,8 @@ void ClassTable::initStdClasses() {
 
     /* 8. I/O */
     addClass("JavaRTL/InputOutput");
+    builtinFunctionClasses.push_back("JavaRTL/InputOutput");
+    std::cout << builtinFunctionClasses.front() << endl;
 
     // print для всех типов
     addMethod("JavaRTL/InputOutput", "print", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Int;)", "(LJavaRTL/Int;)LJavaRTL/Unit;");

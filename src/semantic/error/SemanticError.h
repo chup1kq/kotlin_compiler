@@ -4,6 +4,8 @@
 #include <string>
 #include <stdexcept>
 
+#include "types.h"
+
 class SemanticError : public std::exception {
 public:
     int code;
@@ -40,6 +42,8 @@ public:
     static SemanticError classNotFound(const std::string &className, const std::string &methodName);
     static SemanticError methodNotFound(const std::string &className, const std::string &methodName);
     static SemanticError methodCandidateNotFound(const std::string &className, const std::string &methodName, const std::string &paramDesc);
+    static SemanticError nullSemanticTypeForLeftExpr(const ExprType &type, const std::string &name = "");
+    static SemanticError nullSemanticType(const ExprType &type, const std::string &name = "");
 };
 
 #endif //KOTLIN_COMPILER_SEMANTIC_ERROR_H
