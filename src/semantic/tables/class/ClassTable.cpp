@@ -484,9 +484,9 @@ void ClassTable::attributeArrayCreatingExpr(MethodTableElement* method, ExprNode
 void ClassTable::attributeFuncOrMethodCall(MethodTableElement* currentMethod, ExprNode* expr) {
     std::vector<SemanticType*> paramTypes;
 
-    // Атрибутируем аргументы
-    if (expr->elements) {
-        for (ExprNode* param : *expr->elements->exprs) {
+    // Атрибутируем параметры
+    if (expr->params) {
+        for (ExprNode* param : *expr->params->exprs) {
             attributeExpression(currentMethod, param, false);
 
             if (!param->semanticType)
@@ -659,7 +659,6 @@ void ClassTable::initStdClasses() {
     /* 8. I/O */
     addClass("JavaRTL/InputOutput");
     builtinFunctionClasses.push_back("JavaRTL/InputOutput");
-    std::cout << builtinFunctionClasses.front() << endl;
 
     // print для всех типов
     addMethod("JavaRTL/InputOutput", "print", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Int;)", "(LJavaRTL/Int;)LJavaRTL/Unit;");
