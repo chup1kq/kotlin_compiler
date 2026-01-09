@@ -9,3 +9,7 @@ int LocalVariableTable::findOrAddLocalVar(std::string name, SemanticType *type, 
 
     return items[name]->id;
 }
+
+bool LocalVariableTable::contains(std::string name) {
+    return items.find(name) != items.end();
+}

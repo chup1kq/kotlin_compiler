@@ -171,11 +171,63 @@ void ClassTable::attributeAndFillLocalsInStatement(MethodTableElement *method, S
 }
 
 void ClassTable::attributeVarOrValStmt(MethodTableElement *method, StmtNode *stmt) {
-    // TODO дописать
+    VarDeclaration* decl = stmt->varDeclaration;
+
+    const std::string& name = stmt->varDeclaration->varId;
+
+    if (method->localVarTable->contains(name)) {
+        throw SemanticError::redefinition(name);
+    }
+
+    bool isConst = (stmt->type == _VAL);
+    bool isInitialized = (stmt->expr != nullptr);
+
+    if (isInitialized) {
+        if (stmt->expr->type == _ASSIGNMENT) {
+            throw SemanticError::unallowedAssignment();
+        }
+
+        attributeExpression(method, stmt->expr);
+    }
+    /* TODO доделать */
+    // SemanticType varType(stmt->varDec);
+    //
+    // if (isInitialized) {
+    //     if (!varType.isReplaceable(*decl->expr->semanticType)) {
+    //         throw SemanticError::assignmentTypeMismatch(stmt->);
+    //     }
+    // }
+    //
+    // method->localVarTable->findOrAddLocalVar(
+    //     name,
+    //     varType,
+    //     isConst,
+    //     isInitialized
+    // );
 }
 
 void ClassTable::attributeIfStmt(MethodTableElement *method, StmtNode *stmt) {
-    // TODO дописать
+    if (stmt->cond == nullptr) {
+        throw SemanticError::returnTypeMismatch(method->strName + method->strDesc);
+    }
+
+    if (!isNeededType("LJavaRTL/Boolean", stmt->cond->semanticType->className)) {
+        throw SemanticError::conditionNotBoolean(method->strName + method->strDesc);
+    }
+
+    attributeExpression(method, stmt->cond);
+
+    if (stmt->trueStmtList != nullptr) {
+        for (auto & stmt: *stmt->trueStmtList->stmts) {
+            attributeAndFillLocalsInStatement(method, stmt);
+        }
+    }
+
+    if (stmt->falseStmtList != nullptr) {
+        for (auto & stmt: *stmt->falseStmtList->stmts) {
+            attributeAndFillLocalsInStatement(method, stmt);
+        }
+    }
 }
 
 void ClassTable::attributeCycle(MethodTableElement *method, StmtNode *stmt) {

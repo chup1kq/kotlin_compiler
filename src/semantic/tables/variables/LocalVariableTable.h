@@ -11,6 +11,7 @@ public:
     std::map<std::string, LocalVariableTableElement*> items;
 
     int findOrAddLocalVar(std::string name, SemanticType * type, int isConst, int isInitialized);
+    bool contains(std::string name);
 };
 
 #endif //KOTLIN_COMPILER_LOCALVARIABLETABLE_H
