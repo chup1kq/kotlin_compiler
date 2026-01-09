@@ -28,8 +28,11 @@ void ClassTable::buildClassTable(KotlinFileNode* root) {
     if (root->topLevelList->classList)
         addClassesToClassTable(items[topLevelClassName], *root->topLevelList->classList);
 
+    std::cout << items.size() << endl;
+
     // Проверяем и заполняем локальные переменные в top level функциях
     attributeAndFillLocalsInClasses();
+
 
 
     // TODO дописать
@@ -125,8 +128,13 @@ void ClassTable::attributeAndFillLocalsInClasses() {
         // По всем методам
         for (auto& [methodName, overloads] : cls.second->methods->methods) {
             // По всем перегрузкам
+            int i = 0;
             for (auto& [descriptor, method] : overloads) {
-                // method имеет тип MethodTableElement*
+                std::cout << i++ << std::endl;
+                std::cout << methodName << std::endl;
+                std::cout << descriptor << std::endl;
+                if (!method || !method->start)
+                    continue;
                 attributeAndFillLocals(method);
             }
         }
@@ -152,7 +160,7 @@ void ClassTable::attributeAndFillLocalsInStatement(MethodTableElement *method, S
             break;
         case (_VAL):
         case (_VAR):
-            // attributeVarOrValStmt(method, stmt);
+            attributeVarOrValStmt(method, stmt);
             break;
         case (_IF_STMT):
             attributeIfStmt(method, stmt);
@@ -330,6 +338,7 @@ void ClassTable::attributeReturn(MethodTableElement *method, StmtNode *stmt) {
 }
 
 void ClassTable::attributeExpression(MethodTableElement *method, ExprNode *expr, bool isStatementContext) {
+    std::cout << "entered ClassTable::attributeExpression" << std::endl;
     if (!expr)
         return;
 
@@ -356,27 +365,34 @@ void ClassTable::attributeExpression(MethodTableElement *method, ExprNode *expr,
     }
 
     switch (expr->type) {
-        case _INTEGER_LITERAL:
+        case _INTEGER_LITERAL: {
             expr->semanticType = SemanticType::classType("JavaRTL/Int");
             return;
-        case _FLOAT_LITERAL:
+        }
+        case _FLOAT_LITERAL: {
             expr->semanticType = SemanticType::classType("JavaRTL/Float");
             return;
-        case _DOUBLE_LITERAL:
+        }
+        case _DOUBLE_LITERAL: {
             expr->semanticType = SemanticType::classType("JavaRTL/Double");
             return;
-        case _STRING_LITERAL:
+        }
+        case _STRING_LITERAL: {
             expr->semanticType = SemanticType::classType("JavaRTL/String");
             return;
-        case _CHAR_LITERAL:
+        }
+        case _CHAR_LITERAL: {
             expr->semanticType = SemanticType::classType("JavaRTL/Char");
             return;
-        case _BOOL_LITERAL:
+        }
+        case _BOOL_LITERAL: {
             expr->semanticType = SemanticType::classType("JavaRTL/Boolean");
             return;
-        case _BRACKETS:
+        }
+        case _BRACKETS: {
             expr->semanticType = leftType;
             return;
+        }
         case _IDENTIFIER: {
             attributeIdentifierExpr(method->localVarTable, expr);
             return;
@@ -501,6 +517,7 @@ void ClassTable::attributeArrayCreatingExpr(MethodTableElement* method, ExprNode
 }
 
 void ClassTable::attributeFuncOrMethodCall(MethodTableElement* currentMethod, ExprNode* expr) {
+    std::cout << "Entered ClassTable::attributeFuncOrMethodCall" << std::endl;
     std::vector<SemanticType*> paramTypes;
 
     // Атрибутируем параметры
@@ -536,11 +553,13 @@ void ClassTable::attributeFuncOrMethodCall(MethodTableElement* currentMethod, Ex
     bool isMethodFound = false;
     if (!methods.contains(methodName)) {
         // Если не нашли ни в классах, ни в свободных функциях, то ищем в стандартных
+        std::cout << builtinFunctionClasses.size() << std::endl;
         for (auto& builtinClassName : builtinFunctionClasses) {
             relatedClassName = builtinClassName;
             methods = this->items[relatedClassName]->methods->methods;
             if (methods.contains(methodName)) {
                 isMethodFound = true;
+                break;
             }
         }
         if (!isMethodFound)
@@ -556,39 +575,26 @@ void ClassTable::attributeFuncOrMethodCall(MethodTableElement* currentMethod, Ex
 
 
 void ClassTable::initStdClasses() {
-    ClassTable *classTable = new ClassTable(this->topLevelClassName);
-
     auto addClass = [&](const std::string& name, bool isOpen = false) {
-        classTable->items[name] = new ClassTableElement();
-        classTable->items[name]->clsName = name;
-        classTable->items[name]->isOpen = isOpen ? 1 : 0;
-        return classTable->items[name];
-    };
-    auto addMethod = [&](
-        const std::string& nameClass,
-        const std::string& nameMethod,
-        SemanticType* returnType,
-        const std::string& desk,
-        const std::string& strDesc
-    ) {
-        classTable->items[nameClass]->methods->addMethod(
-            nameMethod,
-            desk,
-            new MethodTableElement(
-                0,
-                0,
-                nameMethod,
-                strDesc,
-                nullptr,
-                returnType,
-                {}
-            )
-        );
+        if (this->items.contains(name)) return this->items[name];
+        ClassTableElement* cls = new ClassTableElement();
+        cls->clsName = name;
+        cls->isOpen = isOpen;
+        this->items[name] = cls;
+        return cls;
     };
 
+    auto addMethod = [&](const std::string& nameClass, const std::string& nameMethod,
+                     SemanticType* returnType, const std::string& desk, const std::string& strDesc) {
+    auto& methodsMap = this->items[nameClass]->methods->methods;
+    if (!methodsMap.contains(nameMethod)) {
+        methodsMap[nameMethod][strDesc] = new MethodTableElement(0,0,nameMethod,strDesc,nullptr,returnType,{});
+    }
+    };
 
     /* 1.0 Инициализация класса Int */
     addClass("JavaRTL/Int");
+    builtinFunctionClasses.push_back("JavaRTL/Int");
     /* 1.1 Конструктор */
     addMethod("JavaRTL/Int", "<init>", SemanticType::classType("JavaRTL/Unit"), "(I)", "(I)V");
     /* 1.2 Арифметические операции */
@@ -611,6 +617,7 @@ void ClassTable::initStdClasses() {
 
     /* 2.0 Инициализация класса Float */
     addClass("JavaRTL/Float");
+    builtinFunctionClasses.push_back("JavaRTL/Float");
     /* 2.1 Конструктор */
     addMethod("JavaRTL/Float", "<init>", SemanticType::classType("JavaRTL/Unit"), "(F)", "(F)V");
     /* 2.2 Арифметические операции */
@@ -632,6 +639,7 @@ void ClassTable::initStdClasses() {
 
     /* 3.0 Инициализация класса Double */
     addClass("JavaRTL/Double");
+    builtinFunctionClasses.push_back("JavaRTL/Double");
     /* 3.1 Конструктор */
     addMethod("JavaRTL/Double", "<init>", SemanticType::classType("JavaRTL/Unit"), "(D)", "(D)V");
     /* 3.2 Арифметические операции */
@@ -652,6 +660,7 @@ void ClassTable::initStdClasses() {
 
     /* 4. Инициализация класса String */
     addClass("JavaRTL/String");
+    builtinFunctionClasses.push_back("JavaRTL/String");
 
     addMethod("JavaRTL/String", "toInt", SemanticType::classType("JavaRTL/Int"), "()", "()LJavaRTL/Int;");
     addMethod("JavaRTL/String", "toFloat", SemanticType::classType("JavaRTL/Float"), "()", "()LJavaRTL/Float;");
@@ -660,10 +669,12 @@ void ClassTable::initStdClasses() {
 
     /* 5. Инициализация класса Char */
     addClass("JavaRTL/Char");
+    builtinFunctionClasses.push_back("JavaRTL/Char");
     addMethod("JavaRTL/Char", "<init>", SemanticType::classType("JavaRTL/Unit"), "(C)", "(C)V");
 
     /* 6. Инициализация класса Boolean */
     addClass("JavaRTL/Boolean");
+    builtinFunctionClasses.push_back("JavaRTL/Boolean");
     addMethod("JavaRTL/Boolean", "<init>", SemanticType::classType("JavaRTL/Unit"), "(I)", "(I)V");  // true/false как 1/0
     addMethod("JavaRTL/Boolean", "not", SemanticType::classType("JavaRTL/Boolean"), "()", "()LJavaRTL/Boolean;");
     addMethod("JavaRTL/Boolean", "and", SemanticType::classType("JavaRTL/Boolean"), "(LJavaRTL/Boolean;)", "(LJavaRTL/Boolean;)LJavaRTL/Boolean;");
@@ -698,7 +709,6 @@ void ClassTable::initStdClasses() {
     // readLine
     addMethod("JavaRTL/InputOutput", "readLine", SemanticType::classType("JavaRTL/String"), "()", "()LJavaRTL/String;");
 
-    this->items = classTable->items;
 }
 
 bool ClassTable::isNeededType(const std::string& signature, const std::string& type) {

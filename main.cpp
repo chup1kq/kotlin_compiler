@@ -31,8 +31,8 @@ int main() {
     JavaRTLTypesTransformator *RTLTypesTransformator = new JavaRTLTypesTransformator();
     RTLTypesTransformator->transform(root);
 
-    LiteralsTransformator *LiteralsTransformation = new LiteralsTransformator();
-    LiteralsTransformation->transform(root);
+    // LiteralsTransformator *LiteralsTransformation = new LiteralsTransformator();
+    // LiteralsTransformation->transform(root);
 
     OperatorsTransformator *operatorsTransformator = new OperatorsTransformator();
     operatorsTransformator->transform(root);
