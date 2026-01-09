@@ -132,4 +132,6 @@ add_executable(kotlin_parser
         src/generation/ClassGeneration.h
         src/generation/BytecodeGenerator.cpp
         src/generation/BytecodeGenerator.h
+        src/generation/KotlinCodeGenerator.cpp
+        src/generation/KotlinCodeGenerator.h
 )

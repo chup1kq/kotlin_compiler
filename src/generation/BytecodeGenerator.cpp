@@ -6,6 +6,12 @@ void BytecodeGenerator::appendArray(const uint8_t *array, size_t size) {
     }
 }
 
+void BytecodeGenerator::appendToByteArray(std::vector<uint8_t>* data, const uint8_t* array, size_t size) {
+    for (int i = 0; i < size; i++) {
+        data->push_back(array[i]);
+    }
+}
+
 std::vector<uint8_t> BytecodeGenerator::intToByteVector(int num, int arraySize) {
     std::vector<uint8_t> res(arraySize);
     for (size_t i = 0; i < arraySize; i++) {

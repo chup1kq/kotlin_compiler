@@ -29,11 +29,12 @@ private:
 
     void writeU2(uint16_t value);
     void writeU4(uint32_t value);
+    void generate();
 
 public:
     ClassGeneration(ClassTableElement* cls, const std::string& filename);
 
-    void generate();
+    void generateClassFile(const std::string& className);
 
     // Секции .class файла
     void writeHeader();           // Magic + version

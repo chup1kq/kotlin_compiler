@@ -6,12 +6,19 @@ ClassGeneration::ClassGeneration(ClassTableElement* cls, const std::string& file
       m_accessFlags(0x0021),
       m_superClassIndex(0),
       m_thisClassIndex(0) {
-    m_filename = "lexer-build/" + filename + ".class";
+}
+
+void ClassGeneration::generateClassFile(const std::string& className) {
+    m_filename = "lexer-build/" + className + ".class";
     m_out.open(m_filename, ios::binary | ios::trunc);
 
     if (!m_out.is_open()) {
         throw runtime_error("Cannot create file: " + m_filename);
     }
+
+    m_buffer.clear();
+    generate();
+    m_out.close();
 }
 
 void ClassGeneration::generate() {
@@ -21,7 +28,6 @@ void ClassGeneration::generate() {
     writeFields();
     writeMethods();
     writeToFile();
-    m_out.close();
     printf("Generated: %s\n", m_filename.c_str());
 }
 
