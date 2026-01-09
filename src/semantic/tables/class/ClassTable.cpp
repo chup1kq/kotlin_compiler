@@ -152,7 +152,7 @@ void ClassTable::attributeAndFillLocalsInStatement(MethodTableElement *method, S
             break;
         case (_VAL):
         case (_VAR):
-            attributeVarOrValStmt(method, stmt);
+            // attributeVarOrValStmt(method, stmt);
             break;
         case (_IF_STMT):
             attributeIfStmt(method, stmt);
@@ -172,6 +172,7 @@ void ClassTable::attributeAndFillLocalsInStatement(MethodTableElement *method, S
 
 void ClassTable::attributeVarOrValStmt(MethodTableElement *method, StmtNode *stmt) {
     VarDeclaration* decl = stmt->varDeclaration;
+
 
     const std::string& name = stmt->varDeclaration->varId;
 
@@ -207,23 +208,23 @@ void ClassTable::attributeVarOrValStmt(MethodTableElement *method, StmtNode *stm
 }
 
 void ClassTable::attributeIfStmt(MethodTableElement *method, StmtNode *stmt) {
-    if (stmt->cond == nullptr) {
+    if (!stmt->cond) {
         throw SemanticError::returnTypeMismatch(method->strName + method->strDesc);
     }
+
+    attributeExpression(method, stmt->cond);
 
     if (!isNeededType("LJavaRTL/Boolean", stmt->cond->semanticType->className)) {
         throw SemanticError::conditionNotBoolean(method->strName + method->strDesc);
     }
 
-    attributeExpression(method, stmt->cond);
-
-    if (stmt->trueStmtList != nullptr) {
+    if (stmt->trueStmtList && stmt->trueStmtList->stmts) {
         for (auto & stmt: *stmt->trueStmtList->stmts) {
             attributeAndFillLocalsInStatement(method, stmt);
         }
     }
 
-    if (stmt->falseStmtList != nullptr) {
+    if (stmt->falseStmtList && stmt->falseStmtList->stmts) {
         for (auto & stmt: *stmt->falseStmtList->stmts) {
             attributeAndFillLocalsInStatement(method, stmt);
         }
@@ -485,7 +486,7 @@ void ClassTable::attributeFuncOrMethodCall(MethodTableElement* currentMethod, Ex
     std::vector<SemanticType*> paramTypes;
 
     // Атрибутируем параметры
-    if (expr->params) {
+    if (expr->params && expr->params->exprs) {
         for (ExprNode* param : *expr->params->exprs) {
             attributeExpression(currentMethod, param, false);
 
