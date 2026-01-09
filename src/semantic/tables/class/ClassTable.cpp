@@ -356,6 +356,24 @@ void ClassTable::attributeExpression(MethodTableElement *method, ExprNode *expr,
     }
 
     switch (expr->type) {
+        case _INTEGER_LITERAL:
+            expr->semanticType = SemanticType::classType("JavaRTL/Int");
+            return;
+        case _FLOAT_LITERAL:
+            expr->semanticType = SemanticType::classType("JavaRTL/Float");
+            return;
+        case _DOUBLE_LITERAL:
+            expr->semanticType = SemanticType::classType("JavaRTL/Double");
+            return;
+        case _STRING_LITERAL:
+            expr->semanticType = SemanticType::classType("JavaRTL/String");
+            return;
+        case _CHAR_LITERAL:
+            expr->semanticType = SemanticType::classType("JavaRTL/Char");
+            return;
+        case _BOOL_LITERAL:
+            expr->semanticType = SemanticType::classType("JavaRTL/Boolean");
+            return;
         case _BRACKETS:
             expr->semanticType = leftType;
             return;
