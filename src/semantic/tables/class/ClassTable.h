@@ -27,7 +27,7 @@ public:
 
     void addClassesToClassTable(ClassTableElement *baseClass, std::list<ClassNode*> classList);
 
-    void attributeAndFillLocalsInBaseClass(const std::string& topLevelClassName);
+    void attributeAndFillLocalsInClasses();
     void attributeAndFillLocals(MethodTableElement* method);
     void attributeAndFillLocalsInStatement(MethodTableElement* method, StmtNode* stmt);
 
@@ -41,7 +41,7 @@ public:
 
     void attributeIdentifierExpr(LocalVariableTable *table, ExprNode* expr);
     void attributeAssignmentExpr(LocalVariableTable *table, ExprNode* expr);
-    void attributeArrayCreatingExpr(LocalVariableTable *table, ExprNode* expr);
+    void attributeArrayCreatingExpr(MethodTableElement *method, ExprNode* expr);
     void attributeFuncOrMethodCall(MethodTableElement* currentMethod, ExprNode* expr);
 
 

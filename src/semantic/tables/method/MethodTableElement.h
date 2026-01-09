@@ -16,7 +16,7 @@ public:
     StmtListNode * start;
     SemanticType * retType = nullptr;
     vector<FuncParam*> params;
-    LocalVariableTable * localVarTable = nullptr;
+    LocalVariableTable * localVarTable = new LocalVariableTable();
     int isFirst;
 
     MethodTableElement(int nameConst,

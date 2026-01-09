@@ -32,7 +32,7 @@ void ClassTable::buildClassTable(KotlinFileNode* root) {
         addClassesToClassTable(items[topLevelClassName], *root->topLevelList->classList);
 
     // Проверяем и заполняем локальные переменные в top level функциях
-    attributeAndFillLocalsInBaseClass(topLevelClassName);
+    attributeAndFillLocalsInClasses();
 
 
     // TODO дописать
@@ -122,39 +122,53 @@ void ClassTable::addClassesToClassTable(ClassTableElement *baseClass, std::list<
     }
 }
 
-void ClassTable::attributeAndFillLocalsInBaseClass(const std::string& topLevelClassName) {
-    ClassTableElement* baseClass = items.at(topLevelClassName);
-
-    for (auto& [methodName, overloads] : baseClass->methods->methods) {
-        for (auto& [descriptor, method] : overloads) {
-            // method имеет тип MethodTableElement*
-            attributeAndFillLocals(method);
+void ClassTable::attributeAndFillLocalsInClasses() {
+    // По всем клаасам
+    for (auto& cls : items) {
+        // По всем методам
+        for (auto& [methodName, overloads] : cls.second->methods->methods) {
+            // По всем перегрузкам
+            for (auto& [descriptor, method] : overloads) {
+                // method имеет тип MethodTableElement*
+                attributeAndFillLocals(method);
+            }
         }
     }
 }
 
 void ClassTable::attributeAndFillLocals(MethodTableElement *method) {
+    if (!method || !method->start || !method->start->stmts) return;
+
     for (auto* stmt : *method->start->stmts) {
         attributeAndFillLocalsInStatement(method, stmt);
     }
 }
 
 void ClassTable::attributeAndFillLocalsInStatement(MethodTableElement *method, StmtNode *stmt) {
+    if (!stmt)
+        return;
+
     switch (stmt->type) {
         case (_EXPRESSION):
             attributeExpression(method, stmt->expr, true);
+            break;
         case (_VAL):
         case (_VAR):
             attributeVarOrValStmt(method, stmt);
+            break;
         case (_IF_STMT):
             attributeIfStmt(method, stmt);
+            break;
         case (_WHILE):
         case (_DO_WHILE):
             attributeCycle(method, stmt);
+            break;
         case (_FOR):
             attributeFor(method, stmt);
+            break;
         case (_RETURN):
             attributeReturn(method, stmt);
+            break;
     }
 }
 
@@ -303,7 +317,7 @@ void ClassTable::attributeExpression(MethodTableElement *method, ExprNode *expr,
             return;
         }
         case _ARRAY_EXPR: {
-            attributeArrayCreatingExpr(method->localVarTable, expr);
+            attributeArrayCreatingExpr(method, expr);
             return;
         }
         case _FUNC_CALL:
@@ -395,7 +409,7 @@ void ClassTable::attributeAssignmentExpr(LocalVariableTable *table, ExprNode* ex
     throw SemanticError::unallowedAssignment();
 }
 
-void ClassTable::attributeArrayCreatingExpr(LocalVariableTable* table, ExprNode* expr) {
+void ClassTable::attributeArrayCreatingExpr(MethodTableElement* method, ExprNode* expr) {
     // expr->typeElements содержит TypeNode для типа элементов массива
     if (!expr->typeElements) {
         throw SemanticError::undefinedArrayElementType();
@@ -406,7 +420,7 @@ void ClassTable::attributeArrayCreatingExpr(LocalVariableTable* table, ExprNode*
     // Если есть элементы (arrayOf(expr_list)), нужно проверить их типы
     if (expr->elements) {
         for (auto& elem : *expr->elements->exprs) {
-            attributeExpression(nullptr, elem, false); // рекурсивно атрибутируем элементы
+            attributeExpression(method, elem, false); // рекурсивно атрибутируем элементы
             if (!elementType->isReplaceable(*elem->semanticType)) {
                 throw SemanticError::assignmentTypeMismatch(elementType->className, elem->semanticType->className);
             }
@@ -439,8 +453,8 @@ void ClassTable::attributeFuncOrMethodCall(MethodTableElement* currentMethod, Ex
     }
 
     const std::string& methodName = expr->identifierName;
-    if (!this->items.contains(baseClassName))
-        throw SemanticError::classNotFound(baseClassName, methodName);
+    if (!this->items.contains(relatedClassName))
+        throw SemanticError::classNotFound(relatedClassName, methodName);
 
     auto& methods = this->items[relatedClassName]->methods->methods;
 
