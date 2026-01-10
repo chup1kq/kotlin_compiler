@@ -1,6 +1,8 @@
 #include "OperatorsTransformator.h"
 
 #include <ios>
+#include <iostream>
+#include <ostream>
 
 #include "../../error/SemanticError.h"
 
@@ -167,29 +169,128 @@ void OperatorsTransformator::transformExpressionBody(ExprNode* expr) {
 
         // ----------------------- Range для циклов ----------------------
 
+        // TODO зарефакторить, чтобы перезаписывался expr-> либо внутри вспомогательного метода, либо снаружи
         else if (expr->type == _RANGE) {
-            expr->type = _FUNC_ACCESS;
-            expr->identifierName =  "range";
-            expr->params = new ExprListNode(expr->right);
+            ExprNode* newExpr = transformRangeToArrayOf(expr);
+
+            expr->type = newExpr->type;
+            expr->typeElements = newExpr->typeElements;
+            expr->elements = newExpr->elements;
+
+            expr->left = nullptr;
             expr->right = nullptr;
+
+            delete newExpr;
         }
         else if (expr->type == _DOWN_TO) {
-            expr->type = _FUNC_ACCESS;
-            expr->identifierName =  "downTo";
-            expr->params = new ExprListNode(expr->right);
+            ExprNode* newExpr = transformRangeToArrayOf(expr);
+
+            expr->type = newExpr->type;
+            expr->typeElements = newExpr->typeElements;
+            expr->elements = newExpr->elements;
+
+            expr->left = nullptr;
             expr->right = nullptr;
+
+            delete newExpr;
         }
         else if (expr->type == _UNTIL) {
-            expr->type = _FUNC_ACCESS;
-            expr->identifierName =  "until";
-            expr->params = new ExprListNode(expr->right);
+            ExprNode* newExpr = transformRangeToArrayOf(expr);
+
+            expr->type = newExpr->type;
+            expr->typeElements = newExpr->typeElements;
+            expr->elements = newExpr->elements;
+
+            expr->left = nullptr;
             expr->right = nullptr;
+
+            delete newExpr;
         }
         else if (expr->type == _STEP) {
-            expr->type = _FUNC_ACCESS;
-            expr->identifierName =  "step";
-            expr->params = new ExprListNode(expr->right);
-            expr->right = nullptr;
+            addStepToArrayOf(expr);
         }
     }
+}
+
+ExprNode *OperatorsTransformator::transformRangeToArrayOf(ExprNode *range) {
+    if (range->type == _RANGE || range->type == _DOWN_TO || range->type == _UNTIL) {
+        if (range->left->type != _INTEGER_LITERAL)
+            throw SemanticError::invalidRangeType(exprTypeToString(range->left->type));
+
+        if (range->right->type != _INTEGER_LITERAL)
+            throw SemanticError::invalidRangeType(exprTypeToString(range->right->type));
+    }
+
+    if (range->type == _RANGE) {
+        return createArrayOfFromRange(range->left, range->right);
+    }
+
+    if (range->type == _DOWN_TO) {
+        return createArrayOfFromRange(range->right, range->left);
+    }
+
+    if (range->type == _UNTIL) {
+        range->right->intValue--;
+        return createArrayOfFromRange(range->left, range->right);
+    }
+}
+
+ExprNode *OperatorsTransformator::createArrayOfFromRange(ExprNode *start, ExprNode *end) {
+    int startNumber = start->intValue;
+    int endNumber = end->intValue;
+
+    if (startNumber > endNumber) {
+        throw SemanticError::invalidRangeParams(start->intValue, end->intValue);
+    }
+
+    ExprListNode* exprs = new ExprListNode();
+    for (int i = startNumber; i <= endNumber; i++) {
+        std::cout << i << std::endl;
+        ExprListNode::addExprToList(exprs, ExprNode::createIntNode(i));
+    }
+
+    return ExprNode::createArrayExprNode(
+        TypeNode::createType(_INT, false, ""),
+        exprs
+    );
+}
+
+void OperatorsTransformator::addStepToArrayOf(ExprNode *expr) {
+    if (expr->type != _STEP) {
+        return;
+    }
+
+    if (expr->right->type != _INTEGER_LITERAL) {
+        throw SemanticError::invalidRangeType(exprTypeToString(expr->right->type));
+    }
+
+    int step = expr->right->intValue;
+    if (step < 1) {
+        throw SemanticError::invalidStepValue(step);
+    }
+
+    ExprListNode* elementsList = expr->left->elements;
+    if (!elementsList || !elementsList->exprs) {
+        return;
+    }
+
+    std::list<ExprNode*>& exprs = *elementsList->exprs;
+
+    // Создаем новый список только с нужными элементами
+    ExprListNode* newExprs = new ExprListNode();
+    int index = 0;
+
+    for (auto* element : exprs) {
+        if (index % step == 0) {  // Берем каждый step-й элемент (0, step, 2*step...)
+            ExprListNode::addExprToList(newExprs, element);
+        }
+        index++;
+    }
+
+    expr->type = _ARRAY_EXPR;
+    expr->elements = newExprs;
+    expr->typeElements = TypeNode::createType(_INT, false, "");
+    expr->left = nullptr;
+    expr->right = nullptr;
+    expr->identifierName = "";
 }

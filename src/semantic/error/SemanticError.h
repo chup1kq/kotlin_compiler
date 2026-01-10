@@ -48,6 +48,10 @@ public:
     static SemanticError undeclaredType(const std::string &varName);
     static SemanticError differentTypesInArrayCreation(const std::string &firstType, const std::string &incompatibleType);
     static SemanticError notReplaceableTypesInArrayCreation(const std::string &arrayType, const std::string &elementsType);
+    static SemanticError emptyRange();
+    static SemanticError invalidRangeType(const std::string &typeName);
+    static SemanticError invalidRangeParams(int start, int end);
+    static SemanticError invalidStepValue(int stepValue);
 
 };
 

@@ -78,19 +78,22 @@ StmtNode *StmtNode::createVarOrValStmtNode(ModifierMap* modifiers, StmtType type
 
 StmtNode * StmtNode::createForNodeFromSingleStmt(VarDeclaration* iterator, ExprNode *range, StmtNode *cycleStmt) {
     StmtListNode *listNode = new StmtListNode(cycleStmt);
+    VarDeclarationList* varList = new VarDeclarationList(iterator);
 
     StmtNode* node = new StmtNode();
     node->type = _FOR;
-    node->forIterator = iterator;
+    node->forIteratorList = varList;
     node->cond = range;
     node->blockStmts = listNode;
     return node;
 }
 
 StmtNode * StmtNode::createForNodeFromBlockStmt(VarDeclaration* iterator, ExprNode *range, StmtListNode *cycleStmt) {
+    VarDeclarationList* varList = new VarDeclarationList(iterator);
+
     StmtNode* node = new StmtNode();
     node->type = _FOR;
-    node->forIterator = iterator;
+    node->forIteratorList = varList;
     node->cond = range;
     node->blockStmts = cycleStmt;
     return node;

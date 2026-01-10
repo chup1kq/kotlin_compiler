@@ -230,3 +230,32 @@ SemanticError SemanticError::notReplaceableTypesInArrayCreation(const std::strin
     );
 }
 
+SemanticError SemanticError::emptyRange() {
+    return SemanticError(
+        EMPTY_RANGE,
+        "Empty range in for cycle"
+    );
+}
+
+SemanticError SemanticError::invalidRangeType(const std::string &typeName) {
+    return SemanticError(
+        INVALID_RANGE_TYPE,
+        "Range must contain only numbers. Now contains '" + typeName + "'"
+    );
+}
+
+SemanticError SemanticError::invalidRangeParams(int start, int end) {
+    return SemanticError(
+        INVALID_RANGE_PARAMS,
+        "Start value '" + std::to_string(start) + "' must be >= end value '" + std::to_string(end) + "'"
+    );
+}
+
+SemanticError SemanticError::invalidStepValue(int stepValue) {
+    return SemanticError(
+        INVALID_RANGE_PARAMS,
+        "Step value must be > 0, but now '" + std::to_string(stepValue) + "'"
+    );
+}
+
+

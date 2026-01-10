@@ -8,6 +8,11 @@ class OperatorsTransformator : public ASTTransformer {
 protected:
     void transformExpressionBody(ExprNode* expr) override;
     void transformVarDeclarationBody(VarDeclaration* decl) override;
+
+private:
+    ExprNode* transformRangeToArrayOf(ExprNode* range);
+    ExprNode* createArrayOfFromRange(ExprNode *start, ExprNode* end);
+    void addStepToArrayOf(ExprNode* expr);
 };
 
 

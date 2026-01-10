@@ -28,14 +28,14 @@ int main() {
 
     createDotTree(root, "ast_tree.txt");
 
+    OperatorsTransformator *operatorsTransformator = new OperatorsTransformator();
+    operatorsTransformator->transform(root);
+
     JavaRTLTypesTransformator *RTLTypesTransformator = new JavaRTLTypesTransformator();
     RTLTypesTransformator->transform(root);
 
     // LiteralsTransformator *LiteralsTransformation = new LiteralsTransformator();
     // LiteralsTransformation->transform(root);
-
-    OperatorsTransformator *operatorsTransformator = new OperatorsTransformator();
-    operatorsTransformator->transform(root);
 
     BaseTypesAttributing *baseTypesAttributing = new BaseTypesAttributing();
     baseTypesAttributing->transform(root);
