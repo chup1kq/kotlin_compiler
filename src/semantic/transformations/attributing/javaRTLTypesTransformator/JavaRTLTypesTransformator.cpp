@@ -36,11 +36,15 @@ void JavaRTLTypesTransformator::replaceToRTLInTypeNode(TypeNode *typeNode) {
         case _BOOLEAN:
             typeNode->customName = "JavaRTL/Boolean";
             break;
-        case _UNIT:
-            typeNode->customName = "JavaRTL/Unit";
-            break;
+        // case _UNIT:
+        //     typeNode->customName = "JavaRTL/Unit";
+        //     break;
 
         default:
             break;
     }
+}
+
+void JavaRTLTypesTransformator::transformTypeNode(TypeNode* typeNode) {
+    replaceToRTLInTypeNode(typeNode);
 }

@@ -42,6 +42,9 @@ void ASTTransformer::transformFunctions(std::list<FunNode*> functions) {
         if (fun->args)
             transformVarDeclarations(*fun->args->decls);
 
+        if (fun->type)
+            transformTypeNode(fun->type);
+
     }
 
 }
@@ -159,3 +162,5 @@ void ASTTransformer::transformVarDeclaration(VarDeclaration* decl) {
 
     transformVarDeclarationBody(decl);
 }
+
+void ASTTransformer::transformTypeNode(TypeNode *typeNode) {}

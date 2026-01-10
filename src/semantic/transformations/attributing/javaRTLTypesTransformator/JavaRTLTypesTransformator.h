@@ -9,6 +9,7 @@ protected:
     void transformExpressionBody(ExprNode* expr) override;
     void transformVarDeclarationBody(VarDeclaration* decl) override;
 
+    void transformTypeNode(TypeNode* typeNode) override;
 private:
     void replaceToRTLInTypeNode(TypeNode *typeNode);
 };

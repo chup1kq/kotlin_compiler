@@ -28,6 +28,8 @@ protected:
 
     void transformVarDeclarations(std::list<VarDeclaration*> decls);
     void transformVarDeclaration(VarDeclaration* decl);
+
+    virtual void transformTypeNode(TypeNode* typeNode);
 };
 
 #endif

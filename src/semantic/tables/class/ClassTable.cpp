@@ -324,9 +324,9 @@ void ClassTable::attributeReturn(MethodTableElement *method, StmtNode *stmt) {
         throw SemanticError::returnTypeMismatch(method->strName + method->strDesc);
     }
 
-    // return;
     if (stmt->expr == nullptr) {
-        if (!isNeededType("LUnit", retType->className)) {
+        // Если return без expr, а возвращаемое значение функции не void
+        if (retType->className != "Unit") {
             throw SemanticError::missingReturnValue(method->strName + method->strDesc);
         }
         return;
@@ -335,11 +335,11 @@ void ClassTable::attributeReturn(MethodTableElement *method, StmtNode *stmt) {
     attributeExpression(method, stmt->expr);
 
     // return expr;
-    if (isNeededType("LUnit", retType->className)) {
+    if (retType->className == "Unit" && stmt->expr->semanticType->className != "Unit") {
         throw SemanticError::returnFromVoid(method->strName + method->strDesc);
     }
 
-    if (!retType->isReplaceable(*stmt->expr->semanticType)) {
+    if (retType->className != stmt->expr->semanticType->className) {
         throw SemanticError::returnTypeMismatch(method->strName + method->strDesc);
     }
 }
