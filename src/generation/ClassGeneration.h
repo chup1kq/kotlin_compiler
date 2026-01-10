@@ -31,6 +31,11 @@ private:
     void writeU4(uint32_t value);
     void generate();
 
+    void writeU2Local(std::vector<uint8_t>& buffer, uint16_t value);
+    void writeU4Local(std::vector<uint8_t>& buffer, uint32_t value);
+
+    size_t m_headerPos;
+
 public:
     ClassGeneration(ClassTableElement* cls, const std::string& filename);
 
@@ -46,6 +51,8 @@ public:
 
     void generateMainMethod();
     std::vector<uint8_t> generateMethod(MethodTableElement* method);
+
+    int findClassConstantIndex(const std::string& className);
 };
 
 #endif //KOTLIN_COMPILER_CLASSGENERATION_H
