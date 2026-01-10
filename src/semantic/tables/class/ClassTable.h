@@ -37,6 +37,7 @@ public:
     void attributeVarOrValStmt(MethodTableElement* method, StmtNode* stmt);
     void attributeIfStmt(MethodTableElement* method, StmtNode* stmt);
     void attributeCycle(MethodTableElement* method, StmtNode* stmt);
+    void attributeCondition(MethodTableElement *method, ExprNode* cond);
     void attributeFor(MethodTableElement* method, StmtNode* stmt);
     void attributeReturn(MethodTableElement* method, StmtNode* stmt);
 

@@ -231,15 +231,7 @@ void ClassTable::attributeVarOrValStmt(MethodTableElement *method, StmtNode *stm
 }
 
 void ClassTable::attributeIfStmt(MethodTableElement *method, StmtNode *stmt) {
-    if (!stmt->cond) {
-        throw SemanticError::returnTypeMismatch(method->strName + method->strDesc);
-    }
-
-    attributeExpression(method, stmt->cond);
-
-    if (!isNeededType("LJavaRTL/Boolean", stmt->cond->semanticType->className)) {
-        throw SemanticError::conditionNotBoolean(method->strName + method->strDesc);
-    }
+    attributeCondition(method, stmt->cond);
 
     if (stmt->trueStmtList && stmt->trueStmtList->stmts) {
         for (auto & stmt: *stmt->trueStmtList->stmts) {
@@ -255,24 +247,28 @@ void ClassTable::attributeIfStmt(MethodTableElement *method, StmtNode *stmt) {
 }
 
 void ClassTable::attributeCycle(MethodTableElement *method, StmtNode *stmt) {
-    if (!stmt->cond) {
-        throw SemanticError::returnTypeMismatch(method->strName + method->strDesc);
-    }
-
-    attributeExpression(method, stmt->cond);
-
-    if (!stmt->cond->semanticType) {
-        throw SemanticError::returnTypeMismatch(method->strName + method->strDesc);
-    }
-
-    if (stmt->cond->semanticType->className != "JavaRTL/Boolean") {
-        throw SemanticError::conditionNotBoolean(stmt->cond->semanticType->className);
-    }
+    attributeCondition(method, stmt->cond);
 
     if (stmt->blockStmts != nullptr) {
         for (auto* stmt : *stmt->blockStmts->stmts) {
             attributeAndFillLocalsInStatement(method, stmt);
         }
+    }
+}
+
+void ClassTable::attributeCondition(MethodTableElement *method, ExprNode* cond) {
+    if (!cond) {
+        throw SemanticError::returnTypeMismatch(method->strName + method->strDesc);
+    }
+
+    attributeExpression(method, cond);
+
+    if (!cond->semanticType) {
+        throw SemanticError::returnTypeMismatch(method->strName + method->strDesc);
+    }
+
+    if (cond->semanticType->className != "JavaRTL/Boolean") {
+        throw SemanticError::conditionNotBoolean(cond->semanticType->className);
     }
 }
 

@@ -125,10 +125,6 @@ StmtNode * StmtNode::createReturnNode(ExprNode *expr) {
     return node;
 }
 
-string StmtNode::getDotLabel() const {
-    return stmtTypeToString(type);
-}
-
 StmtNode * StmtNode::createIfNode(ExprNode *ifCond, StmtListNode *trueB, StmtListNode *falseB) {
     StmtNode* node = new StmtNode();
     node->type = _IF_STMT;
@@ -138,6 +134,9 @@ StmtNode * StmtNode::createIfNode(ExprNode *ifCond, StmtListNode *trueB, StmtLis
     return node;
 }
 
+string StmtNode::getDotLabel() const {
+    return stmtTypeToString(type);
+}
 
 string StmtNode::toDot() const {
     string dot;
