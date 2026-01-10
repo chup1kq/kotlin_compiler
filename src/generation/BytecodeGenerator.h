@@ -71,6 +71,14 @@ public:
     const std::vector<uint8_t>& getBytecode() const { return m_buffer; }
     void clear() { m_buffer.clear(); }
 
+    static std::vector<uint8_t> iaload();
+    static std::vector<uint8_t> daload();
+    static std::vector<uint8_t> faload();
+    static std::vector<uint8_t> laload();
+    static std::vector<uint8_t> baload();
+    static std::vector<uint8_t> caload();
+    static std::vector<uint8_t> saload();
+
     static std::vector<uint8_t> generateBytesForConstantTable(ConstantTable* table);
     static std::vector<uint8_t> generateBytesForConstantTableItem(ConstantTableElement* elem);
 

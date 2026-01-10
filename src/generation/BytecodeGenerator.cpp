@@ -273,6 +273,34 @@ std::vector<uint8_t> BytecodeGenerator::iadd() {
     return {0x60};
 }
 
+std::vector<uint8_t> BytecodeGenerator::iaload() {
+    return {0x46};
+}
+
+std::vector<uint8_t> BytecodeGenerator::daload() {
+    return {0x4F};
+}
+
+std::vector<uint8_t> BytecodeGenerator::faload() {
+    return {0x47};
+}
+
+std::vector<uint8_t> BytecodeGenerator::laload() {
+    return {0x4E};
+}
+
+std::vector<uint8_t> BytecodeGenerator::baload() {
+    return {0x33};
+}
+
+std::vector<uint8_t> BytecodeGenerator::caload() {
+    return {0x34};
+}
+
+std::vector<uint8_t> BytecodeGenerator::saload() {
+    return {0x35};
+}
+
 std::vector<uint8_t> BytecodeGenerator::generateBytesForConstantTable(ConstantTable *table) {
     std::vector<uint8_t> res;
     std::vector<uint8_t> bytes;
