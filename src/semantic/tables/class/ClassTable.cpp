@@ -4,8 +4,7 @@
 
 #include "ClassTableElement.h"
 #include "../constant/ConstantTable.h"
-
-class FuncParam;
+#include "../params/FuncParam.h"
 
 ClassTable::ClassTable(const std::string& fileName) {
     this->items.clear();
@@ -256,22 +255,18 @@ void ClassTable::attributeIfStmt(MethodTableElement *method, StmtNode *stmt) {
 }
 
 void ClassTable::attributeCycle(MethodTableElement *method, StmtNode *stmt) {
-    if (stmt->cond == nullptr) {
-        throw SemanticError::returnTypeMismatch(
-            method->strName + method->strDesc
-        );
+    if (!stmt->cond) {
+        throw SemanticError::returnTypeMismatch(method->strName + method->strDesc);
     }
 
     attributeExpression(method, stmt->cond);
 
-    if (stmt->cond->semanticType == nullptr) {
-        throw SemanticError::returnTypeMismatch(
-            method->strName + method->strDesc
-        );
+    if (!stmt->cond->semanticType) {
+        throw SemanticError::returnTypeMismatch(method->strName + method->strDesc);
     }
 
-    if (!isNeededType("LJavaRTL/Boolean", stmt->cond->semanticType->className)) {
-        throw SemanticError::conditionNotBoolean(method->strName + method->strDesc);
+    if (stmt->cond->semanticType->className != "JavaRTL/Boolean") {
+        throw SemanticError::conditionNotBoolean(stmt->cond->semanticType->className);
     }
 
     if (stmt->blockStmts != nullptr) {

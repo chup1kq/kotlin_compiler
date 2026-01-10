@@ -162,7 +162,7 @@ SemanticError SemanticError::undefinedArrayElementType() {
 SemanticError SemanticError::conditionNotBoolean(const std::string &name) {
     return SemanticError(
         CONDITION_NOT_BOOLEAN,
-        "Condition nust be boolean '" + name + "'"
+        "Condition must be boolean, but actualy '" + name + "'"
     );
 }
 
