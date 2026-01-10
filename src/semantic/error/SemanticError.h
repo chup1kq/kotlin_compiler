@@ -46,6 +46,8 @@ public:
     static SemanticError nullSemanticType(const ExprType &type, const std::string &name = "");
     static SemanticError notReplaceableTypesInStmtDeclaration(const std::string &varName, const std::string &varType, const std::string &exprType);
     static SemanticError undeclaredType(const std::string &varName);
+    static SemanticError differentTypesInArrayCreation(const std::string &firstType, const std::string &incompatibleType);
+    static SemanticError notReplaceableTypesInArrayCreation(const std::string &arrayType, const std::string &elementsType);
 
 };
 

@@ -52,6 +52,7 @@ public:
 
 private:
     bool isNeededType(const std::string& signature, const std::string& type);
+    SemanticType checkSameElementsType(std::list<ExprNode*> *exprs);
 };
 
 #endif //KOTLIN_COMPILER_CLASSTABLE_H

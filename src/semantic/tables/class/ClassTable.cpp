@@ -179,7 +179,7 @@ void ClassTable::attributeAndFillLocalsInStatement(MethodTableElement *method, S
             attributeCycle(method, stmt);
             break;
         case (_FOR):
-            attributeFor(method, stmt);
+            // attributeFor(method, stmt);
             break;
         case (_RETURN):
             attributeReturn(method, stmt);
@@ -209,8 +209,8 @@ void ClassTable::attributeVarOrValStmt(MethodTableElement *method, StmtNode *stm
         if (!currentType->isReplaceable(*exprType)) {
             throw SemanticError::notReplaceableTypesInStmtDeclaration(
                 name,
-                currentType->className,
-                exprType->className
+                currentType->toString(),
+                exprType->toString()
             );
         }
     }
@@ -502,26 +502,64 @@ void ClassTable::attributeAssignmentExpr(LocalVariableTable *table, ExprNode* ex
 }
 
 void ClassTable::attributeArrayCreatingExpr(MethodTableElement* method, ExprNode* expr) {
-    // expr->typeElements содержит TypeNode для типа элементов массива
-    if (!expr->typeElements) {
-        throw SemanticError::undefinedArrayElementType();
+    // Тип из typeElements (arrayOf<Int> или NULL)
+    if (expr->typeElements) {
+        expr->semanticType = SemanticType::arrayType(
+            new SemanticType(expr->typeElements)
+        );
     }
 
-    SemanticType* elementType = new SemanticType(expr->typeElements);
+    // Аттрибутируем элементы внутри скобок
+    if (expr->elements && expr->elements->exprs && !expr->elements->exprs->empty()) {
+        for (auto& e : *expr->elements->exprs) {
+            attributeExpression(method, e);
+        }
 
-    // Если есть элементы (arrayOf(expr_list)), нужно проверить их типы
-    if (expr->elements) {
-        for (auto& elem : *expr->elements->exprs) {
-            attributeExpression(method, elem, false); // рекурсивно атрибутируем элементы
-            if (!elementType->isReplaceable(*elem->semanticType)) {
-                throw SemanticError::assignmentTypeMismatch(elementType->className, elem->semanticType->className);
+        // Получаем тип элементов (все должны быть одинаковыми)
+        SemanticType elementsType = checkSameElementsType(expr->elements->exprs);
+
+        // Если есть заданный тип массива (arrayOf<Int?>), проверяем совместимость
+        if (expr->semanticType) {
+            SemanticType* expectedElementType = expr->semanticType->elementType;
+            if (!expectedElementType->isReplaceable(elementsType)) {
+                throw SemanticError::notReplaceableTypesInArrayCreation(
+                    expectedElementType->toString(),
+                    elementsType.toString()
+                );
             }
+        } else {
+            // Тип не задан -> выводим из элементов
+            expr->semanticType = SemanticType::arrayType(new SemanticType(elementsType));
+        }
+    } else {
+        // Пустой arrayOf<> или arrayOf() - используем заданный тип или undefined
+        if (!expr->semanticType) {
+            expr->semanticType = SemanticType::arrayType(
+                new SemanticType(TypeNode::createUndefinedType())
+            );
+        }
+    }
+}
+
+SemanticType ClassTable::checkSameElementsType(std::list<ExprNode*> *exprs) {
+    if (!exprs || exprs->empty()) {
+        return SemanticType(TypeNode::createUndefinedType());
+    }
+
+    SemanticType firstType = *exprs->front()->semanticType;
+
+    for (auto& expr : *exprs) {
+        if (!firstType.isReplaceable(*expr->semanticType)) {
+            throw SemanticError::differentTypesInArrayCreation(
+                firstType.className,
+                expr->semanticType->className
+            );
         }
     }
 
-    // Устанавливаем тип массива
-    expr->semanticType = SemanticType::arrayType(elementType);
+    return firstType;
 }
+
 
 void ClassTable::attributeFuncOrMethodCall(MethodTableElement* currentMethod, ExprNode* expr) {
     std::cout << "Entered ClassTable::attributeFuncOrMethodCall" << std::endl;

@@ -139,6 +139,9 @@ void ASTTransformer::transformExpression(ExprNode* expr) {
     if (expr->elements)
         transformExpressions(expr->elements);
 
+    if (expr->typeElements)
+        transformTypeNode(expr->typeElements);
+
     transformExpressionBody(expr);
 }
 

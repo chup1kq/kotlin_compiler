@@ -62,3 +62,12 @@ SemanticType* SemanticType::arrayType(SemanticType* elementType, bool nullable) 
     t->isNullable = nullable;
     return t;
 }
+
+std::string SemanticType::toString() const {
+    if (!isArray()) {
+        return className.empty() ? "Undefined" : className;
+    }
+
+    return "Array<" + elementType->toString() + ">";
+}
+

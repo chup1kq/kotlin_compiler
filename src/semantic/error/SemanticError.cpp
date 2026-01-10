@@ -215,3 +215,18 @@ SemanticError SemanticError::undeclaredType(const std::string &varName) {
         "Type for variable '" + varName + "' is not declared in this scope"
     );
 }
+
+SemanticError SemanticError::differentTypesInArrayCreation(const std::string &firstType, const std::string &incompatibleType) {
+    return SemanticError(
+        DIFFERENT_TYPES_IN_ARRAY_CREATION,
+        "Incompatible types in arrayOf. First element type '" + firstType + "', incompatible with '" + incompatibleType + "'"
+    );
+}
+
+SemanticError SemanticError::notReplaceableTypesInArrayCreation(const std::string &arrayType, const std::string &elementsType) {
+    return SemanticError(
+        NOT_REPLACEABLE_TYPES,
+        "Not replaceable types in arrayOf. Declared type '" + arrayType + "', elements have type '" + elementsType + "'"
+    );
+}
+

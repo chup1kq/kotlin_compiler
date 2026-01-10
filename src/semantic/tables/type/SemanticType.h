@@ -26,6 +26,8 @@ public:
 
     SemanticType();
     explicit SemanticType(TypeNode* typeNode);
+
+    std::string toString() const;
 };
 
 
