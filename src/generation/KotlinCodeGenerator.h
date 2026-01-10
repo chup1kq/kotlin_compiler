@@ -19,9 +19,6 @@ private:
     static std::vector<uint8_t> generateFor(StmtNode* stmt, ClassTableElement* classElement, MethodTableElement* methodElement);
     static std::vector<uint8_t> generateValOrVar(StmtNode* stmt, ClassTableElement* classElement, MethodTableElement* methodElement);
     static std::vector<uint8_t> generateIdentifier(ExprNode* expr, MethodTableElement* methodElement);
-
-    static std::vector<uint8_t> generateBytesForConstantTable(ConstantTable* table);
-    static std::vector<uint8_t> generateBytesForConstantTableItem(ConstantTableElement* elem);
 };
 
 

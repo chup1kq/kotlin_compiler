@@ -3,6 +3,8 @@
 #include <vector>
 #include <cstdint>
 #include <stdexcept>
+#include "../semantic/tables/class/ClassTableElement.h"
+#include "../semantic/tables/class/ClassTable.h"
 
 enum class IfCommandType { EQ, NE, LT, LE, GT, GE };
 
@@ -68,6 +70,9 @@ public:
     // Получить готовый байткод
     const std::vector<uint8_t>& getBytecode() const { return m_buffer; }
     void clear() { m_buffer.clear(); }
+
+    static std::vector<uint8_t> generateBytesForConstantTable(ConstantTable* table);
+    static std::vector<uint8_t> generateBytesForConstantTableItem(ConstantTableElement* elem);
 
 };
 

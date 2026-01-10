@@ -272,3 +272,52 @@ std::vector<uint8_t> BytecodeGenerator::aaload() {
 std::vector<uint8_t> BytecodeGenerator::iadd() {
     return {0x60};
 }
+
+std::vector<uint8_t> BytecodeGenerator::generateBytesForConstantTable(ConstantTable *table) {
+    std::vector<uint8_t> res;
+    std::vector<uint8_t> bytes;
+
+    for (auto & element: table->items) {
+        bytes = generateBytesForConstantTableItem(element.second);
+        appendToByteArray(&res, bytes.data(), bytes.size());
+    }
+
+    return res;
+}
+
+std::vector<uint8_t> BytecodeGenerator::generateBytesForConstantTableItem(ConstantTableElement *elem) {
+    std::vector<uint8_t> res = intToByteVector(elem->type, 1);
+
+    switch (elem->type) {
+        case (UTF8): {
+            uint16_t len = elem->utf8String.length();
+            std::vector<uint8_t> lenBytes = intToByteVector(len, 2);
+            appendToByteArray(&res, lenBytes.data(), lenBytes.size());
+            const std::string& str = elem->utf8String;
+            res.insert(res.end(), str.begin(), str.end());
+        } break;
+        case (String):
+        case (Class): {
+            std::vector<uint8_t> ref = intToByteVector(elem->firstRef, 2);
+            appendToByteArray(&res, ref.data(), ref.size());
+        } break;
+        case (NameAndType):
+        case (MethodRef):
+        case (FieldRef): {
+            std::vector<uint8_t> firstRef = intToByteVector(elem->firstRef, 2);
+            std::vector<uint8_t> secondRef = intToByteVector(elem->secondRef, 2);
+            appendToByteArray(&res, firstRef.data(), firstRef.size());
+            appendToByteArray(&res, secondRef.data(), secondRef.size());
+        } break;
+        case (Integer): {
+            std::vector<uint8_t> num = intToByteVector(elem->intValue, 4);
+            appendToByteArray(&res, num.data(), num.size());
+        } break;
+        case (Double): {
+            std::vector<uint8_t> num = intToByteVector(elem->doubleValue, 8);
+            appendToByteArray(&res, num.data(), num.size());
+        } break;
+    }
+
+    return res;
+}
