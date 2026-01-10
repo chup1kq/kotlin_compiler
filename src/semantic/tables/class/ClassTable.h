@@ -46,6 +46,14 @@ public:
     void attributeArrayCreatingExpr(MethodTableElement *method, ExprNode* expr);
     void attributeFuncOrMethodCall(MethodTableElement* currentMethod, ExprNode* expr);
 
+    void fillLiterals(ClassTableElement* elem);
+    void fillFieldConstants(ClassTableElement* elem);
+    void fillLiteralsInStatement(StmtNode* stmt, ClassTableElement* elem);
+    void fillLiteralsInExpression(ExprNode* expr, ClassTableElement* elem);
+
+    void fillMethodRefs(ClassTableElement* elem);
+    void fillMethodRefsInStatement(StmtNode* stmt, ClassTableElement* elem);
+    void fillMethodRefsInExpression(ExprNode* expr, ClassTableElement* elem);
 
     // Сгенерировать таблицу методанных
     void initStdClasses();
@@ -53,6 +61,7 @@ public:
 private:
     bool isNeededType(const std::string& signature, const std::string& type);
     SemanticType checkSameElementsType(std::list<ExprNode*> *exprs);
+    std::string getTypeDescriptor(SemanticType* type);
 };
 
 #endif //KOTLIN_COMPILER_CLASSTABLE_H
