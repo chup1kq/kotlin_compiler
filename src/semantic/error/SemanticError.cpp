@@ -201,3 +201,17 @@ SemanticError SemanticError::nullSemanticType(const ExprType &type, const std::s
     );
 }
 
+SemanticError SemanticError::notReplaceableTypesInStmtDeclaration(const std::string &varName, const std::string &varType, const std::string &exprType) {
+    return SemanticError(
+        NOT_REPLACEABLE_TYPES,
+        "Not replaceable types in var/val statement '" + varName + "'."
+                " Var type '" + varType + "' is not replaceable with default value '" + exprType + "'"
+    );
+}
+
+SemanticError SemanticError::undeclaredType(const std::string &varName) {
+    return SemanticError(
+        UNDECLARED_TYPE,
+        "Type for variable '" + varName + "' is not declared in this scope"
+    );
+}

@@ -123,17 +123,33 @@ void ClassTable::addClassesToClassTable(ClassTableElement *baseClass, std::list<
 }
 
 void ClassTable::attributeAndFillLocalsInClasses() {
-    // По всем клаасам
     for (auto& [className, cls] : items) {
         for (auto& [methodName, overloads] : cls->methods->methods) {
             for (auto& [descriptor, method] : overloads) {
-                std::cout << "class=" << className
+                std::cout << "Processing class=" << className
                           << " method=" << methodName
                           << " desc=" << descriptor << std::endl;
+
+                if (!method) {
+                    std::cout << "  → skipped (method=nullptr)" << std::endl;
+                    continue;
+                }
+                if (!method->start) {
+                    std::cout << "  → skipped (method->start=nullptr)" << std::endl;
+                    continue;
+                }
+                if (!method->start->stmts) {
+                    std::cout << "  → skipped (method->start->stmts=nullptr)" << std::endl;
+                    continue;
+                }
+
+                std::cout << "  → ATTRIBUTING (" << method->start->stmts->size() << " statements)" << std::endl;
+                attributeAndFillLocals(method);
             }
         }
     }
 }
+
 
 void ClassTable::attributeAndFillLocals(MethodTableElement *method) {
     if (!method || !method->start || !method->start->stmts)
@@ -174,39 +190,45 @@ void ClassTable::attributeAndFillLocalsInStatement(MethodTableElement *method, S
 
 void ClassTable::attributeVarOrValStmt(MethodTableElement *method, StmtNode *stmt) {
     VarDeclaration* decl = stmt->varDeclaration;
-
-
-    const std::string& name = stmt->varDeclaration->varId;
+    const std::string& name = decl->varId;
 
     if (method->localVarTable->contains(name)) {
         throw SemanticError::redefinition(name);
     }
 
-    bool isConst = (stmt->type == _VAL);
-    bool isInitialized = (stmt->expr != nullptr);
+    SemanticType* currentType = new SemanticType(decl->varType);
+    if (decl->defaultValue) {
+        attributeExpression(method, decl->defaultValue);
 
-    if (isInitialized) {
-        if (stmt->expr->type == _ASSIGNMENT) {
-            throw SemanticError::unallowedAssignment();
+        // Если тип явно не задан
+        if (decl->varType->type == _UNDEFINED) {
+            currentType = decl->defaultValue->semanticType;
         }
 
-        attributeExpression(method, stmt->expr);
+        SemanticType* exprType = decl->defaultValue->semanticType;
+        // Проверяем, что указанный (:Int, ...) соответствует типу присваемого expr
+        if (!currentType->isReplaceable(*exprType)) {
+            throw SemanticError::notReplaceableTypesInStmtDeclaration(
+                name,
+                currentType->className,
+                exprType->className
+            );
+        }
     }
-    /* TODO доделать */
-    // SemanticType varType(stmt->varDec);
-    //
-    // if (isInitialized) {
-    //     if (!varType.isReplaceable(*decl->expr->semanticType)) {
-    //         throw SemanticError::assignmentTypeMismatch(stmt->);
-    //     }
-    // }
-    //
-    // method->localVarTable->findOrAddLocalVar(
-    //     name,
-    //     varType,
-    //     isConst,
-    //     isInitialized
-    // );
+    // Если нет дефолтного значения и тип не указан
+    else if (decl->varType->type == _UNDEFINED) {
+        throw SemanticError::undeclaredType(name);
+    }
+
+    bool isConst = (stmt->type == _VAL);
+    bool isInitialized = (decl->defaultValue != nullptr);
+
+    method->localVarTable->findOrAddLocalVar(
+        name,
+        currentType,
+        isConst,
+        isInitialized
+    );
 }
 
 void ClassTable::attributeIfStmt(MethodTableElement *method, StmtNode *stmt) {

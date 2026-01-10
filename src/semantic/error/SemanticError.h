@@ -44,6 +44,9 @@ public:
     static SemanticError methodCandidateNotFound(const std::string &className, const std::string &methodName, const std::string &paramDesc);
     static SemanticError nullSemanticTypeForLeftExpr(const ExprType &type, const std::string &name = "");
     static SemanticError nullSemanticType(const ExprType &type, const std::string &name = "");
+    static SemanticError notReplaceableTypesInStmtDeclaration(const std::string &varName, const std::string &varType, const std::string &exprType);
+    static SemanticError undeclaredType(const std::string &varName);
+
 };
 
 #endif //KOTLIN_COMPILER_SEMANTIC_ERROR_H
