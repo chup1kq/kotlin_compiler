@@ -31,6 +31,11 @@ void ClassTable::buildClassTable(KotlinFileNode* root) {
     // Проверяем и заполняем локальные переменные в top level функциях
     attributeAndFillLocalsInClasses();
 
+    // TODO Доделать, строка не появляется
+    for (auto& cls : this->items) {
+        fillConstructorMethodRefs(cls.second);
+    }
+
     std::cout << "=== STARTING fillLiterals ===" << std::endl;
     int classIdx = 0;
     for (auto& cls : this->items) {
@@ -75,6 +80,8 @@ void ClassTable::addBaseClass() {
 
     // Добавляем базовый класс в таблицу
     items[topLevelClassName] = topLevelFunctionsClass;
+
+    topLevelFunctionsClass->addDefaultConstructorIfNeeded();
 }
 
 std::string ClassTable::makeTopLevelClassName(const std::string& fileName) {
@@ -127,12 +134,13 @@ void ClassTable::addClassesToClassTable(ClassTableElement *baseClass, std::list<
 
         this->items.insert(std::pair<std::string, ClassTableElement*>(className, newClass));
 
-        // TODO добавить primary конструктор
-        newClass->addPrimaryConstructor(classNode->primaryConstructor);
+        if (classNode->primaryConstructor) {
+            newClass->addPrimaryConstructor(classNode->primaryConstructor);
+        }
+        newClass->addDefaultConstructorIfNeeded();
+
         // TODO заполнить поля
 
-
-        // TODO заполнить методы
         newClass->addMethodsToTable(*classNode->body->methods);
     }
 }
@@ -990,6 +998,26 @@ void ClassTable::fillFieldConstants(ClassTableElement *elem) {
     elem->constants->findOrAddConstant(FieldRef, "", 0, 0, intClass, intNameAndType);
 }
 
+void ClassTable::fillConstructorMethodRefs(ClassTableElement* cls) {
+    // Для каждого конструктора
+    auto& ctors = cls->methods->methods["<init>"];
+    for (auto& [desc, method] : ctors) {
+        // Добавляем вызов super.<init>()
+        int initNameIdx = cls->constants->findOrAddConstant(UTF8, "<init>");
+        int initDescIdx = cls->constants->findOrAddConstant(UTF8, "()V");
+
+        // ✅ #8 = NameAndType #6:#7
+        int nameAndTypeIdx = cls->constants->findOrAddConstant(NameAndType, "", 0, 0, initNameIdx, initDescIdx);
+
+        // ✅ #9 = Methodref Object:#8
+        int objectClassIdx = cls->constants->findOrAddConstant(Class, "", 0, 0,
+            cls->constants->findOrAddConstant(UTF8, "java/lang/Object"));
+        int superInitRef = cls->constants->findOrAddConstant(MethodRef, "", 0, 0, objectClassIdx, nameAndTypeIdx);
+
+        // Сохраняем для генерации байткода
+        method->superConstructorCall = superInitRef;
+    }
+}
 
 
 void ClassTable::initStdClasses() {

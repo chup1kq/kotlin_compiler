@@ -28,6 +28,7 @@ public:
     ClassTableElement();
 
     void addPrimaryConstructor(Constructor* primaryConstructor);
+    void addDefaultConstructorIfNeeded() const;
 
     void addMethodsToTable(std::list<FunNode *> funcList);
     void addMethodToTable(FunNode* method);

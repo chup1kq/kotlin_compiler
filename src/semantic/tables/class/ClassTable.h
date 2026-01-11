@@ -46,6 +46,8 @@ public:
     void attributeArrayCreatingExpr(MethodTableElement *method, ExprNode* expr);
     void attributeFuncOrMethodCall(MethodTableElement* currentMethod, ExprNode* expr);
 
+    void fillConstructorMethodRefs(ClassTableElement* cls);
+
     void fillLiterals(ClassTableElement* elem);
     void fillFieldConstants(ClassTableElement* elem);
     void fillLiteralsInStatement(StmtNode* stmt, ClassTableElement* elem);

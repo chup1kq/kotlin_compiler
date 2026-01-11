@@ -18,6 +18,7 @@ public:
     vector<FuncParam*> params;
     LocalVariableTable * localVarTable = new LocalVariableTable();
     int isFirst;
+    int superConstructorCall = 0;
 
     MethodTableElement(int nameConst,
         int descConst,

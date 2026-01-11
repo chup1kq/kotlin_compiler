@@ -59,6 +59,42 @@ void ClassTableElement::addPrimaryConstructor(Constructor* primaryConstructor) {
     }
 }
 
+void ClassTableElement::addDefaultConstructorIfNeeded() const {
+    std::string initName = "<init>";
+    std::string emptyDesc = "()V";  // Пустой конструктор
+
+    // Проверяем, есть ли уже конструктор с таким дескриптором
+    if (!this->methods->methods.contains(initName) ||
+        !this->methods->methods[initName].contains(emptyDesc)) {
+
+        // Создаем дефолтный конструктор
+        SemanticType* unitType = SemanticType::classType("JavaRTL/Unit");
+        std::vector<FuncParam*> emptyParams;
+
+        int initNameIdx = this->constants->findOrAddConstant(UTF8, initName);
+        int initDescIdx = this->constants->findOrAddConstant(UTF8, emptyDesc);
+
+        // Добавляем в таблицу методов
+        if (!this->methods->methods.contains(initName)) {
+            this->methods->methods[initName] = std::map<std::string, MethodTableElement*>();
+        }
+
+        this->methods->methods[initName][emptyDesc] =
+            new MethodTableElement(
+                initNameIdx,           // methodName (индекс Utf8 "<init>")
+                initDescIdx,           // descriptor (индекс Utf8 "()V")
+                initName,              // strName
+                emptyDesc,             // strDesc
+                nullptr,               // пустое тело
+                unitType,              // возвращает Unit (конструктор!)
+                emptyParams            // без параметров
+            );
+
+        std::cout << "Added default constructor: " << initName << emptyDesc << std::endl;
+        }
+}
+
+
 void ClassTableElement::addMethodsToTable(std::list<FunNode *> funcList) {
     for (auto& func : funcList) {
         addMethodToTable(func);
