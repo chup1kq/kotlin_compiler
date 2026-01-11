@@ -6,7 +6,7 @@
 #include "BytecodeGenerator.h"
 
 std::vector<uint8_t> KotlinCodeGenerator::generateStatement(StmtNode *stmt, ClassTableElement *classElement,
-                                                                 MethodTableElement *methodElement) {
+                                                            MethodTableElement *methodElement) {
     if (stmt->type == _EXPRESSION) {
         return generateExpression(stmt->expr, classElement, methodElement);
     } else if (stmt->type == _RETURN) {
@@ -22,18 +22,16 @@ std::vector<uint8_t> KotlinCodeGenerator::generateStatement(StmtNode *stmt, Clas
 }
 
 std::vector<uint8_t> KotlinCodeGenerator::generateExpression(ExprNode *expr, ClassTableElement *classElement,
-    MethodTableElement *methodElement) {
+                                                             MethodTableElement *methodElement) {
     if (expr->type == _IDENTIFIER) {
         return generateIdentifier(expr, methodElement);
     } else if (expr->type == _ARRAY_EXPR) {
-
     } else if (expr->type == _ARRAY_ACCESS) {
-
     }
 }
 
 std::vector<uint8_t> KotlinCodeGenerator::generateReturnStatement(StmtNode *stmt, ClassTableElement *classElement,
-    MethodTableElement *methodElement) {
+                                                                  MethodTableElement *methodElement) {
     std::vector<uint8_t> res;
 
     std::vector<uint8_t> value = generateExpression(stmt->expr, classElement, methodElement);
@@ -46,14 +44,14 @@ std::vector<uint8_t> KotlinCodeGenerator::generateReturnStatement(StmtNode *stmt
 }
 
 std::vector<uint8_t> KotlinCodeGenerator::generateCycle(StmtNode *stmt, ClassTableElement *classElement,
-    MethodTableElement *methodElement) {
+                                                        MethodTableElement *methodElement) {
     std::vector<uint8_t> res;
     std::vector<uint8_t> cond;
     std::vector<uint8_t> body;
     std::vector<uint8_t> tmp;
     std::vector<uint8_t> ifBytes;
 
-    for (auto & bodyStmt: *stmt->blockStmts->stmts) {
+    for (auto &bodyStmt: *stmt->blockStmts->stmts) {
         tmp = generateStatement(bodyStmt, classElement, methodElement);
         BytecodeGenerator::appendToByteArray(&body, tmp.data(), tmp.size());
     }
@@ -86,11 +84,85 @@ std::vector<uint8_t> KotlinCodeGenerator::generateCycle(StmtNode *stmt, ClassTab
 
 std::vector<uint8_t> KotlinCodeGenerator::generateFor(StmtNode *stmt, ClassTableElement *classElement,
                                                       MethodTableElement *methodElement) {
-    /*TODO*/
+    std::vector<uint8_t> res;
+
+    ExprNode *condExpr = stmt->cond;
+
+    int trueLocal = stmt->forIteratorList->decls->front()->id;
+    methodElement->localVarTable->items[stmt->forIteratorList->decls->front()->varId]->id;
+
+    std::string lc = "$";
+    lc += stmt->id;
+    int local = methodElement->localVarTable->items[lc]->id; // Переменная для for.
+    auto init = BytecodeGenerator::iconstBipushSipush(0);
+    BytecodeGenerator::appendToByteArray(&res, init.data(), init.size());
+    auto loc = BytecodeGenerator::istore(local);
+    BytecodeGenerator::appendToByteArray(&res, loc.data(), loc.size());
+
+
+    std::vector<uint8_t> fill;
+
+    auto arr = generateExpression(condExpr, classElement, methodElement); // Загрузка массива.
+    BytecodeGenerator::appendToByteArray(&fill, arr.data(), arr.size());
+
+
+    // Инициализация локалки.
+    auto loa = BytecodeGenerator::iload(local);
+    BytecodeGenerator::appendToByteArray(&fill, loa.data(), loa.size());
+    auto aa = BytecodeGenerator::aaload();
+    auto as = BytecodeGenerator::astore(trueLocal);
+    BytecodeGenerator::appendToByteArray(&fill, aa.data(), aa.size());
+    BytecodeGenerator::appendToByteArray(&fill, as.data(), as.size());
+
+    // Истинное тело.
+    if (stmt->blockStmts != NULL) {
+        for (auto &bodyStmt: *stmt->blockStmts->stmts) {
+            auto tmp = generateStatement(bodyStmt, classElement, methodElement);
+            BytecodeGenerator::appendToByteArray(&fill, tmp.data(), tmp.size());
+        }
+    }
+
+    // Возвращение истинной локалки в массив.
+
+    //auto al = aload(trueLocal);
+
+    // Инкрементация.
+    auto l2 = BytecodeGenerator::iload(local);
+    BytecodeGenerator::appendToByteArray(&fill, l2.data(), l2.size());
+    auto bi = BytecodeGenerator::iconstBipushSipush(1);
+    BytecodeGenerator::appendToByteArray(&fill, bi.data(), bi.size());
+
+    auto inc = BytecodeGenerator::iadd();
+    BytecodeGenerator::appendToByteArray(&fill, inc.data(), inc.size());
+    auto str = BytecodeGenerator::istore(local);
+    BytecodeGenerator::appendToByteArray(&fill, str.data(), str.size());
+
+
+    // Проверка.
+    std::vector<uint8_t> cond;
+    arr = generateExpression(condExpr, classElement, methodElement); // Загрузка массива.
+    BytecodeGenerator::appendToByteArray(&cond, arr.data(), arr.size());
+    auto arl = BytecodeGenerator::arraylength();
+    BytecodeGenerator::appendToByteArray(&cond, arl.data(), arl.size());
+    auto l5 = BytecodeGenerator::iload(local);
+    BytecodeGenerator::appendToByteArray(&cond, l5.data(), l5.size());
+
+    int offset = fill.size() + cond.size();
+    offset = -offset;
+
+    auto gt = BytecodeGenerator::go_to(fill.size());
+
+    BytecodeGenerator::appendToByteArray(&res, gt.data(), gt.size());
+    BytecodeGenerator::appendToByteArray(&res, fill.data(), fill.size());
+    BytecodeGenerator::appendToByteArray(&res, cond.data(), cond.size());
+    auto if_i = BytecodeGenerator::if_icmp(IfCommandType::NE, offset);
+    BytecodeGenerator::appendToByteArray(&res, if_i.data(), if_i.size());
+
+    return res;
 }
 
 std::vector<uint8_t> KotlinCodeGenerator::generateValOrVar(StmtNode *stmt, ClassTableElement *classElement,
-    MethodTableElement *methodElement) {
+                                                           MethodTableElement *methodElement) {
     std::vector<uint8_t> res;
 
     if (!stmt->expr) {
@@ -123,7 +195,7 @@ std::vector<uint8_t> KotlinCodeGenerator::generateIdentifier(ExprNode *expr, Met
 }
 
 std::vector<uint8_t> KotlinCodeGenerator::generateArrayCreation(ExprNode *expr, ClassTableElement *classElement,
-    MethodTableElement *methodElement) {
+                                                                MethodTableElement *methodElement) {
     std::vector<uint8_t> res;
 
     auto dims = getArrayDimensions(expr);
@@ -136,19 +208,20 @@ std::vector<uint8_t> KotlinCodeGenerator::generateArrayCreation(ExprNode *expr, 
     // multianewarray с количеством измерений
     std::string typeDesc = getArrayTypeDescriptor(expr->semanticType);
     int classIndex = classElement->constants->findOrAddConstant(Class, "",
-        classElement->constants->findOrAddConstant(UTF8, typeDesc));
+                                                                classElement->constants->findOrAddConstant(
+                                                                    UTF8, typeDesc));
 
-    res.push_back(0xC5);  // multianewarray
+    res.push_back(0xC5); // multianewarray
     auto idxBytes = BytecodeGenerator::intToByteVector(classIndex, 2);
     BytecodeGenerator::appendToByteArray(&res, idxBytes.data(), idxBytes.size());
-    res.push_back(static_cast<uint8_t>(dims.sizes.size()));  // dims count
+    res.push_back(static_cast<uint8_t>(dims.sizes.size())); // dims count
 
     return res;
 }
 
 /* TODO под вопросом */
 std::vector<uint8_t> KotlinCodeGenerator::generateArrayAccess(ExprNode *expr, ClassTableElement *classElement,
-    MethodTableElement *methodElement) {
+                                                              MethodTableElement *methodElement) {
     std::vector<uint8_t> res;
 
     // Загрузить ссылку на массив (expr->left)
@@ -190,7 +263,7 @@ ArrayDimensions KotlinCodeGenerator::getArrayDimensions(ExprNode *expr) {
 
     if (expr->semanticType->elementType) {
         int maxNestedSize = 0;
-        for (auto &elem : *expr->elements->exprs) {
+        for (auto &elem: *expr->elements->exprs) {
             if (elem->type == _ARRAY_EXPR) {
                 auto nestedDims = getArrayDimensions(elem);
                 dims.nesting = nestedDims.nesting + 1;
@@ -206,7 +279,7 @@ ArrayDimensions KotlinCodeGenerator::getArrayDimensions(ExprNode *expr) {
 /* TODO это GPT */
 std::string KotlinCodeGenerator::getArrayTypeDescriptor(SemanticType *type) {
     std::string desc;
-    SemanticType* t = type;
+    SemanticType *t = type;
     while (t) {
         desc += "[";
         t = t->elementType;
