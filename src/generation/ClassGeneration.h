@@ -37,7 +37,7 @@ private:
     size_t m_headerPos;
 
 public:
-    ClassGeneration(ClassTableElement* cls, const std::string& filename);
+    ClassGeneration(ClassTableElement* cls);
 
     void generateClassFile(const std::string& className);
 

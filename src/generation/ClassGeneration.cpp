@@ -2,7 +2,7 @@
 
 #include "BytecodeGenerator.h"
 
-ClassGeneration::ClassGeneration(ClassTableElement* cls, const std::string& filename)
+ClassGeneration::ClassGeneration(ClassTableElement* cls)
     : m_class(cls),
       m_constants(cls->constants),
       m_accessFlags(0x0021),
@@ -11,7 +11,7 @@ ClassGeneration::ClassGeneration(ClassTableElement* cls, const std::string& file
 }
 
 void ClassGeneration::generateClassFile(const std::string& className) {
-    m_filename = "lexer-build/" + className + ".class";
+    m_filename = "" + className + ".class";
     m_out.open(m_filename, ios::binary | ios::trunc);
 
     if (!m_out.is_open()) {

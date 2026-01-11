@@ -2,6 +2,7 @@
 #include <fstream>
 
 #include "lexer-build/parser.hpp"
+#include "src/generation/ClassGeneration.h"
 #include "src/nodes/topLevel/KotlinFileNode.h"
 #include "src/semantic/tables/class/ClassTable.h"
 #include "src/semantic/tables/constant/ConstantTable.h"
@@ -46,6 +47,9 @@ int main() {
     classTable->buildClassTable(root);
 
     classTableToCSV(classTable, "tables");
+
+    ClassGeneration *classGeneration = new ClassGeneration(classTable->items["BaseClass"]);
+    classGeneration->generateClassFile("Main");
 
     return 0;
 }
