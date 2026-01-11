@@ -124,20 +124,20 @@ void ClassTable::attributeAndFillLocalsInClasses() {
     for (auto& [className, cls] : items) {
         for (auto& [methodName, overloads] : cls->methods->methods) {
             for (auto& [descriptor, method] : overloads) {
-                std::cout << "Processing class=" << className
-                          << " method=" << methodName
-                          << " desc=" << descriptor << std::endl;
+                // std::cout << "Processing class=" << className
+                //           << " method=" << methodName
+                //           << " desc=" << descriptor << std::endl;
 
                 if (!method) {
-                    std::cout << "  → skipped (method=nullptr)" << std::endl;
+                    // std::cout << "  → skipped (method=nullptr)" << std::endl;
                     continue;
                 }
                 if (!method->start) {
-                    std::cout << "  → skipped (method->start=nullptr)" << std::endl;
+                    // std::cout << "  → skipped (method->start=nullptr)" << std::endl;
                     continue;
                 }
                 if (!method->start->stmts) {
-                    std::cout << "  → skipped (method->start->stmts=nullptr)" << std::endl;
+                    // std::cout << "  → skipped (method->start->stmts=nullptr)" << std::endl;
                     continue;
                 }
 
@@ -311,6 +311,10 @@ void ClassTable::attributeFor(MethodTableElement *method, StmtNode *stmt) {
         iter->varType->customName = stmt->cond->semanticType->elementType->className;
         std::cout << iter->varType->customName << std::endl;
     }
+
+    // Ставим итератору массива первое значение из перебираемого списка и добавляем в таблицу локальных переменных
+    // iter->defaultValue = stmt->cond->elements->exprs->front(); // тут nullptr выкидывает
+    method->localVarTable->findOrAddLocalVar(iter->varId, stmt->cond->semanticType->elementType, false, true);
 
     if (stmt->blockStmts != nullptr) {
         for (auto* s : *stmt->blockStmts->stmts) {
@@ -504,7 +508,6 @@ void ClassTable::attributeAssignmentExpr(LocalVariableTable *table, ExprNode* ex
 }
 
 void ClassTable::attributeArrayCreatingExpr(MethodTableElement* method, ExprNode* expr) {
-    // Тип из typeElements (arrayOf<Int> или NULL)
     if (expr->typeElements) {
         expr->semanticType = SemanticType::arrayType(
             new SemanticType(expr->typeElements)

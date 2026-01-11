@@ -1,12 +1,31 @@
 #include "BaseTypesAttributing.h"
 
 void BaseTypesAttributing::transformExpressionBody(ExprNode *expr) {
+    // Пропускаем, если тип уже установлен
+    if (expr->typeElements && expr->typeElements->customName != "") {
+        return;
+    }
+
+    // === МАССИВЫ: выводим тип по элементам ===
+    if (expr->type == _ARRAY_EXPR && expr->elements && expr->elements->exprs && !expr->elements->exprs->empty()) {
+        ExprNode* firstElement = expr->elements->exprs->front();
+
+        // Рекурсивно атрибутируем первый элемент
+        transformExpressionBody(firstElement);
+
+        // Копируем тип элемента для массива
+        if (firstElement->typeElements) {
+            expr->typeElements = firstElement->typeElements->clone();
+            return;
+        }
+    }
+
+    // === Литералы ===
     auto attribute = [&](const std::string& name) {
         expr->typeElements = new TypeNode();
         expr->typeElements->isArray = false;
         expr->typeElements->arrayType = nullptr;
         expr->typeElements->customName = name;
-        return expr;
     };
 
     if (expr->fromLiteral == _FROM_INT) attribute("JavaRTL/Int");

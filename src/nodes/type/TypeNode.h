@@ -12,6 +12,8 @@ public:
     bool isArray;
     TypeNode* arrayType = nullptr;
 
+    TypeNode* clone() const;
+
     static TypeNode* createType(Type type, bool isNullable, std::string customName = "");
     static TypeNode* createUndefinedType();
     static TypeNode* createArrayType(bool isNullable, TypeNode* arrayType);

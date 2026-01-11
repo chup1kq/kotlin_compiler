@@ -1,5 +1,24 @@
 #include "TypeNode.h"
 
+TypeNode* TypeNode::clone() const {
+    TypeNode* cloned = new TypeNode();
+
+    cloned->type = this->type;
+    cloned->isCustomType = this->isCustomType;
+    cloned->customName = this->customName;
+    cloned->isNullable = this->isNullable;
+    cloned->isArray = this->isArray;
+
+    if (this->arrayType) {
+        cloned->arrayType = this->arrayType->clone();
+    } else {
+        cloned->arrayType = nullptr;
+    }
+
+    return cloned;
+}
+
+
 TypeNode * TypeNode::createType(Type type, bool isNullable, std::string customName) {
     TypeNode* typeNode = new TypeNode();
     typeNode->type = type;
