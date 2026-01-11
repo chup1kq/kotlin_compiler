@@ -36,7 +36,7 @@ public:
     static SemanticError assignmentTypeMismatch(const std::string &leftName, const std::string &rightName);
     static SemanticError invalidArrayAssignment(const std::string &name);
     static SemanticError multivarForLoop(const std::string &name);
-    static SemanticError forLoopNotArray(const std::string &name);
+    static SemanticError forLoopNotArray(const std::string &type);
     static SemanticError undefinedArrayElementType();
     static SemanticError conditionNotBoolean(const std::string &name);
     static SemanticError classNotFound(const std::string &className, const std::string &methodName);
@@ -52,6 +52,7 @@ public:
     static SemanticError invalidRangeType(const std::string &typeName);
     static SemanticError invalidRangeParams(int start, int end);
     static SemanticError invalidStepValue(int stepValue);
+    static SemanticError invalidIteratorType(std::string iterType, std::string elementsRangeType);
 
 };
 

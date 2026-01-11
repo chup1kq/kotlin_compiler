@@ -4,7 +4,6 @@
 
 #include "ClassTableElement.h"
 #include "../constant/ConstantTable.h"
-#include "../params/FuncParam.h"
 
 ClassTable::ClassTable(const std::string& fileName) {
     this->items.clear();
@@ -179,7 +178,7 @@ void ClassTable::attributeAndFillLocalsInStatement(MethodTableElement *method, S
             attributeCycle(method, stmt);
             break;
         case (_FOR):
-            // attributeFor(method, stmt);
+            attributeFor(method, stmt);
             break;
         case (_RETURN):
             attributeReturn(method, stmt);
@@ -272,42 +271,45 @@ void ClassTable::attributeCondition(MethodTableElement *method, ExprNode* cond) 
     }
 }
 
-/* TODO переделать на forIteratorList */
+
 void ClassTable::attributeFor(MethodTableElement *method, StmtNode *stmt) {
+    // TODO переделать на несколько переменных
     int varDeclCount = stmt->forIteratorList->decls->size();
 
     if (varDeclCount > 1) {
         throw SemanticError::multivarForLoop(method->strName + method->strDesc);
     }
 
+    if (!stmt->cond)
+        throw SemanticError::emptyRange();
+
     attributeExpression(method, stmt->cond);
 
-    if (stmt->cond->semanticType == nullptr || stmt->cond->type != _ARRAY_EXPR) {
-        throw SemanticError::forLoopNotArray(method->strName + method->strDesc);
+    if (!stmt->cond->semanticType->isArray()) {
+        throw SemanticError::forLoopNotArray(stmt->cond->semanticType->toString());
     }
 
-    VarDeclaration* iter = stmt->forIterator;
+    // Пока что только для одного проверяем
+    VarDeclaration* iter = stmt->forIteratorList->decls->front();
 
-    if (iter != nullptr) {
-        if (iter->varType != nullptr) {
-            SemanticType declaredType(iter->varType);
-            SemanticType arrayType(*stmt->cond->semanticType);
-            SemanticType elementType = *arrayType.elementType;
+    // TODO тут можно не выкидывать исключение, а проверять, что в таблице локальных переменных i имеет такой же тип, что и элементы массива
+    if (method->localVarTable->contains(iter->varId)) {
+        throw SemanticError::redefinition(iter->varId);
+    }
 
-            if (!declaredType.isReplaceable(elementType)) {
-                throw SemanticError::returnTypeMismatch(method->strName + method->strDesc);
-            }
-
-            method->localVarTable->findOrAddLocalVar(iter->varType->customName, new SemanticType(declaredType), false, true);
+    if (iter->varType->customName != "") {
+        // Тип итераратора равен типу элементов перебираемого массива
+        if (iter->varType->customName != stmt->cond->semanticType->elementType->className) {
+            throw SemanticError::invalidIteratorType(
+                iter->varType->customName,
+                stmt->cond->semanticType->elementType->toString()
+            );
         }
-        else {
-            SemanticType elementType = *stmt->cond->semanticType;
-            method->localVarTable->findOrAddLocalVar(iter->varType->customName, new SemanticType(elementType), false, true);
-        }
-
-        std::string imageVar = "$" + iter->varType->customName;
-
-        method->localVarTable->findOrAddLocalVar(imageVar, new SemanticType(), false, true);
+    }
+    else {
+        // тут просто присваиваем, не учитываем вложенные массивы
+        iter->varType->customName = stmt->cond->semanticType->elementType->className;
+        std::cout << iter->varType->customName << std::endl;
     }
 
     if (stmt->blockStmts != nullptr) {

@@ -145,10 +145,10 @@ SemanticError SemanticError::multivarForLoop(const std::string &name) {
     );
 }
 
-SemanticError SemanticError::forLoopNotArray(const std::string &name) {
+SemanticError SemanticError::forLoopNotArray(const std::string &type) {
     return SemanticError(
         FOR_LOOP_NOT_ARRAY,
-        "Only arrays allowed in for loops '" + name + "'"
+        "Only arrays allowed in for loops. Atcual type '" + type + "'"
     );
 }
 
@@ -255,6 +255,13 @@ SemanticError SemanticError::invalidStepValue(int stepValue) {
     return SemanticError(
         INVALID_RANGE_PARAMS,
         "Step value must be > 0, but now '" + std::to_string(stepValue) + "'"
+    );
+}
+
+SemanticError SemanticError::invalidIteratorType(std::string iterType, std::string elementsRangeType) {
+    return SemanticError(
+        INVALID_ITERATOR_TYPE,
+        "Iterator has different type with range elements. Iterator '" + iterType + "' must be '" + elementsRangeType + "'"
     );
 }
 
