@@ -105,8 +105,76 @@ void ClassGeneration::writeToFile() {
     m_buffer.clear();
 }
 
-void ClassGeneration::generateMainMethod() {
-    // пока пустой
+std::vector<uint8_t> ClassGeneration::generateMainMethod(ClassTableElement* elem, MethodTableElement* main) {
+    std::vector<uint8_t> res;
+
+    int d = main->descriptor;
+    int n = main->methodName;
+    int nam = elem->constants->findOrAddConstant(UTF8, "main");
+    int desc = elem->constants->findOrAddConstant(UTF8, "([Ljava/lang/String;)V");
+    int nat = elem->constants->findOrAddConstant(NameAndType, "",0,0,n,d);
+    int mRef = elem->constants->findOrAddConstant(MethodRef, "",0,0,elem->thisClass,nat);
+
+
+    uint8_t publicStaticFlag[2] = { 0x00, 0x09 }; //ACC_PUBLIC + ACC_STATIC
+    BytecodeGenerator::appendToByteArray(&res, publicStaticFlag, 2);
+
+    //Добавление имени метода
+    std::vector<uint8_t> nameBytes = BytecodeGenerator::intToByteVector(nam, 2);
+    BytecodeGenerator::appendToByteArray(&res, nameBytes.data(), nameBytes.size());
+
+    // Добавление дескриптора метода
+    std::vector<uint8_t> typeBytes = BytecodeGenerator::intToByteVector(desc, 2);
+    BytecodeGenerator::appendToByteArray(&res, typeBytes.data(), typeBytes.size());
+
+    //Добавление атрибутов TODO:Code
+    std::vector<uint8_t> codeAttributeSizeBytes = BytecodeGenerator::intToByteVector(1, 2);
+    BytecodeGenerator::appendToByteArray(&res, codeAttributeSizeBytes.data(), codeAttributeSizeBytes.size());
+
+
+    int cd = elem->constants->findOrAddConstant(UTF8, "Code");
+    codeAttributeSizeBytes = BytecodeGenerator::intToByteVector(cd, 2);
+    BytecodeGenerator::appendToByteArray(&res, codeAttributeSizeBytes.data(), codeAttributeSizeBytes.size());
+
+    std::vector<uint8_t> codeBytes;
+
+    codeBytes = BytecodeGenerator::invokestatic(mRef);
+
+    std::vector<uint8_t> ret = BytecodeGenerator::_return();
+
+    BytecodeGenerator::appendToByteArray(&codeBytes, ret.data(), ret.size());
+
+    //Добавление длины атрибута
+    std::vector<uint8_t> lengthBytes = BytecodeGenerator::intToByteVector(12 + codeBytes.size(), 4);
+    BytecodeGenerator::appendToByteArray(&res, lengthBytes.data(), lengthBytes.size());
+
+    //Добавление размера стека операндов
+    std::vector<uint8_t> stackSizeBytes = BytecodeGenerator::intToByteVector(1000, 2);
+    BytecodeGenerator::appendToByteArray(&res, stackSizeBytes.data(), stackSizeBytes.size());
+
+    //Добавление количества локальных переменных
+    int localsSize = 1;
+    std::vector<uint8_t> localsSizeBytes = BytecodeGenerator::intToByteVector(localsSize, 2);
+    BytecodeGenerator::appendToByteArray(&res, localsSizeBytes.data(), localsSizeBytes.size());
+
+
+    //Добавление длины байт-кода TODO: сделать
+    std::vector<uint8_t> codeSizeBytes = BytecodeGenerator::intToByteVector(codeBytes.size(), 4);
+    BytecodeGenerator::appendToByteArray(&res, codeSizeBytes.data(), codeSizeBytes.size());
+
+    //Добавление байт-кода
+    BytecodeGenerator::appendToByteArray(&res, codeBytes.data(), codeBytes.size());
+
+    //Добавление количества записей в таблице исключений
+    std::vector<uint8_t> exceptionTableSizeBytes = BytecodeGenerator::intToByteVector(0, 2);
+    BytecodeGenerator::appendToByteArray(&res, exceptionTableSizeBytes.data(), exceptionTableSizeBytes.size());
+
+    //Добавление количества атрибутов
+    std::vector<uint8_t> attributesCountBytes = BytecodeGenerator::intToByteVector(0, 2);
+    BytecodeGenerator::appendToByteArray(&res, attributesCountBytes.data(), attributesCountBytes.size());
+
+
+    return res;
 }
 
 std::vector<uint8_t> ClassGeneration::generateMethod(MethodTableElement *method) {

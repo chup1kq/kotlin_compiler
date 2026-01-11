@@ -49,7 +49,7 @@ public:
     void writeMethods();          // main() + пользовательские
     void writeToFile();           // Запись
 
-    void generateMainMethod();
+    std::vector<uint8_t> generateMainMethod(ClassTableElement* elem, MethodTableElement* main);
     std::vector<uint8_t> generateMethod(MethodTableElement* method);
 
     int findClassConstantIndex(const std::string& className);
