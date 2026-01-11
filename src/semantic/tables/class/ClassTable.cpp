@@ -31,7 +31,24 @@ void ClassTable::buildClassTable(KotlinFileNode* root) {
     // Проверяем и заполняем локальные переменные в top level функциях
     attributeAndFillLocalsInClasses();
 
+    std::cout << "=== STARTING fillLiterals ===" << std::endl;
+    int classIdx = 0;
+    for (auto& cls : this->items) {
+        std::cout << "Class " << classIdx++ << ": " << cls.first << std::endl;
+        if (cls.second->methods) {
+            std::cout << "  Methods: " << cls.second->methods->methods.size() << std::endl;
+        }
+        fillLiterals(cls.second);
+    }
+    std::cout << "=== fillLiterals COMPLETED ===" << std::endl;
 
+    std::cout << "=== STARTING fillMethodRefs ===" << std::endl;
+    classIdx = 0;
+    for (auto& cls : this->items) {
+        std::cout << "Class " << classIdx++ << ": " << cls.first << std::endl;
+        fillMethodRefs(cls.second);
+    }
+    std::cout << "=== fillMethodRefs COMPLETED ===" << std::endl;
 
     // TODO дописать
 }
@@ -645,103 +662,174 @@ void ClassTable::attributeFuncOrMethodCall(MethodTableElement* currentMethod, Ex
 }
 
 void ClassTable::fillLiterals(ClassTableElement *elem) {
-    for (auto & methods : elem->methods->methods) {
-        for (auto & method : methods.second) {
-            for (auto & stmt : *method.second->start->stmts) {
+    if (!elem || !elem->methods || !elem->methods->methods.size())
+        return;
+
+    for (auto& [methodName, overloads] : elem->methods->methods) {
+        for (auto& [desc, method] : overloads) {
+            if (!method || !method->start || !method->start->stmts)
+                continue;
+
+            std::cout << "Filling " << methodName << std::endl;
+            for (auto& stmt : *method->start->stmts) {
                 fillLiteralsInStatement(stmt, elem);
             }
         }
     }
 }
 
+
 void ClassTable::fillMethodRefs(ClassTableElement *elem) {
-    for (auto & methods : elem->methods->methods) {
-        for (auto & method : methods.second) {
-            for (auto & stmt : *method.second->start->stmts) {
+    if (!elem || !elem->methods || !elem->methods->methods.size())
+        return;
+
+    std::cout << "  → Processing method refs" << std::endl;
+
+    for (auto& [methodName, overloads] : elem->methods->methods) {
+        for (auto& [desc, method] : overloads) {
+            if (!method || !method->start || !method->start->stmts)
+                continue;
+
+            for (auto& stmt : *method->start->stmts) {
                 fillMethodRefsInStatement(stmt, elem);
             }
         }
     }
 }
 
+
 void ClassTable::fillMethodRefsInStatement(StmtNode *stmt, ClassTableElement *elem) {
-    if (stmt->type == _EXPRESSION) {
-        fillMethodRefsInExpression(stmt->expr, elem);
-    } else if (stmt->type == _RETURN) {
-        fillMethodRefsInExpression(stmt->expr, elem);
-    } else if (stmt->type == _VAL || stmt->type == _VAR) {
-        fillMethodRefsInExpression(stmt->expr, elem);
-    } else if (stmt->type ==_DO_WHILE || stmt->type == _WHILE || stmt->type == _FOR) {
-        fillMethodRefsInExpression(stmt->cond, elem);
-        for (auto & stmt : *stmt->blockStmts->stmts) {
-            fillMethodRefsInStatement(stmt, elem);
-        }
+    if (!stmt) return;
+
+    switch (stmt->type) {
+        case _EXPRESSION:
+            if (stmt->expr && stmt->expr->semanticType)
+                fillMethodRefsInExpression(stmt->expr, elem);
+            break;
+        case _RETURN:
+            if (stmt->expr && stmt->expr->semanticType)
+                fillMethodRefsInExpression(stmt->expr, elem);
+            break;
+        case _VAL:
+        case _VAR:
+            if (stmt->varDeclaration && stmt->varDeclaration->defaultValue
+                && stmt->varDeclaration->defaultValue->semanticType)
+                fillMethodRefsInExpression(stmt->varDeclaration->defaultValue, elem);
+            break;
+        case _DO_WHILE:
+        case _WHILE:
+            if (stmt->cond && stmt->cond->semanticType)
+                fillMethodRefsInExpression(stmt->cond, elem);
+            if (stmt->blockStmts && stmt->blockStmts->stmts) {
+                for (auto& s : *stmt->blockStmts->stmts) {
+                    fillMethodRefsInStatement(s, elem);
+                }
+            }
+            break;
+        case _FOR:
+            if (stmt->cond && stmt->cond->semanticType)
+                fillMethodRefsInExpression(stmt->cond, elem);
+            if (stmt->blockStmts && stmt->blockStmts->stmts) {
+                for (auto& s : *stmt->blockStmts->stmts) {
+                    fillMethodRefsInStatement(s, elem);
+                }
+            }
+            break;
+        case _IF_STMT:
+            if (stmt->cond && stmt->cond->semanticType)
+                fillMethodRefsInExpression(stmt->cond, elem);
+            if (stmt->trueStmtList && stmt->trueStmtList->stmts) {
+                for (auto& s : *stmt->trueStmtList->stmts) {
+                    fillMethodRefsInStatement(s, elem);
+                }
+            }
+            if (stmt->falseStmtList && stmt->falseStmtList->stmts) {
+                for (auto& s : *stmt->falseStmtList->stmts) {
+                    fillMethodRefsInStatement(s, elem);
+                }
+            }
+            break;
     }
 }
+
 
 /* TODO ? */
 void ClassTable::fillMethodRefsInExpression(ExprNode *expr, ClassTableElement *elem) {
-    if (!expr) return;
+    if (!expr || !expr->semanticType) return;
 
-    if (expr->left) {
+    // ✅ РЕКУРСИЯ - сначала дочерние узлы
+    if (expr->left && expr->left->semanticType)
         fillMethodRefsInExpression(expr->left, elem);
-    }
-    if (expr->right) {
+    if (expr->right && expr->right->semanticType)
         fillMethodRefsInExpression(expr->right, elem);
-    }
 
+    // ✅ Параметры
     if (expr->params && expr->params->exprs) {
-        for (auto & param : *expr->params->exprs) {
-            if (param) {
+        for (auto& param : *expr->params->exprs) {
+            if (param && param->semanticType)
                 fillMethodRefsInExpression(param, elem);
-            }
         }
     }
 
-    if (expr->type == _FUNC_CALL || expr->type == _FUNC_ACCESS) {
-        std::string id = expr->identifierName;
+    // ✅ Элементы массива
+    if (expr->elements && expr->elements->exprs) {
+        for (auto& e : *expr->elements->exprs) {
+            if (e && e->semanticType)
+                fillMethodRefsInExpression(e, elem);
+        }
+    }
 
-        std::string paramDesc = "(";
-        if (expr->params && expr->params->exprs) {
-            for (auto & param : *expr->params->exprs) {
-                if (param && param->semanticType) {
-                    paramDesc += getTypeDescriptor(param->semanticType);
-                }
+    // ✅ FUNC_CALL / FUNC_ACCESS
+    if (expr->type != _FUNC_CALL && expr->type != _FUNC_ACCESS)
+        return;
+
+    if (expr->identifierName.empty()) return;
+
+    // Строим дескриптор "()LJavaRTL/Unit;"
+    std::string paramDesc = "(";
+    if (expr->params && expr->params->exprs) {
+        for (auto& param : *expr->params->exprs) {
+            if (param && param->semanticType) {
+                paramDesc += getTypeDescriptor(param->semanticType);
             }
         }
-        paramDesc += ")";
+    }
+    paramDesc += ")";
 
-        if (expr->semanticType) {
-            paramDesc += getTypeDescriptor(expr->semanticType);
+    if (expr->semanticType) {
+        paramDesc += getTypeDescriptor(expr->semanticType);
+    } else {
+        paramDesc += "V";  // void
+    }
+
+    // Создаем CONSTANT_Methodref
+    int nameIdx = elem->constants->findOrAddConstant(UTF8, expr->identifierName);
+    int descIdx = elem->constants->findOrAddConstant(UTF8, paramDesc);
+    int nameAndType = elem->constants->findOrAddConstant(NameAndType, "", 0, 0, nameIdx, descIdx);
+
+    if (expr->type == _FUNC_CALL) {
+        // println -> JavaRTL/InputOutput.println
+        if (expr->identifierName == "print" || expr->identifierName == "println" || expr->identifierName == "readLine") {
+            int ioClassName = elem->constants->findOrAddConstant(UTF8, "JavaRTL/InputOutput");
+            int ioClass = elem->constants->findOrAddConstant(Class, "", 0, 0, ioClassName);
+            elem->constants->findOrAddConstant(MethodRef, "", 0, 0, ioClass, nameAndType);
         } else {
-            paramDesc += "V";
+            // Обычный вызов метода текущего класса
+            int thisClassName = elem->constants->findOrAddConstant(UTF8, elem->clsName);
+            int thisClass = elem->constants->findOrAddConstant(Class, "", 0, 0, thisClassName);
+            elem->constants->findOrAddConstant(MethodRef, "", 0, 0, thisClass, nameAndType);
         }
-
-        int nameIdx = elem->constants->findOrAddConstant(UTF8, id);
-        int descIdx = elem->constants->findOrAddConstant(UTF8, paramDesc);
-        int nameAndType = elem->constants->findOrAddConstant(NameAndType, "", 0, 0, nameIdx, descIdx);
-
-        if (expr->type == _FUNC_CALL) {
-            if (id == "print" || id == "println" || id == "readLine") {
-                int ioClassName = elem->constants->findOrAddConstant(UTF8, "JavaRTL/InputOutput");
-                int ioClass = elem->constants->findOrAddConstant(Class, "", 0, 0, ioClassName);
-                elem->constants->findOrAddConstant(MethodRef, "", 0, 0, ioClass, nameAndType);
-            } else {
-                int thisClass = elem->constants->findOrAddConstant(Class, "", 0, 0,
-                    elem->constants->findOrAddConstant(UTF8, elem->clsName));
-                elem->constants->findOrAddConstant(MethodRef, "", 0, 0, thisClass, nameAndType);
-            }
-        }
-        else if (expr->type == _FUNC_ACCESS) {
-            if (expr->left && expr->left->semanticType) {
-                std::string className = expr->left->semanticType->className;
-                int clsNameIdx = elem->constants->findOrAddConstant(UTF8, className);
-                int clsIdx = elem->constants->findOrAddConstant(Class, "", 0, 0, clsNameIdx);
-                elem->constants->findOrAddConstant(MethodRef, "", 0, 0, clsIdx, nameAndType);
-            }
+    } else if (expr->type == _FUNC_ACCESS) {
+        // Метод объекта: obj.method()
+        if (expr->left && expr->left->semanticType) {
+            std::string className = expr->left->semanticType->className;
+            int clsNameIdx = elem->constants->findOrAddConstant(UTF8, className);
+            int clsIdx = elem->constants->findOrAddConstant(Class, "", 0, 0, clsNameIdx);
+            elem->constants->findOrAddConstant(MethodRef, "", 0, 0, clsIdx, nameAndType);
         }
     }
 }
+
 
 void ClassTable::fillLiteralsInStatement(StmtNode *stmt, ClassTableElement *elem) {
     if (stmt->type == _EXPRESSION) {
@@ -759,21 +847,27 @@ void ClassTable::fillLiteralsInStatement(StmtNode *stmt, ClassTableElement *elem
 }
 
 void ClassTable::fillLiteralsInExpression(ExprNode *expr, ClassTableElement *elem) {
-        if (!expr) return;
+    if (!expr || !expr->semanticType) return;
 
-    // Обработка литералов — добавляем конструкторы оберток в constant pool
+    // Обработка литералов — добавляем конструкторы И ПОЛЯ (как в эталоне)
     if (expr->fromLiteral == _FROM_BOOLEAN) {
-        // new JavaRTL/Boolean(int)
+        // 1. FieldRef: JavaRTL/Boolean._ivalue:I (ЭТАЛОН)
+        int fieldType = elem->constants->findOrAddConstant(UTF8, "I");
+        int fieldName = elem->constants->findOrAddConstant(UTF8, "_ivalue");
+        int fieldNAT = elem->constants->findOrAddConstant(NameAndType, "", 0, 0, fieldName, fieldType);
+
         int boolClassName = elem->constants->findOrAddConstant(UTF8, "JavaRTL/Boolean");
         int boolClass = elem->constants->findOrAddConstant(Class, "", 0, 0, boolClassName);
+        elem->constants->findOrAddConstant(FieldRef, "", 0, 0, boolClass, fieldNAT);  // ✅ ПОЛЕ
 
+        // 2. MethodRef: <init>(I)V
         int initName = elem->constants->findOrAddConstant(UTF8, "<init>");
         int initDesc = elem->constants->findOrAddConstant(UTF8, "(I)V");
         int initNAT = elem->constants->findOrAddConstant(NameAndType, "", 0, 0, initName, initDesc);
         elem->constants->findOrAddConstant(MethodRef, "", 0, 0, boolClass, initNAT);
 
     } else if (expr->fromLiteral == _FROM_CHAR) {
-        // new JavaRTL/Char(char)
+        // MethodRef: JavaRTL/Char.<init>(C)V
         int charClassName = elem->constants->findOrAddConstant(UTF8, "JavaRTL/Char");
         int charClass = elem->constants->findOrAddConstant(Class, "", 0, 0, charClassName);
 
@@ -783,7 +877,7 @@ void ClassTable::fillLiteralsInExpression(ExprNode *expr, ClassTableElement *ele
         elem->constants->findOrAddConstant(MethodRef, "", 0, 0, charClass, initNAT);
 
     } else if (expr->fromLiteral == _FROM_DOUBLE) {
-        // new JavaRTL/Double(double)
+        // MethodRef: JavaRTL/Double.<init>(D)V
         int doubleClassName = elem->constants->findOrAddConstant(UTF8, "JavaRTL/Double");
         int doubleClass = elem->constants->findOrAddConstant(Class, "", 0, 0, doubleClassName);
 
@@ -793,7 +887,7 @@ void ClassTable::fillLiteralsInExpression(ExprNode *expr, ClassTableElement *ele
         elem->constants->findOrAddConstant(MethodRef, "", 0, 0, doubleClass, initNAT);
 
     } else if (expr->fromLiteral == _FROM_FLOAT) {
-        // new JavaRTL/Float(float)
+        // MethodRef: JavaRTL/Float.<init>(F)V
         int floatClassName = elem->constants->findOrAddConstant(UTF8, "JavaRTL/Float");
         int floatClass = elem->constants->findOrAddConstant(Class, "", 0, 0, floatClassName);
 
@@ -803,26 +897,35 @@ void ClassTable::fillLiteralsInExpression(ExprNode *expr, ClassTableElement *ele
         elem->constants->findOrAddConstant(MethodRef, "", 0, 0, floatClass, initNAT);
 
     } else if (expr->fromLiteral == _FROM_INT) {
-        // CONSTANT_Integer для больших чисел
+        // 1. CONSTANT_Integer для больших чисел (БЕЗОПАСНО)
+        // Предполагаем, что intValue всегда валидно после парсинга
         if (expr->intValue < -32768 || expr->intValue > 32767) {
             elem->constants->findOrAddConstant(Integer, "", expr->intValue, 0, 0);
         }
 
-        // new JavaRTL/Int(int)
+        // 2. FieldRef: JavaRTL/Int._value:I (ЭТАЛОН)
+        int fieldType = elem->constants->findOrAddConstant(UTF8, "I");
+        int fieldName = elem->constants->findOrAddConstant(UTF8, "_value");
+        int fieldNAT = elem->constants->findOrAddConstant(NameAndType, "", 0, 0, fieldName, fieldType);
+
         int intClassName = elem->constants->findOrAddConstant(UTF8, "JavaRTL/Int");
         int intClass = elem->constants->findOrAddConstant(Class, "", 0, 0, intClassName);
+        elem->constants->findOrAddConstant(FieldRef, "", 0, 0, intClass, fieldNAT);  // ✅ ПОЛЕ
 
+        // 3. MethodRef: <init>(I)V
         int initName = elem->constants->findOrAddConstant(UTF8, "<init>");
         int initDesc = elem->constants->findOrAddConstant(UTF8, "(I)V");
         int initNAT = elem->constants->findOrAddConstant(NameAndType, "", 0, 0, initName, initDesc);
         elem->constants->findOrAddConstant(MethodRef, "", 0, 0, intClass, initNAT);
 
     } else if (expr->fromLiteral == _FROM_STRING) {
-        // CONSTANT_String
-        int strUtf8 = elem->constants->findOrAddConstant(UTF8, expr->stringValue);
-        elem->constants->findOrAddConstant(String, "", 0, 0, strUtf8);
+        // 1. CONSTANT_String (ЭТАЛОН)
+        if (!expr->stringValue.empty()) {
+            int strUtf8 = elem->constants->findOrAddConstant(UTF8, expr->stringValue);
+            elem->constants->findOrAddConstant(String, "", 0, 0, strUtf8);
+        }
 
-        // new JavaRTL/String(String)
+        // 2. MethodRef: JavaRTL/String.<init>(Ljava/lang/String;)V
         int strClassName = elem->constants->findOrAddConstant(UTF8, "JavaRTL/String");
         int strClass = elem->constants->findOrAddConstant(Class, "", 0, 0, strClassName);
 
@@ -832,7 +935,7 @@ void ClassTable::fillLiteralsInExpression(ExprNode *expr, ClassTableElement *ele
         elem->constants->findOrAddConstant(MethodRef, "", 0, 0, strClass, initNAT);
 
     } else if (expr->fromLiteral == _FROM_UNIT) {
-        // new JavaRTL/Unit()
+        // MethodRef: JavaRTL/Unit.<init>()V
         int unitClassName = elem->constants->findOrAddConstant(UTF8, "JavaRTL/Unit");
         int unitClass = elem->constants->findOrAddConstant(Class, "", 0, 0, unitClassName);
 
@@ -842,23 +945,26 @@ void ClassTable::fillLiteralsInExpression(ExprNode *expr, ClassTableElement *ele
         elem->constants->findOrAddConstant(MethodRef, "", 0, 0, unitClass, initNAT);
     }
 
-    if (expr->left) {
-        fillMethodRefsInExpression(expr->left, elem);
+    // Рекурсия - обработка дочерних выражений (ваш код правильный)
+    if (expr->left && expr->left->semanticType) {
+        fillLiteralsInExpression(expr->left, elem);
     }
-    if (expr->right) {
-        fillMethodRefsInExpression(expr->right, elem);
+    if (expr->right && expr->right->semanticType) {
+        fillLiteralsInExpression(expr->right, elem);
     }
+
     if (expr->params && expr->params->exprs) {
         for (auto & param : *expr->params->exprs) {
-            if (param) {
-                fillMethodRefsInExpression(param, elem);
+            if (param && param->semanticType) {
+                fillLiteralsInExpression(param, elem);
             }
         }
     }
+
     if (expr->elements && expr->elements->exprs) {
         for (auto & elemExpr : *expr->elements->exprs) {
-            if (elemExpr) {
-                fillMethodRefsInExpression(elemExpr, elem);
+            if (elemExpr && elemExpr->semanticType) {
+                fillLiteralsInExpression(elemExpr, elem);
             }
         }
     }

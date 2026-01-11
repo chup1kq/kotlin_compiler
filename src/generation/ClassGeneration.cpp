@@ -1,5 +1,7 @@
 #include "ClassGeneration.h"
 
+#include <iostream>
+
 #include "BytecodeGenerator.h"
 
 ClassGeneration::ClassGeneration(ClassTableElement* cls)
@@ -44,8 +46,11 @@ void ClassGeneration::writeHeader() {
     // 2 байта: major_version = 65 (Java 21)
     writeU2(0x0041);
 
+    std::cout << "Constant table size: " + to_string(m_class->constants->items.size()) << std::endl;
+
     // 2 байта: constant_pool_count
-    writeU2(0);
+    uint16_t poolCount = static_cast<uint16_t>(m_class->constants->items.size() + 1);
+    writeU2(poolCount);
 }
 
 void ClassGeneration::writeConstantPool() {
