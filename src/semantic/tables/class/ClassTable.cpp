@@ -1048,7 +1048,7 @@ bool ClassTable::isNeededType(const std::string& signature, const std::string& t
 }
 
 std::string ClassTable::getTypeDescriptor(SemanticType* type) {
-    if (!type) return "LJava/lang/Object;";
+    if (!type) return "Ljava/lang/Object;";
 
     /* TODO */
     if (type->className == "Int") {
