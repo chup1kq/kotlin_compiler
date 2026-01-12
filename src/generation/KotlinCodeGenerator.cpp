@@ -5,6 +5,10 @@
 
 #include "BytecodeGenerator.h"
 
+std::vector<uint8_t> KotlinCodeGenerator::generate(ClassTableElement *classElement, MethodTableElement *methodElement) {
+    return generateMethodAttribute(classElement, methodElement);
+}
+
 std::vector<uint8_t> KotlinCodeGenerator::generateStatement(StmtNode *stmt, ClassTableElement *classElement,
                                                             MethodTableElement *methodElement) {
     if (stmt->type == _EXPRESSION) {

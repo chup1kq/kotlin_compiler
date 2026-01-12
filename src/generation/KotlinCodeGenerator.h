@@ -13,7 +13,7 @@ struct ArrayDimensions {
 
 class KotlinCodeGenerator {
 public:
-
+    static std::vector<uint8_t> generate(ClassTableElement* classElement, MethodTableElement* methodElement);
 
 private:
     static std::vector<uint8_t> generateStatement(StmtNode* stmt, ClassTableElement* classElement, MethodTableElement* methodElement);

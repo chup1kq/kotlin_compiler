@@ -51,6 +51,7 @@ public:
 
     std::vector<uint8_t> generateMainMethod(ClassTableElement* elem, MethodTableElement* main);
     std::vector<uint8_t> generateMethod(MethodTableElement* method);
+    std::vector<uint8_t> generateMethod(ClassTableElement* elem, MethodTableElement *method);
 
     int findClassConstantIndex(const std::string& className);
 };

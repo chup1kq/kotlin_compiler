@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "BytecodeGenerator.h"
+#include "KotlinCodeGenerator.h"
 
 ClassGeneration::ClassGeneration(ClassTableElement* cls)
     : m_class(cls),
@@ -26,14 +27,73 @@ void ClassGeneration::generateClassFile(const std::string& className) {
     printf("Generated: %s\n", m_filename.c_str());
 }
 
+// void ClassGeneration::generate() {
+//     m_headerPos = 8;        // запомни позицию constant_pool_count
+//     writeHeader();          // CAFEBABE + версии + count=0
+//     writeConstantPool();    // заполняет count и pool
+//     writeClassInfo();       // this_class, super_class
+//     writeFields();          // поля класса
+//     writeMethods();         // методы
+//     writeToFile();          // запись в файл
+// }
+
 void ClassGeneration::generate() {
-    m_headerPos = 8;        // запомни позицию constant_pool_count
-    writeHeader();          // CAFEBABE + версии + count=0
-    writeConstantPool();    // заполняет count и pool
-    writeClassInfo();       // this_class, super_class
-    writeFields();          // поля класса
-    writeMethods();         // методы
-    writeToFile();          // запись в файл
+    writeU4(0xCAFEBABE);
+    // 2 байта: minor_version = 0
+    writeU2(0x0000);
+    // 2 байта: major_version = 65 (Java 21)
+    writeU2(0x0041);
+    ClassTableElement * elem = m_class;
+    printf("Constants count :%d\n", elem->constants->items.size());
+
+    std::vector<uint8_t> tableLen = BytecodeGenerator::intToByteVector(elem->constants->items.size() + 1, 2);
+
+    BytecodeGenerator::appendToByteArray(&m_buffer, tableLen.data(), tableLen.size());
+
+    std::vector<uint8_t> data = BytecodeGenerator::generateBytesForConstantTable(elem->constants);
+    data.push_back(0x00);
+	data.push_back(0x21);
+
+    std::vector<uint8_t> thisCls = BytecodeGenerator::intToByteVector(elem->thisClass, 2);
+    std::vector<uint8_t> parentCls = BytecodeGenerator::intToByteVector(elem->superClass, 2);
+    BytecodeGenerator::appendToByteArray(&data, thisCls.data(), thisCls.size());
+    BytecodeGenerator::appendToByteArray(&data, parentCls.data(), parentCls.size());
+    std::vector<uint8_t> interfaceCount = BytecodeGenerator::intToByteVector(0, 2);
+    std::vector<uint8_t> fieldCount = BytecodeGenerator::intToByteVector(0, 2);
+
+	// Посчитать количество методов.
+	int mCount = 0;
+	std::vector<uint8_t> cd;
+	//mCount = 2;
+
+    for (auto & methodTable : elem->methods->methods) {
+        std::vector<uint8_t> cd1 = generateMethod(elem, methodTable.second);
+        BytecodeGenerator::appendToByteArray(&cd, cd1.data(),cd1.size());
+    }
+
+	if (elem->methods->methods.count("main") != 0)
+	{
+		if (elem->methods->methods["main"])
+		{
+			mCount++;
+			std::vector<uint8_t> m = generateMainMethod(elem, elem->methods->methods["main"]);
+			BytecodeGenerator::appendToByteArray(&cd, m.data(),m.size());
+		}
+	}
+	
+    std::vector<uint8_t> methodCount = BytecodeGenerator::intToByteVector(mCount, 2);
+
+    std::vector<uint8_t> attributeCount = BytecodeGenerator::intToByteVector(0, 2);
+    BytecodeGenerator::appendToByteArray(&data, interfaceCount.data(), interfaceCount.size());
+    BytecodeGenerator::appendToByteArray(&data, fieldCount.data(), fieldCount.size());
+    BytecodeGenerator::appendToByteArray(&data, methodCount.data(), methodCount.size());
+	BytecodeGenerator::appendToByteArray(&data, cd.data(), cd.size());
+    BytecodeGenerator::appendToByteArray(&data, attributeCount.data(), attributeCount.size());
+
+    BytecodeGenerator::appendToByteArray(&m_buffer, data.data(), data.size());
+    writeToFile();
+    // Закрытие файла.
+    m_out.close();
 }
 
 void ClassGeneration::writeHeader() {
@@ -203,6 +263,28 @@ std::vector<uint8_t> ClassGeneration::generateMethod(MethodTableElement *method)
     return res;
 }
 
+std::vector<uint8_t> ClassGeneration::generateMethod(ClassTableElement* elem, MethodTableElement *method) {
+    std::vector<uint8_t> res;
+
+    uint8_t publicStaticFlag[2] = { 0x00, 0x09 }; //ACC_PUBLIC + ACC_STATIC
+    BytecodeGenerator::appendToByteArray(&res, publicStaticFlag, 2);
+
+    //Добавление имени метода
+    std::vector<uint8_t> nameBytes = BytecodeGenerator::intToByteVector(method->methodName, 2);
+    BytecodeGenerator::appendToByteArray(&res, nameBytes.data(), nameBytes.size());
+
+    // Добавление дескриптора метода
+    std::vector<uint8_t> typeBytes = BytecodeGenerator::intToByteVector(method->descriptor, 2);
+    BytecodeGenerator::appendToByteArray(&res, typeBytes.data(), typeBytes.size());
+
+    //Добавление атрибутов TODO:Code
+    std::vector<uint8_t> codeAttributeSizeBytes = BytecodeGenerator::intToByteVector(1, 2);
+    BytecodeGenerator::appendToByteArray(&res, codeAttributeSizeBytes.data(), codeAttributeSizeBytes.size());
+    std::vector<uint8_t> codeAttributeBytes = KotlinCodeGenerator::generate(elem, method);
+    BytecodeGenerator::appendToByteArray(&res, codeAttributeBytes.data(), codeAttributeBytes.size());
+
+    return res;
+}
 
 void ClassGeneration::writeU2(uint16_t value) {
     m_buffer.push_back(value >> 8);
