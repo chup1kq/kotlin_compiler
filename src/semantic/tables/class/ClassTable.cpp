@@ -10,7 +10,6 @@ ClassTable::ClassTable(const std::string& fileName) {
     this->topLevelClassName = makeTopLevelClassName(fileName);
 }
 
-
 void ClassTable::buildClassTable(KotlinFileNode* root) {
     initStdClasses();
     addBaseClass();
@@ -40,8 +39,9 @@ void ClassTable::buildClassTable(KotlinFileNode* root) {
     if (items.find(topLevelClassName) != items.end()) {
         auto* mainKt = items[topLevelClassName];
         std::cout << "  Methods count: " << mainKt->methods->methods.size() << std::endl;
-        for (auto& [name, overloads] : mainKt->methods->methods) {
-            std::cout << "    → " << name << std::endl;
+        // ✅ УПРОЩЕНО: теперь methods — плоская map
+        for (auto& [fullMethodName, method] : mainKt->methods->methods) {
+            std::cout << "    → " << fullMethodName << std::endl;
         }
     }
 
@@ -55,8 +55,9 @@ void ClassTable::buildClassTable(KotlinFileNode* root) {
     if (items.find(topLevelClassName) != items.end()) {
         auto* mainKt = items[topLevelClassName];
         std::cout << "  Methods count: " << mainKt->methods->methods.size() << std::endl;
-        for (auto& [name, overloads] : mainKt->methods->methods) {
-            std::cout << "    → " << name << std::endl;
+        // ✅ УПРОЩЕНО: теперь methods — плоская map
+        for (auto& [fullMethodName, method] : mainKt->methods->methods) {
+            std::cout << "    → " << fullMethodName << std::endl;
         }
     }
 
@@ -67,8 +68,9 @@ void ClassTable::buildClassTable(KotlinFileNode* root) {
     if (items.find(topLevelClassName) != items.end()) {
         auto* mainKt = items[topLevelClassName];
         std::cout << "  Methods count: " << mainKt->methods->methods.size() << std::endl;
-        for (auto& [name, overloads] : mainKt->methods->methods) {
-            std::cout << "    → " << name << std::endl;
+        // ✅ УПРОЩЕНО: теперь methods — плоская map
+        for (auto& [fullMethodName, method] : mainKt->methods->methods) {
+            std::cout << "    → " << fullMethodName << std::endl;
         }
     }
 
@@ -187,35 +189,29 @@ void ClassTable::addClassesToClassTable(ClassTableElement *baseClass, std::list<
 }
 
 void ClassTable::attributeAndFillLocalsInClasses() {
+    // ✅ УПРОЩЕНО: убраны вложенные циклы по перегрузкам
     for (auto& [className, cls] : items) {
-        for (auto& [methodName, overloads] : cls->methods->methods) {
-            for (auto& [descriptor, method] : overloads) {
-                std::cout << "Processing class=" << className
-                          << " method=" << methodName
-                          << " desc=" << descriptor << std::endl;
+        for (auto& [fullMethodName, method] : cls->methods->methods) {
+            std::cout << "Processing class=" << className
+                      << " method=" << fullMethodName << std::endl;
 
-                if (!method) {
-                    // std::cout << "  → skipped (method=nullptr)" << std::endl;
-                    continue;
-                }
-                if (!method->start) {
-                    // std::cout << "  → skipped (method->start=nullptr)" << std::endl;
-                    continue;
-                }
-                if (!method->start->stmts) {
-                    // std::cout << "  → skipped (method->start->stmts=nullptr)" << std::endl;
-                    continue;
-                }
-
-                std::cout << "  → ATTRIBUTING (" << method->start->stmts->size() << " statements)" << std::endl;
-                std::cout << "  → ATTRIBUTING (" << method->strName << " )" << std::endl;
-                attributeAndFillLocals(method);
-                std::cout << "  → ENDED ATTRIBUTING (" << method->strName << " )" << std::endl;
+            if (!method) {
+                continue;
             }
+            if (!method->start) {
+                continue;
+            }
+            if (!method->start->stmts) {
+                continue;
+            }
+
+            std::cout << "  → ATTRIBUTING (" << method->start->stmts->size() << " statements)" << std::endl;
+            std::cout << "  → ATTRIBUTING (" << method->strName << " )" << std::endl;
+            attributeAndFillLocals(method);
+            std::cout << "  → ENDED ATTRIBUTING (" << method->strName << " )" << std::endl;
         }
     }
 }
-
 
 void ClassTable::attributeAndFillLocals(MethodTableElement *method) {
     if (!method || !method->start || !method->start->stmts)
@@ -636,7 +632,6 @@ SemanticType ClassTable::checkSameElementsType(std::list<ExprNode*> *exprs) {
     return firstType;
 }
 
-
 void ClassTable::attributeFuncOrMethodCall(MethodTableElement* currentMethod, ExprNode* expr) {
     std::cout << "Entered ClassTable::attributeFuncOrMethodCall" << std::endl;
     std::vector<SemanticType*> paramTypes;
@@ -653,7 +648,7 @@ void ClassTable::attributeFuncOrMethodCall(MethodTableElement* currentMethod, Ex
         }
     }
 
-    // "(LJavaRTL/String;)"
+    // "(LJavaRTL/Int;)" — параметры вызова
     std::string paramDesc = ClassTableElement::addParamsToMethodDescriptor(paramTypes);
 
     // Определяем класс
@@ -668,47 +663,33 @@ void ClassTable::attributeFuncOrMethodCall(MethodTableElement* currentMethod, Ex
     if (!this->items.contains(relatedClassName))
         throw SemanticError::classNotFound(relatedClassName, methodName);
 
-    auto& methodsMap = this->items[relatedClassName]->methods->methods;
+    // ✅ УПРОЩЕНО: ищем полный ключ "methodName_paramDesc"
+    std::string fullMethodKey = methodName + "_" + paramDesc;
 
-    bool isMethodFoundInClass = methodsMap.contains(methodName);
-    if (!isMethodFoundInClass) {
+    auto* cls = this->items[relatedClassName];
+    if (!cls->methods->contains(methodName, paramDesc)) {
         // Поиск в builtin классах
         bool foundInBuiltin = false;
-        for (auto& builtinClassName : builtinFunctionClasses) {
+        for (const auto& builtinClassName : builtinFunctionClasses) {
             if (!this->items.contains(builtinClassName))
                 continue;
-            auto& m = this->items[builtinClassName]->methods->methods;
-            if (m.contains(methodName)) {
+
+            if (this->items[builtinClassName]->methods->contains(methodName, paramDesc)) {
                 relatedClassName = builtinClassName;
-                methodsMap = m;
+                cls = this->items[builtinClassName];
                 foundInBuiltin = true;
                 break;
             }
         }
-        if (!foundInBuiltin)
-            throw SemanticError::methodNotFound(relatedClassName, methodName);
-    }
-
-    auto& overloads = methodsMap[methodName];
-
-    // Ищем перегрузку по prefix match полного дескриптора
-    MethodTableElement* chosen = nullptr;
-    std::string chosenDesc;
-
-    for (auto& [fullDesc, methodElem] : overloads) {
-        // fullDesc: "(LJavaRTL/String;)LJavaRTL/Unit;"
-        if (fullDesc.rfind(paramDesc, 0) == 0) { // начинается с paramDesc
-            chosen = methodElem;
-            chosenDesc = fullDesc;
-            break;
+        if (!foundInBuiltin) {
+            throw SemanticError::methodNotFound(relatedClassName, methodName + paramDesc);
         }
     }
 
+    // ✅ УПРОЩЕНО: получаем метод напрямую, без циклов по перегрузкам
+    MethodTableElement* chosen = cls->methods->getMethod(methodName, paramDesc);
     if (!chosen) {
-        std::cout << "paramDesc: " << paramDesc << std::endl;
-        for (auto& [fullDesc, _] : overloads) {
-            std::cout << "candidate: " << fullDesc << std::endl;
-        }
+        std::cout << "Method not found: " << relatedClassName << "." << methodName << paramDesc << std::endl;
         throw SemanticError::methodCandidateNotFound(relatedClassName, methodName, paramDesc);
     }
 
@@ -717,53 +698,46 @@ void ClassTable::attributeFuncOrMethodCall(MethodTableElement* currentMethod, Ex
 
 void ClassTable::fillLiterals(ClassTableElement *elem) {
     std::cout << "Entered fillLiterals::" << elem->clsName << std::endl;
-    if (!elem || !elem->methods || !elem->methods->methods.empty() == false) {
+    if (!elem || !elem->methods || elem->methods->methods.empty()) {
         std::cout << "  → SKIPPED (no methods)" << std::endl;
         return;
     }
 
-    for (auto& [methodName, overloads] : elem->methods->methods) {
-        std::cout << "  → Scanning method: " << methodName << std::endl;
+    // ✅ УПРОЩЕНО: один цикл по плоской map
+    for (auto& [fullMethodName, method] : elem->methods->methods) {
+        std::cout << "  → Scanning method: " << fullMethodName << std::endl;
+        std::cout << "      method=" << (method ? "OK" : "NULL") << std::endl;
+        std::cout << "      method->start=" << (method && method->start ? "OK" : "NULL") << std::endl;
+        std::cout << "      method->start->stmts=" << (method && method->start && method->start->stmts ? "OK" : "NULL") << std::endl;
 
-        for (auto& [desc, method] : overloads) {
-            std::cout << "    → Checking '" << methodName << "' (" << desc << ")" << std::endl;
-            std::cout << "      method=" << (method ? "OK" : "NULL") << std::endl;
-            std::cout << "      method->start=" << (method && method->start ? "OK" : "NULL") << std::endl;
-            std::cout << "      method->start->stmts=" << (method && method->start && method->start->stmts ? "OK" : "NULL") << std::endl;
+        if (!method || !method->start || !method->start->stmts) {
+            std::cout << "      → SKIPPED (missing start/stmts)" << std::endl;
+            continue;
+        }
 
-            if (!method || !method->start || !method->start->stmts) {
-                std::cout << "      → SKIPPED (missing start/stmts)" << std::endl;
-                continue;
-            }
-
-            std::cout << "Filling " << methodName << " (" << method->start->stmts->size() << " statements)" << std::endl;
-            for (auto& stmt : *method->start->stmts) {
-                fillLiteralsInStatement(stmt, elem);
-            }
+        std::cout << "Filling " << method->strName << " (" << method->start->stmts->size() << " statements)" << std::endl;
+        for (auto& stmt : *method->start->stmts) {
+            fillLiteralsInStatement(stmt, elem);
         }
     }
 }
 
-
-
 void ClassTable::fillMethodRefs(ClassTableElement *elem) {
-    if (!elem || !elem->methods || !elem->methods->methods.size())
+    if (!elem || !elem->methods || elem->methods->methods.empty())
         return;
 
     std::cout << "  → Processing method refs" << std::endl;
 
-    for (auto& [methodName, overloads] : elem->methods->methods) {
-        for (auto& [desc, method] : overloads) {
-            if (!method || !method->start || !method->start->stmts)
-                continue;
+    // ✅ УПРОЩЕНО: один цикл по плоской map
+    for (auto& [fullMethodName, method] : elem->methods->methods) {
+        if (!method || !method->start || !method->start->stmts)
+            continue;
 
-            for (auto& stmt : *method->start->stmts) {
-                fillMethodRefsInStatement(stmt, elem);
-            }
+        for (auto& stmt : *method->start->stmts) {
+            fillMethodRefsInStatement(stmt, elem);
         }
     }
 }
-
 
 void ClassTable::fillMethodRefsInStatement(StmtNode *stmt, ClassTableElement *elem) {
     if (!stmt) return;
@@ -819,8 +793,7 @@ void ClassTable::fillMethodRefsInStatement(StmtNode *stmt, ClassTableElement *el
     }
 }
 
-
-/* TODO ? */
+// Остальные методы НЕ ИЗМЕНЕНЫ (нет циклов по перегрузкам)
 void ClassTable::fillMethodRefsInExpression(ExprNode *expr, ClassTableElement *elem) {
     if (!expr || !expr->semanticType) return;
 
@@ -897,25 +870,32 @@ void ClassTable::fillMethodRefsInExpression(ExprNode *expr, ClassTableElement *e
     }
 }
 
-
 void ClassTable::fillLiteralsInStatement(StmtNode *stmt, ClassTableElement *elem) {
-    std:cout << "Entered fillLiteralsInExpression Semantic type = " << stmt->semanticType->toString() << endl;
+    // ✅ ИСПРАВЛЕНО: проверяем stmt->semanticType
+    if (stmt && stmt->semanticType) {
+        std::cout << "fillLiteralsInStatement: " << stmt->semanticType->toString() << std::endl;
+    }
     if (stmt->type == _EXPRESSION) {
         fillLiteralsInExpression(stmt->expr, elem);
     } else if (stmt->type == _RETURN) {
         fillLiteralsInExpression(stmt->expr, elem);
     } else if (stmt->type == _VAL || stmt->type == _VAR) {
-        fillLiteralsInExpression(stmt->expr, elem);
-    } else if (stmt->type ==_DO_WHILE || stmt->type == _WHILE || stmt->type == _FOR) {
+        fillLiteralsInExpression(stmt->varDeclaration->defaultValue, elem);
+    } else if (stmt->type == _DO_WHILE || stmt->type == _WHILE || stmt->type == _FOR) {
         fillLiteralsInExpression(stmt->cond, elem);
-        for (auto & stmt : *stmt->blockStmts->stmts) {
-            fillLiteralsInStatement(stmt, elem);
+        if (stmt->blockStmts && stmt->blockStmts->stmts) {
+            for (auto & s : *stmt->blockStmts->stmts) {
+                fillLiteralsInStatement(s, elem);
+            }
         }
     }
 }
 
 void ClassTable::fillLiteralsInExpression(ExprNode *expr, ClassTableElement *elem) {
-    std:cout << "Entered fillLiteralsInExpression Semantic type = " << expr->semanticType->toString() << endl;
+    if (expr && expr->semanticType) {
+        std::cout << "fillLiteralsInExpression: " << expr->semanticType->toString() << std::endl;
+    }
+
     if (!expr || !expr->semanticType) return;
 
     if (expr->fromLiteral == _FROM_BOOLEAN) {
@@ -1000,6 +980,7 @@ void ClassTable::fillLiteralsInExpression(ExprNode *expr, ClassTableElement *ele
 
 /* TODO ? */
 void ClassTable::fillFieldConstants(ClassTableElement *elem) {
+    // НЕ ИЗМЕНЕН — нет циклов по перегрузкам
     // Boolean._ivalue:I
     int boolClassName = elem->constants->findOrAddConstant(UTF8, "JavaRTL/Boolean");
     int boolClass = elem->constants->findOrAddConstant(Class, "", 0, 0, boolClassName);
@@ -1007,35 +988,36 @@ void ClassTable::fillFieldConstants(ClassTableElement *elem) {
     int ivalueName = elem->constants->findOrAddConstant(UTF8, "_ivalue");
     int intType = elem->constants->findOrAddConstant(UTF8, "I");
     int boolNameAndType = elem->constants->findOrAddConstant(NameAndType, "", 0, 0, ivalueName, intType);
-    elem->constants->findOrAddConstant(FieldRef, "", 0, 0, boolClass, boolNameAndType);  // сохраняем!
+    elem->constants->findOrAddConstant(FieldRef, "", 0, 0, boolClass, boolNameAndType);
 
     // Int._value:I (переиспользуем "I")
     int intClassName = elem->constants->findOrAddConstant(UTF8, "JavaRTL/Int");
     int intClass = elem->constants->findOrAddConstant(Class, "", 0, 0, intClassName);
 
     int valueName = elem->constants->findOrAddConstant(UTF8, "_value");
-    int intNameAndType = elem->constants->findOrAddConstant(NameAndType, "", 0, 0, valueName, intType);  // тот же intType!
+    int intNameAndType = elem->constants->findOrAddConstant(NameAndType, "", 0, 0, valueName, intType);
     elem->constants->findOrAddConstant(FieldRef, "", 0, 0, intClass, intNameAndType);
 }
 
 void ClassTable::fillConstructorMethodRefs(ClassTableElement* cls) {
-    // Для каждого конструктора
-    auto& ctors = cls->methods->methods["<init>"];
-    for (auto& [desc, method] : ctors) {
-        // Добавляем вызов super.<init>()
-        int initNameIdx = cls->constants->findOrAddConstant(UTF8, "<init>");
-        int initDescIdx = cls->constants->findOrAddConstant(UTF8, "()V");
+    // ✅ УПРОЩЕНО: ищем все конструкторы "<init>_*"
+    std::string initPrefix = "<init>_";
 
-        // ✅ #8 = NameAndType #6:#7
-        int nameAndTypeIdx = cls->constants->findOrAddConstant(NameAndType, "", 0, 0, initNameIdx, initDescIdx);
+    for (auto& [fullMethodName, method] : cls->methods->methods) {
+        if (fullMethodName.rfind(initPrefix, 0) == 0) {  // начинается с "<init>_"
+            // Добавляем вызов super.<init>()
+            int initNameIdx = cls->constants->findOrAddConstant(UTF8, "<init>");
+            int initDescIdx = cls->constants->findOrAddConstant(UTF8, "()V");
 
-        // ✅ #9 = Methodref Object:#8
-        int objectClassIdx = cls->constants->findOrAddConstant(Class, "", 0, 0,
-            cls->constants->findOrAddConstant(UTF8, "java/lang/Object"));
-        int superInitRef = cls->constants->findOrAddConstant(MethodRef, "", 0, 0, objectClassIdx, nameAndTypeIdx);
+            int nameAndTypeIdx = cls->constants->findOrAddConstant(NameAndType, "", 0, 0, initNameIdx, initDescIdx);
 
-        // Сохраняем для генерации байткода
-        method->superConstructorCall = superInitRef;
+            int objectClassIdx = cls->constants->findOrAddConstant(Class, "", 0, 0,
+                cls->constants->findOrAddConstant(UTF8, "java/lang/Object"));
+            int superInitRef = cls->constants->findOrAddConstant(MethodRef, "", 0, 0, objectClassIdx, nameAndTypeIdx);
+
+            // Сохраняем для генерации байткода
+            method->superConstructorCall = superInitRef;
+        }
     }
 }
 
@@ -1050,31 +1032,27 @@ void ClassTable::initStdClasses() {
         return cls;
     };
 
-    auto addMethod = [&](const std::string& nameClass,
-                     const std::string& nameMethod,
+    // ✅ УПРОЩЕНО: используем addMethod напрямую
+    auto addMethod = [&](const std::string& className,
+                     const std::string& methodName,
                      SemanticType* returnType,
                      const std::string& paramsDesc,   // "(LJavaRTL/String;)"
                      const std::string& fullDesc) {   // "(LJavaRTL/String;)LJavaRTL/Unit;"
-        auto& methodsMap = this->items[nameClass]->methods->methods;
 
-        if (!methodsMap.contains(nameMethod)) {
-            methodsMap[nameMethod] = {};
-        }
-
-        // Ключ — ПОЛНЫЙ дескриптор
-        methodsMap[nameMethod][fullDesc] =
+        // ✅ Прямой вызов addMethod с плоским ключом
+        ClassTableElement* cls = this->items[className];
+        cls->methods->addMethod(methodName, paramsDesc,
             new MethodTableElement(
-                0,            // methodNameNumber (если нужно — потом заполните из ConstantTable)
+                0,            // methodNameNumber
                 0,            // methodDescNumber
-                nameMethod,   // strName
+                methodName,   // strName
                 fullDesc,     // strDesc = полный дескриптор
                 nullptr,      // start
                 returnType,   // retType
                 {}            // params
-            );
+            )
+        );
     };
-
-
 
     /* 1.0 Инициализация класса Int */
     addClass("JavaRTL/Int");

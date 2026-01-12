@@ -1,10 +1,10 @@
 #include "MethodTable.h"
 
+#include "../../error/SemanticError.h"
+
 MethodTable::MethodTable() {
-    methods = std::map<
-        std::string,
-        std::map<std::string, MethodTableElement*>
-    >();
+    // ✅ УПРОЩЕНО: обычная map без вложенности
+    methods = std::map<std::string, MethodTableElement*>();
 }
 
 void MethodTable::addMethod(
@@ -12,11 +12,24 @@ void MethodTable::addMethod(
     const std::string& descriptor,
     MethodTableElement* element
 ) {
-    // если метода с таким именем ещё нет — создаём
-    if (!methods.count(methodName)) {
-        methods[methodName] = {};
+    // ✅ КЛЮЧ = methodName + "_" + descriptor (убрана вложенность)
+    std::string fullKey = methodName + "_" + descriptor;
+
+    // Проверяем уникальность (было бы перегрузка)
+    if (methods.count(fullKey)) {
+        throw SemanticError::methodAlreadyExists(fullKey);
     }
 
-    // кладём конкретную перегрузку
-    methods[methodName][descriptor] = element;
+    methods[fullKey] = element;
+}
+
+bool MethodTable::contains(const std::string& methodName, const std::string& descriptor) const {
+    std::string fullKey = methodName + "_" + descriptor;
+    return methods.count(fullKey) > 0;
+}
+
+MethodTableElement* MethodTable::getMethod(const std::string& methodName, const std::string& descriptor) const {
+    std::string fullKey = methodName + "_" + descriptor;
+    auto it = methods.find(fullKey);
+    return (it != methods.end()) ? it->second : nullptr;
 }

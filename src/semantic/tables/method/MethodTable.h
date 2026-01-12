@@ -7,10 +7,7 @@
 
 class MethodTable {
 public:
-    // Вложенная map для поддержки перегрузки
-    // Первый string - имя метода
-    // Второй string - дескриптор
-    std::map<std::string, std::map<std::string, MethodTableElement *>> methods;
+    std::map<std::string, MethodTableElement*> methods;
 
     MethodTable();
 
@@ -20,8 +17,8 @@ public:
         MethodTableElement* element
     );
 
-    // TODO для поддержки перегрузок
-    // vector<MethodTableElement*> findCandidates(const std::string& name);
+    bool contains(const std::string& methodName, const std::string& descriptor) const;
+    MethodTableElement* getMethod(const std::string& methodName, const std::string& descriptor) const;
 };
 
 #endif //KOTLIN_COMPILER_METHODTABLE_H

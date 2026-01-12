@@ -49,7 +49,7 @@ int main() {
     classTableToCSV(classTable, "tables");
 
     ClassGeneration *classGeneration = new ClassGeneration(classTable->items["MainKt"]);
-    classGeneration->generateClassFile("Main");
+    classGeneration->generateClassFile("MainKt");
 
     return 0;
 }

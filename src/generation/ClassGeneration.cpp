@@ -87,21 +87,13 @@ void ClassGeneration::writeFields() {
 }
 
 void ClassGeneration::writeMethods() {
-    uint16_t count = 0;
-
-    for (const auto& namePair : m_class->methods->methods) {
-        count += namePair.second.size();
-    }
+    uint16_t count = static_cast<uint16_t>(m_class->methods->methods.size());
 
     writeU2(count);
 
-    for (const auto& namePair : m_class->methods->methods) {
-        for (const auto& descPair : namePair.second) {
-            MethodTableElement* method = descPair.second;
-
-            auto bytes = generateMethod(method);
-            m_buffer.insert(m_buffer.end(), bytes.begin(), bytes.end());
-        }
+    for (const auto& [fullMethodName, method] : m_class->methods->methods) {
+        auto bytes = generateMethod(method);
+        m_buffer.insert(m_buffer.end(), bytes.begin(), bytes.end());
     }
 }
 
