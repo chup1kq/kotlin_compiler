@@ -28,6 +28,8 @@ private:
 
     static ArrayDimensions getArrayDimensions(ExprNode *expr);
     static std::string getArrayTypeDescriptor(SemanticType* type);
+
+    static std::vector<uint8_t> generateMethodAttribute(ClassTableElement* classElement, MethodTableElement* methodElement);
 };
 
 
