@@ -341,10 +341,10 @@ std::vector<uint8_t> BytecodeGenerator::generateBytesForConstantTableItem(Consta
             std::vector<uint8_t> num = intToByteVector(elem->intValue, 4);
             appendToByteArray(&res, num.data(), num.size());
         } break;
-        case (Double): {
-            std::vector<uint8_t> num = intToByteVector(elem->doubleValue, 8);
-            appendToByteArray(&res, num.data(), num.size());
-        } break;
+        // case (Double): {
+        //     std::vector<uint8_t> num = intToByteVector(elem->doubleValue, 8);
+        //     appendToByteArray(&res, num.data(), num.size());
+        // } break;
     }
 
     return res;

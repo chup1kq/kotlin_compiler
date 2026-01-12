@@ -130,8 +130,10 @@ void ClassTableElement::addMethodToTable(FunNode *func) {
     int methodNameNumber = this->constants->findOrAddConstant(UTF8, ident);
     int methodDescNumber = this->constants->findOrAddConstant(UTF8, descriptor);
 
+
     this->methods->methods.find(ident)->second[descriptor] = new MethodTableElement(methodNameNumber, methodDescNumber, ident, descriptor, func->body, retVal, params);
     // тут еще он добавляет в FunctionTable
+    std::cout << "Вызывается заполением методов в MainKt count = " << ident << " " << descriptor << std::endl;
 
     // Добавляем переменную this в локальные переменные
     SemanticType* ths = SemanticType::classType(clsName, false);

@@ -105,14 +105,14 @@ int ConstantTable::findConstant(
                     }
                     break;
 
-                case ConstantType::Double:
-                    // Для Double сравниваем вещественное значение
-                    // Внимание: прямое сравнение double может быть неточным
-                    // В реальном коде лучше использовать epsilon сравнение
-                    if (doubleEquals(doubleValue, element->doubleValue)) {
-                        return id;
-                    }
-                    break;
+                // case ConstantType::Double:
+                //     // Для Double сравниваем вещественное значение
+                //     // Внимание: прямое сравнение double может быть неточным
+                //     // В реальном коде лучше использовать epsilon сравнение
+                //     if (doubleEquals(doubleValue, element->doubleValue)) {
+                //         return id;
+                //     }
+                //     break;
             }
         }
     }

@@ -43,12 +43,12 @@ int main() {
 
     createDotTree(root, "after_transform.txt");
 
-    ClassTable *classTable = new ClassTable("BaseClass");
+    ClassTable *classTable = new ClassTable("MainKt");
     classTable->buildClassTable(root);
 
     classTableToCSV(classTable, "tables");
 
-    ClassGeneration *classGeneration = new ClassGeneration(classTable->items["BaseClass"]);
+    ClassGeneration *classGeneration = new ClassGeneration(classTable->items["MainKt"]);
     classGeneration->generateClassFile("Main");
 
     return 0;

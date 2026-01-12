@@ -4,12 +4,12 @@
 
 enum ConstantType {
     UTF8 = 1,
-    Class = 2,
-    MethodRef = 3,
-    FieldRef = 4,
-    NameAndType = 5,
-    Integer = 6,
-    Double = 7,
+    Class = 7,
+    MethodRef = 10,
+    FieldRef = 9,
+    NameAndType = 12,
+    Integer = 3,
+    Float = 4,
     String = 8,
 };
 
