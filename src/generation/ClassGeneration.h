@@ -7,6 +7,14 @@
 
 using namespace std;
 
+enum AccessFlags {
+    F_ACC_PUBLIC = 0x0001,
+    F_ACC_PRIVATE = 0x0002,
+    F_ACC_PROTECTED = 0x0004,
+    F_ACC_FINAL = 0x0010,
+    F_ACC_SUPER = 0x0020,
+};
+
 class ClassGeneration {
 private:
     // Основные данные

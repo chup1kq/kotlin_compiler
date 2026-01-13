@@ -41,6 +41,7 @@ public:
     // Управление потоком
     static std::vector<uint8_t> go_to(int offset);
     static std::vector<uint8_t> if_icmp(IfCommandType type, int offset);
+    static std::vector<uint8_t> if_acmp(IfCommandType type, int offset);
     static std::vector<uint8_t> if_(IfCommandType type, int offset);
 
     // Методы
@@ -66,6 +67,10 @@ public:
 
     // Арифметика
     static std::vector<uint8_t> iadd();
+    static std::vector<uint8_t> isub();
+    static std::vector<uint8_t> imul();
+    static std::vector<uint8_t> idiv();
+    static std::vector<uint8_t> iinc(int varIndex, int increment);
 
     // Получить готовый байткод
     const std::vector<uint8_t>& getBytecode() const { return m_buffer; }

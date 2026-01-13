@@ -168,6 +168,19 @@ std::vector<uint8_t> BytecodeGenerator::if_icmp(IfCommandType type, int offset) 
     return res;
 }
 
+std::vector<uint8_t> BytecodeGenerator::if_acmp(IfCommandType type, int offset) {
+    std::vector<uint8_t> res;
+    switch (type) {
+        case IfCommandType::EQ: res.push_back(0xA5); break; // if_acmpeq
+        case IfCommandType::NE: res.push_back(0xA6); break; // if_acmpne
+        default: throw std::runtime_error("Invalid if_acmp type");
+    }
+    auto bytes = intToByteVector(offset, 2);
+    res.insert(res.end(), bytes.begin(), bytes.end());
+    return res;
+}
+
+
 std::vector<uint8_t> BytecodeGenerator::if_(IfCommandType type, int offset) {
     std::vector<uint8_t> res;
 
@@ -278,6 +291,36 @@ std::vector<uint8_t> BytecodeGenerator::aaload() {
 std::vector<uint8_t> BytecodeGenerator::iadd() {
     return {0x60};
 }
+
+std::vector<uint8_t> BytecodeGenerator::imul() {
+    return {0x64};
+}
+
+std::vector<uint8_t> BytecodeGenerator::isub() {
+    return {0x68};
+}
+
+std::vector<uint8_t> BytecodeGenerator::idiv() {
+    return {0x6C};
+}
+
+std::vector<uint8_t> BytecodeGenerator::iinc(int varIndex, int increment) {
+    std::vector<uint8_t> res;
+    if (varIndex >= 0 && varIndex <= 255 && increment >= -128 && increment <= 127) {
+        res.push_back(0x84);  // iinc
+        res.push_back(static_cast<uint8_t>(varIndex));
+        res.push_back(static_cast<int8_t>(increment));  // s1
+    } else {
+        // wide iinc для больших индексов/приращений
+        res.push_back(0xC4);  // wide
+        res.push_back(0x84);  // iinc
+        res.push_back((varIndex >> 8) & 0xFF);
+        res.push_back(varIndex & 0xFF);
+        res.push_back(static_cast<int8_t>(increment));
+    }
+    return res;
+}
+
 
 std::vector<uint8_t> BytecodeGenerator::iaload() {
     return {0x46};
