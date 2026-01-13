@@ -27,11 +27,15 @@ std::vector<uint8_t> KotlinCodeGenerator::generateStatement(StmtNode *stmt, Clas
 
 std::vector<uint8_t> KotlinCodeGenerator::generateExpression(ExprNode *expr, ClassTableElement *classElement,
                                                              MethodTableElement *methodElement) {
+    // TODO
     if (expr->type == _IDENTIFIER) {
         return generateIdentifier(expr, methodElement);
     } else if (expr->type == _ARRAY_EXPR) {
+        return {};
     } else if (expr->type == _ARRAY_ACCESS) {
+        return {};
     }
+    return {};
 }
 
 std::vector<uint8_t> KotlinCodeGenerator::generateReturnStatement(StmtNode *stmt, ClassTableElement *classElement,
@@ -302,11 +306,13 @@ std::vector<uint8_t> KotlinCodeGenerator::generateMethodAttribute(ClassTableElem
     BytecodeGenerator::appendToByteArray(&res, codeAttributeSizeBytes.data(), codeAttributeSizeBytes.size());
 
     std::vector<uint8_t> codeBytes;
-    for (auto & stmt : *methodElement->start->stmts) {
-        if (!stmt) continue;
+    if (methodElement->start) {
+        for (auto & stmt : *methodElement->start->stmts) {
+            if (!stmt) continue;
 
-        std::vector<uint8_t> bytes = generateStatement(stmt, classElement, methodElement);
-        BytecodeGenerator::appendToByteArray(&codeBytes, bytes.data(), bytes.size());
+            std::vector<uint8_t> bytes = generateStatement(stmt, classElement, methodElement);
+            BytecodeGenerator::appendToByteArray(&codeBytes, bytes.data(), bytes.size());
+        }
     }
 
     printf("Code bytes len: %d\n", codeBytes.size());

@@ -43,6 +43,10 @@ void ClassGeneration::generate() {
     writeU2(0x0000);
     // 2 байта: major_version = 65 (Java 21)
     writeU2(0x0041);
+
+    uint8_t classAccessFlags[2] = {0x21, 0x00};  // ACC_PUBLIC + ACC_SUPER
+    BytecodeGenerator::appendToByteArray(&m_buffer, classAccessFlags, 2);
+
     ClassTableElement * elem = m_class;
     printf("Constants count :%d\n", elem->constants->items.size());
 

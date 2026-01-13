@@ -872,9 +872,7 @@ void ClassTable::fillMethodRefsInExpression(ExprNode *expr, ClassTableElement *e
 
 void ClassTable::fillLiteralsInStatement(StmtNode *stmt, ClassTableElement *elem) {
     // ✅ ИСПРАВЛЕНО: проверяем stmt->semanticType
-    if (stmt && stmt->semanticType) {
-        std::cout << "fillLiteralsInStatement: " << stmt->semanticType->toString() << std::endl;
-    }
+
     if (stmt->type == _EXPRESSION) {
         fillLiteralsInExpression(stmt->expr, elem);
     } else if (stmt->type == _RETURN) {
