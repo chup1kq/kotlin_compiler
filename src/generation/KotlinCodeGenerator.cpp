@@ -301,49 +301,55 @@ std::vector<uint8_t> KotlinCodeGenerator::generateMethodAttribute(ClassTableElem
     MethodTableElement *methodElement) {
     std::vector<uint8_t> res;
 
+    // 1. name_index "Code"
     int cd = classElement->constants->findOrAddConstant(UTF8, "Code");
-    std::vector<uint8_t> codeAttributeSizeBytes = BytecodeGenerator::intToByteVector(cd, 2);
-    BytecodeGenerator::appendToByteArray(&res, codeAttributeSizeBytes.data(), codeAttributeSizeBytes.size());
+    std::vector<uint8_t> codeNameBytes = BytecodeGenerator::intToByteVector(cd, 2);
+    BytecodeGenerator::appendToByteArray(&res, codeNameBytes.data(), codeNameBytes.size());
 
+    // 2. Генерация байткода
     std::vector<uint8_t> codeBytes;
-    if (methodElement->start) {
+    if (methodElement->start && methodElement->start->stmts) {
         for (auto & stmt : *methodElement->start->stmts) {
             if (!stmt) continue;
-
             std::vector<uint8_t> bytes = generateStatement(stmt, classElement, methodElement);
             BytecodeGenerator::appendToByteArray(&codeBytes, bytes.data(), bytes.size());
         }
     }
 
-    printf("Code bytes len: %d\n", codeBytes.size());
+    // 3. ОБЯЗАТЕЛЬНО добавляем return для void метода!
+    std::vector<uint8_t> ret = BytecodeGenerator::_return();  // 0xB1
+    BytecodeGenerator::appendToByteArray(&codeBytes, ret.data(), ret.size());
 
-    //Добавление длины атрибута
-    std::vector<uint8_t> lengthBytes = BytecodeGenerator::intToByteVector(12 + codeBytes.size(), 4);
+    printf("Code bytes len: %d\n", codeBytes.size());  // Должно быть >=1!
+
+    // 4. attribute_length = 12 + code_length (JVMS §4.7.3)
+    uint32_t attrLength = 12 + codeBytes.size();
+    std::vector<uint8_t> lengthBytes = BytecodeGenerator::intToByteVector(attrLength, 4);
     BytecodeGenerator::appendToByteArray(&res, lengthBytes.data(), lengthBytes.size());
 
-    //Добавление размера стека операндов
-    std::vector<uint8_t> stackSizeBytes = BytecodeGenerator::intToByteVector(1000, 2);
+    // 5. max_stack
+    std::vector<uint8_t> stackSizeBytes = BytecodeGenerator::intToByteVector(50, 2);
     BytecodeGenerator::appendToByteArray(&res, stackSizeBytes.data(), stackSizeBytes.size());
 
-    //Добавление количества локальных переменных
-    int localsSize = methodElement->localVarTable->items.size();
+    // 6. max_locals (main=2, остальные=по таблице+1)
+    int localsSize = (methodElement->strName == "main") ? 2 : methodElement->localVarTable->items.size() + 1;
     std::vector<uint8_t> localsSizeBytes = BytecodeGenerator::intToByteVector(localsSize, 2);
     BytecodeGenerator::appendToByteArray(&res, localsSizeBytes.data(), localsSizeBytes.size());
 
-    //Добавление длины байт-кода
+    // 7. code_length
     std::vector<uint8_t> codeSizeBytes = BytecodeGenerator::intToByteVector(codeBytes.size(), 4);
     BytecodeGenerator::appendToByteArray(&res, codeSizeBytes.data(), codeSizeBytes.size());
 
-    //Добавление байт-кода
+    // 8. code
     BytecodeGenerator::appendToByteArray(&res, codeBytes.data(), codeBytes.size());
 
-    //Добавление количества записей в таблице исключений
-    std::vector<uint8_t> exceptionTableSizeBytes = BytecodeGenerator::intToByteVector(0, 2);
-    BytecodeGenerator::appendToByteArray(&res, exceptionTableSizeBytes.data(), exceptionTableSizeBytes.size());
+    // 9. exception_table_length = 0
+    std::vector<uint8_t> exceptionBytes = BytecodeGenerator::intToByteVector(0, 2);
+    BytecodeGenerator::appendToByteArray(&res, exceptionBytes.data(), exceptionBytes.size());
 
-    //Добавление количества атрибутов
-    std::vector<uint8_t> attributesCountBytes = BytecodeGenerator::intToByteVector(0, 2);
-    BytecodeGenerator::appendToByteArray(&res, attributesCountBytes.data(), attributesCountBytes.size());
+    // 10. attributes_count = 0
+    std::vector<uint8_t> attrCountBytes = BytecodeGenerator::intToByteVector(0, 2);
+    BytecodeGenerator::appendToByteArray(&res, attrCountBytes.data(), attrCountBytes.size());
 
     return res;
 }

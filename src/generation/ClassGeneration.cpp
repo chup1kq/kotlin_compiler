@@ -290,27 +290,16 @@ std::vector<uint8_t> ClassGeneration::generateMethod(MethodTableElement *method)
 std::vector<uint8_t> ClassGeneration::generateMethod(ClassTableElement* elem, MethodTableElement *method) {
     std::vector<uint8_t> res;
 
+    // access_flags, name_index, descriptor_index, attributes_count=1
     uint16_t flags = getMethodAccessFlags(method);
-    BytecodeGenerator::appendToByteArray(
-        &res,
-        BytecodeGenerator::intToByteVector(flags, 2).data(),
-        2
-    );
+    BytecodeGenerator::appendToByteArray(&res, BytecodeGenerator::intToByteVector(flags, 2).data(), 2);
+    BytecodeGenerator::appendToByteArray(&res, BytecodeGenerator::intToByteVector(method->methodName, 2).data(), 2);
+    BytecodeGenerator::appendToByteArray(&res, BytecodeGenerator::intToByteVector(method->descriptor, 2).data(), 2);
+    BytecodeGenerator::appendToByteArray(&res, BytecodeGenerator::intToByteVector(1, 2).data(), 2);
 
-
-    //Добавление имени метода
-    std::vector<uint8_t> nameBytes = BytecodeGenerator::intToByteVector(method->methodName, 2);
-    BytecodeGenerator::appendToByteArray(&res, nameBytes.data(), nameBytes.size());
-
-    // Добавление дескриптора метода
-    std::vector<uint8_t> typeBytes = BytecodeGenerator::intToByteVector(method->descriptor, 2);
-    BytecodeGenerator::appendToByteArray(&res, typeBytes.data(), typeBytes.size());
-
-    //Добавление атрибутов TODO:Code
-    std::vector<uint8_t> codeAttributeSizeBytes = BytecodeGenerator::intToByteVector(1, 2);
-    BytecodeGenerator::appendToByteArray(&res, codeAttributeSizeBytes.data(), codeAttributeSizeBytes.size());
-    std::vector<uint8_t> codeAttributeBytes = KotlinCodeGenerator::generate(elem, method);
-    BytecodeGenerator::appendToByteArray(&res, codeAttributeBytes.data(), codeAttributeBytes.size());
+    // Code attribute целиком
+    auto codeAttr = KotlinCodeGenerator::generate(elem, method);
+    BytecodeGenerator::appendToByteArray(&res, codeAttr.data(), codeAttr.size());
 
     return res;
 }
