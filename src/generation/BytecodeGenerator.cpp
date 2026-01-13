@@ -22,12 +22,18 @@ std::vector<uint8_t> BytecodeGenerator::intToByteVector(int num, int arraySize) 
 
 std::vector<uint8_t> BytecodeGenerator::iconstBipushSipush(int num) {
     std::vector<uint8_t> res;
-    if (num >= -1 && num <= 5) {
-        res.push_back(0x02 + num + 1);  // iconst_m1..iconst_5
-    } else if (num >= -128 && num <= 127) {
+    if (num == -1) {
+        res.push_back(0x02);  // iconst_m1
+    }
+
+    else if (num >= 0 && num <= 5) {
+        res.push_back(0x03 + num);  // iconst_0..5: 0x03+0=0x03, 0x03+5=0x08
+    }
+    else if (num >= -128 && num <= 127) {
         res.push_back(0x10);  // bipush
         res.push_back(static_cast<uint8_t>(num));
-    } else if (num >= -32768 && num <= 32767) {
+    }
+    else if (num >= -32768 && num <= 32767) {
         res.push_back(0x11);  // sipush
         auto temp = intToByteVector(num, 2);
         res.insert(res.end(), temp.begin(), temp.end());
@@ -341,10 +347,10 @@ std::vector<uint8_t> BytecodeGenerator::generateBytesForConstantTableItem(Consta
             std::vector<uint8_t> num = intToByteVector(elem->intValue, 4);
             appendToByteArray(&res, num.data(), num.size());
         } break;
-        // case (Double): {
-        //     std::vector<uint8_t> num = intToByteVector(elem->doubleValue, 8);
-        //     appendToByteArray(&res, num.data(), num.size());
-        // } break;
+        case (Float): {
+            std::vector<uint8_t> num = intToByteVector(elem->doubleValue, 8);
+            appendToByteArray(&res, num.data(), num.size());
+        } break;
     }
 
     return res;
