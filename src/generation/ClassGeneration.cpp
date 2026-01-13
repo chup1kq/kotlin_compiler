@@ -13,6 +13,22 @@ ClassGeneration::ClassGeneration(ClassTableElement* cls)
       m_thisClassIndex(0) {
 }
 
+uint16_t getMethodAccessFlags(MethodTableElement* method) {
+    // <init> — НИКОГДА НЕ STATIC
+    if (method->strName == "<init>") {
+        return 0x0001; // ACC_PUBLIC
+    }
+
+    // main — public static
+    if (method->strName == "main") {
+        return 0x0009; // ACC_PUBLIC | ACC_STATIC
+    }
+
+    // обычные методы
+    return 0x0001; // ACC_PUBLIC
+}
+
+
 void ClassGeneration::generateClassFile(const std::string& className) {
     m_filename = "" + className + ".class";
     m_out.open(m_filename, ios::binary | ios::trunc);
@@ -38,67 +54,71 @@ void ClassGeneration::generateClassFile(const std::string& className) {
 // }
 
 void ClassGeneration::generate() {
-    writeU4(0xCAFEBABE);
-    // 2 байта: minor_version = 0
-    writeU2(0x0000);
-    // 2 байта: major_version = 65 (Java 21)
-    writeU2(0x0041);
+    m_buffer.clear();
 
-    uint8_t classAccessFlags[2] = {0x21, 0x00};  // ACC_PUBLIC + ACC_SUPER
-    BytecodeGenerator::appendToByteArray(&m_buffer, classAccessFlags, 2);
+    /* ========= 1. MAGIC + VERSION ========= */
+    writeU4(0xCAFEBABE);   // magic
+    writeU2(0x0000);       // minor_version
+    writeU2(0x0041);       // major_version (Java 21)
 
-    ClassTableElement * elem = m_class;
-    printf("Constants count :%d\n", elem->constants->items.size());
+    /* ========= 2. CONSTANT POOL ========= */
+    uint16_t cpCount = static_cast<uint16_t>(m_constants->items.size() + 1);
+    writeU2(cpCount);
 
-    std::vector<uint8_t> tableLen = BytecodeGenerator::intToByteVector(elem->constants->items.size() + 1, 2);
+    std::vector<uint8_t> cpBytes =
+        BytecodeGenerator::generateBytesForConstantTable(m_constants);
 
-    BytecodeGenerator::appendToByteArray(&m_buffer, tableLen.data(), tableLen.size());
+    m_buffer.insert(m_buffer.end(), cpBytes.begin(), cpBytes.end());
 
-    std::vector<uint8_t> data = BytecodeGenerator::generateBytesForConstantTable(elem->constants);
-    data.push_back(0x00);
-	data.push_back(0x21);
+    /* ========= 3. ACCESS FLAGS ========= */
+    writeU2(0x0021); // ACC_PUBLIC | ACC_SUPER
 
-    std::vector<uint8_t> thisCls = BytecodeGenerator::intToByteVector(elem->thisClass, 2);
-    std::vector<uint8_t> parentCls = BytecodeGenerator::intToByteVector(elem->superClass, 2);
-    BytecodeGenerator::appendToByteArray(&data, thisCls.data(), thisCls.size());
-    BytecodeGenerator::appendToByteArray(&data, parentCls.data(), parentCls.size());
-    std::vector<uint8_t> interfaceCount = BytecodeGenerator::intToByteVector(0, 2);
-    std::vector<uint8_t> fieldCount = BytecodeGenerator::intToByteVector(0, 2);
+    /* ========= 4. THIS / SUPER ========= */
+    writeU2(m_class->thisClass);    // index of Class "MainKt"
+    writeU2(m_class->superClass);   // index of Class "java/lang/Object"
 
-	// Посчитать количество методов.
-	int mCount = 0;
-	std::vector<uint8_t> cd;
-	//mCount = 2;
+    /* ========= 5. INTERFACES ========= */
+    writeU2(0); // interfaces_count
 
-    for (auto & methodTable : elem->methods->methods) {
-        std::vector<uint8_t> cd1 = generateMethod(elem, methodTable.second);
-        BytecodeGenerator::appendToByteArray(&cd, cd1.data(),cd1.size());
+    /* ========= 6. FIELDS ========= */
+    writeU2(0); // fields_count
+
+    /* ========= 7. METHODS ========= */
+    std::vector<uint8_t> methodsBytes;
+    uint16_t methodsCount = 0;
+
+    // обычные методы
+    for (auto &pair : m_class->methods->methods) {
+        if (!pair.second) continue;
+        if (pair.first == "main") continue; // main отдельно
+
+        auto m = generateMethod(m_class, pair.second);
+        methodsBytes.insert(methodsBytes.end(), m.begin(), m.end());
+        methodsCount++;
     }
 
-	if (elem->methods->methods.count("main") != 0)
-	{
-		if (elem->methods->methods["main"])
-		{
-			mCount++;
-			std::vector<uint8_t> m = generateMainMethod(elem, elem->methods->methods["main"]);
-			BytecodeGenerator::appendToByteArray(&cd, m.data(),m.size());
-		}
-	}
-	
-    std::vector<uint8_t> methodCount = BytecodeGenerator::intToByteVector(mCount, 2);
+    // main
+    if (m_class->methods->methods.count("main")) {
+        auto mainMethod =
+            generateMainMethod(m_class, m_class->methods->methods["main"]);
+        methodsBytes.insert(methodsBytes.end(),
+                            mainMethod.begin(),
+                            mainMethod.end());
+        methodsCount++;
+    }
 
-    std::vector<uint8_t> attributeCount = BytecodeGenerator::intToByteVector(0, 2);
-    BytecodeGenerator::appendToByteArray(&data, interfaceCount.data(), interfaceCount.size());
-    BytecodeGenerator::appendToByteArray(&data, fieldCount.data(), fieldCount.size());
-    BytecodeGenerator::appendToByteArray(&data, methodCount.data(), methodCount.size());
-	BytecodeGenerator::appendToByteArray(&data, cd.data(), cd.size());
-    BytecodeGenerator::appendToByteArray(&data, attributeCount.data(), attributeCount.size());
+    writeU2(methodsCount);
+    m_buffer.insert(m_buffer.end(),
+                    methodsBytes.begin(),
+                    methodsBytes.end());
 
-    BytecodeGenerator::appendToByteArray(&m_buffer, data.data(), data.size());
+    /* ========= 8. CLASS ATTRIBUTES ========= */
+    writeU2(0); // attributes_count
+
+    /* ========= 9. WRITE FILE ========= */
     writeToFile();
-    // Закрытие файла.
-    m_out.close();
 }
+
 
 void ClassGeneration::writeHeader() {
     // 4 байта: Magic number (подпись Java)
@@ -270,8 +290,13 @@ std::vector<uint8_t> ClassGeneration::generateMethod(MethodTableElement *method)
 std::vector<uint8_t> ClassGeneration::generateMethod(ClassTableElement* elem, MethodTableElement *method) {
     std::vector<uint8_t> res;
 
-    uint8_t publicStaticFlag[2] = { 0x00, 0x09 }; //ACC_PUBLIC + ACC_STATIC
-    BytecodeGenerator::appendToByteArray(&res, publicStaticFlag, 2);
+    uint16_t flags = getMethodAccessFlags(method);
+    BytecodeGenerator::appendToByteArray(
+        &res,
+        BytecodeGenerator::intToByteVector(flags, 2).data(),
+        2
+    );
+
 
     //Добавление имени метода
     std::vector<uint8_t> nameBytes = BytecodeGenerator::intToByteVector(method->methodName, 2);
