@@ -158,12 +158,19 @@ std::string ClassTableElement::createVoidMethodDescriptor(vector<FuncParam *> pa
 std::string ClassTableElement::createMethodDescriptor(vector<FuncParam*> params, SemanticType* returnType) {
     std::string desc = addParamsToMethodDescriptor(params);
 
-    if (!returnType->isArray())
-        desc += "L";
-    else
-        desc += "[L";
+    if (returnType->className == "JavaRTL/Unit") {
+        desc += "V";
+        return desc;
+    }
 
-    desc += returnType->className;
+    if (!returnType->isArray()) {
+        desc += "L";
+        desc += returnType->className;
+    }
+    else {
+        desc += "[L";
+        desc += returnType->elementType->className;
+    }
     desc += ";";
 
     std::cout << desc << std::endl;
@@ -173,12 +180,19 @@ std::string ClassTableElement::createMethodDescriptor(vector<FuncParam*> params,
 std::string ClassTableElement::createMethodDescriptor(vector<SemanticType*> params, SemanticType* returnType) {
     std::string desc = addParamsToMethodDescriptor(params);
 
-    if (!returnType->isArray())
-        desc += "L";
-    else
-        desc += "[L";
+    if (returnType->className == "JavaRTL/Unit") {
+        desc += "V";
+        return desc;
+    }
 
-    desc += returnType->className;
+    if (!returnType->isArray()) {
+        desc += "L";
+        desc += returnType->className;
+    }
+    else {
+        desc += "[L";
+        desc += returnType->elementType->className;
+    }
     desc += ";";
 
     std::cout << desc << std::endl;
@@ -189,12 +203,14 @@ std::string ClassTableElement::addParamsToMethodDescriptor(vector<FuncParam *> p
     std::string desc = "(";
 
     for (auto* param : params) {
-        if (!param->type->isArray())
+        if (!param->type->isArray()) {
             desc += "L";
-        else
+            desc += param->type->className;
+        }
+        else {
             desc += "[L";
-
-        desc += param->type->className;
+            desc += param->type->elementType->className;
+        }
         desc += ";";
     }
     desc += ")";
@@ -206,12 +222,14 @@ std::string ClassTableElement::addParamsToMethodDescriptor(vector<SemanticType *
     std::string desc = "(";
 
     for (SemanticType* t : params) {
-        if (!t->isArray())
+        if (!t->isArray()) {
             desc += "L";
-        else
+            desc += t->className;
+        }
+        else {
             desc += "[L";
-
-        desc += t->className;
+            desc += t->elementType->className;
+        }
         desc += ";";
     }
     desc += ")";
