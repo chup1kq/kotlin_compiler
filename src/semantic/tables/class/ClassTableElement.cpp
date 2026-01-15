@@ -125,8 +125,17 @@ void ClassTableElement::addMethodToTable(FunNode *func) {
         throw SemanticError::constructorAlreadyExists(descriptor);
     }
 
+    // TODO вот тут костыль, что у всех main будет descriptor = ([Ljava/lang/String)V;
     int methodNameNumber = this->constants->findOrAddConstant(UTF8, ident);
-    int methodDescNumber = this->constants->findOrAddConstant(UTF8, descriptor);
+    int methodDescNumber;
+
+    if (func->name == "main") {
+        methodDescNumber = this->constants->findOrAddConstant(UTF8, "([Ljava/lang/String;)V");
+    }
+    else {
+        methodDescNumber = this->constants->findOrAddConstant(UTF8, descriptor);
+    }
+
 
     // ✅ УПРОЩЕНО: используем addMethod
     MethodTableElement* methodElem = new MethodTableElement(
