@@ -45,6 +45,7 @@ public:
     void attributeAssignmentExpr(LocalVariableTable *table, ExprNode* expr);
     void attributeArrayCreatingExpr(MethodTableElement *method, ExprNode* expr);
     void attributeFuncOrMethodCall(MethodTableElement* currentMethod, ExprNode* expr);
+    bool isMethodBaseClassConstructor(ExprNode* expr);
 
     void fillConstructorMethodRefs(ClassTableElement* cls);
 

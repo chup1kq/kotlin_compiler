@@ -667,9 +667,9 @@ void ClassTable::attributeFuncOrMethodCall(MethodTableElement* currentMethod, Ex
     std::string fullMethodKey = methodName + "_" + paramDesc;
 
     auto* cls = this->items[relatedClassName];
+    bool foundInBuiltin = false;
     if (!cls->methods->contains(methodName, paramDesc)) {
         // Поиск в builtin классах
-        bool foundInBuiltin = false;
         for (const auto& builtinClassName : builtinFunctionClasses) {
             if (!this->items.contains(builtinClassName))
                 continue;
@@ -681,6 +681,7 @@ void ClassTable::attributeFuncOrMethodCall(MethodTableElement* currentMethod, Ex
                 break;
             }
         }
+        foundInBuiltin = isMethodBaseClassConstructor(expr);
         if (!foundInBuiltin) {
             throw SemanticError::methodNotFound(relatedClassName, methodName + paramDesc);
         }
@@ -688,12 +689,32 @@ void ClassTable::attributeFuncOrMethodCall(MethodTableElement* currentMethod, Ex
 
     // ✅ УПРОЩЕНО: получаем метод напрямую, без циклов по перегрузкам
     MethodTableElement* chosen = cls->methods->getMethod(methodName, paramDesc);
-    if (!chosen) {
+    if (!chosen && !foundInBuiltin) {
         std::cout << "Method not found: " << relatedClassName << "." << methodName << paramDesc << std::endl;
         throw SemanticError::methodCandidateNotFound(relatedClassName, methodName, paramDesc);
     }
 
-    expr->semanticType = chosen->retType;
+    if (isMethodBaseClassConstructor(expr)) {
+        expr->semanticType = SemanticType::classType("JavaRTL/Int");
+    }
+    else {
+        expr->semanticType = chosen->retType;
+    }
+}
+
+bool ClassTable::isMethodBaseClassConstructor(ExprNode *expr) {
+    if (expr->type == _FUNC_CALL && expr->params->exprs->size() == 1) {
+        if (expr->identifierName == "Int" ||
+            expr->identifierName == "Float" ||
+            expr->identifierName == "Double" ||
+            expr->identifierName == "String" ||
+            expr->identifierName == "Char" ||
+            expr->identifierName == "Boolean"
+        ) {
+            return true;
+        }
+    }
+    return false;
 }
 
 void ClassTable::fillLiterals(ClassTableElement *elem) {
