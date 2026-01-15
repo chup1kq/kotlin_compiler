@@ -681,7 +681,7 @@ void ClassTable::attributeFuncOrMethodCall(MethodTableElement* currentMethod, Ex
                 break;
             }
         }
-        foundInBuiltin = isMethodBaseClassConstructor(expr);
+        foundInBuiltin = isMethodBaseClassConstructorOrInputOutput(expr);
         if (!foundInBuiltin) {
             throw SemanticError::methodNotFound(relatedClassName, methodName + paramDesc);
         }
@@ -694,7 +694,8 @@ void ClassTable::attributeFuncOrMethodCall(MethodTableElement* currentMethod, Ex
         throw SemanticError::methodCandidateNotFound(relatedClassName, methodName, paramDesc);
     }
 
-    if (isMethodBaseClassConstructor(expr)) {
+    // TODO ОБЯЗАТЕЛЬНО дописать корректное возращаемое значение, тут Int для теста
+    if (isMethodBaseClassConstructorOrInputOutput(expr)) {
         expr->semanticType = SemanticType::classType("JavaRTL/Int");
     }
     else {
@@ -702,14 +703,17 @@ void ClassTable::attributeFuncOrMethodCall(MethodTableElement* currentMethod, Ex
     }
 }
 
-bool ClassTable::isMethodBaseClassConstructor(ExprNode *expr) {
+bool ClassTable::isMethodBaseClassConstructorOrInputOutput(ExprNode *expr) {
     if (expr->type == _FUNC_CALL && expr->params->exprs->size() == 1) {
         if (expr->identifierName == "Int" ||
             expr->identifierName == "Float" ||
             expr->identifierName == "Double" ||
             expr->identifierName == "String" ||
             expr->identifierName == "Char" ||
-            expr->identifierName == "Boolean"
+            expr->identifierName == "Boolean" ||
+            expr->identifierName == "print" ||
+            expr->identifierName == "println" ||
+            expr->identifierName == "readLine"
         ) {
             return true;
         }

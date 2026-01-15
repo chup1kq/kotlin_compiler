@@ -31,14 +31,79 @@ std::vector<uint8_t> KotlinCodeGenerator::generateExpression(ExprNode *expr, Cla
                                                              MethodTableElement *methodElement) {
     // TODO
     if (expr->type == _IDENTIFIER) {
-        return generateIdentifier(expr, methodElement);
-    } else if (expr->type == _ARRAY_EXPR) {
+        return generateIdentifier(expr, classElement, methodElement);
+    }
+    else if (expr->type == _FUNC_ACCESS) {
+        return generateFuncAccess(expr, classElement, methodElement);
+    }
+    else if (expr->type == _ARRAY_EXPR) {
         return {};
-    } else if (expr->type == _ARRAY_ACCESS) {
+    }
+    else if (expr->type == _ARRAY_ACCESS) {
         return {};
     }
     return {};
 }
+
+std::vector<uint8_t> KotlinCodeGenerator::generateFuncAccess(ExprNode *expr, ClassTableElement* classElement, MethodTableElement *methodElement) {
+    std::vector<uint8_t> result;
+
+    std::vector<uint8_t> obj = generateIdentifier(expr->left, classElement, methodElement);
+    BytecodeGenerator::appendToByteArray(&result, obj.data(), obj.size());
+
+    std::string desc = "(";
+
+    if (expr->params->exprs->size() > 0) {
+        std::vector<uint8_t> params;
+
+        for (auto& cur : *expr->params->exprs) {
+            std::vector<uint8_t> p = generateExpression(cur, classElement, methodElement);
+            BytecodeGenerator::appendToByteArray(&params, p.data(), p.size());
+            // вот тут только одномерный массив, без рекурсии, ибо я не ебу как тут сделать правильно
+            if (cur->semanticType->isArray()) {
+                desc += "[L";
+                desc += cur->semanticType->elementType->className;
+            }
+            else {
+                desc += "L";
+                desc += cur->semanticType->className;
+            }
+            desc += ";";
+        }
+    }
+
+    desc += ")";
+
+    std::string clsn = expr->left->semanticType->className;
+
+    int cn = classElement->constants->findOrAddConstant(UTF8, clsn);
+    int cls = classElement->constants->findOrAddConstant(Class, "", 0, 0, cn);
+
+    SemanticType* r = items[clsn]->methods->methods[expr->identifierName]->retType;
+    if (r->isArray()) {
+        desc += "[L";
+        desc += r->elementType->className;
+    }
+    else {
+        desc += "L";
+        desc += r->className;
+    }
+    desc += ";";
+
+    int n = classElement->constants->findOrAddConstant(UTF8, expr->identifierName);
+    int d = classElement->constants->findOrAddConstant(UTF8, desc);
+    int nat = classElement->constants->findOrAddConstant(NameAndType, "", 0, 0, n, d);
+    int mref = classElement->constants->findOrAddConstant(MethodRef, "", 0, 0, cls, nat);
+
+    std::vector<uint8_t> iv = BytecodeGenerator::invokevirtual(mref);
+    BytecodeGenerator::appendToByteArray(&result, iv.data(), iv.size());
+
+    // TODO дописать для AND и OR
+
+    return result;
+
+}
+
 
 std::vector<uint8_t> KotlinCodeGenerator::generateReturnStatement(StmtNode *stmt, ClassTableElement *classElement,
                                                                   MethodTableElement *methodElement) {
@@ -186,7 +251,7 @@ std::vector<uint8_t> KotlinCodeGenerator::generateValOrVar(StmtNode *stmt, Class
     return res;
 }
 
-std::vector<uint8_t> KotlinCodeGenerator::generateIdentifier(ExprNode *expr, MethodTableElement *methodElement) {
+std::vector<uint8_t> KotlinCodeGenerator::generateIdentifier(ExprNode *expr, ClassTableElement* classElement, MethodTableElement *methodElement) {
     std::vector<uint8_t> res;
     std::vector<uint8_t> bytes;
 
