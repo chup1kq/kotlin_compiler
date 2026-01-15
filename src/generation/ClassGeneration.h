@@ -51,15 +51,13 @@ public:
 
     // Секции .class файла
     void writeHeader();           // Magic + version
-    void writeConstantPool();     // Пул констант
     void writeClassInfo();        // this_class, super_class
     void writeFields();           // Поля класса
-    void writeMethods();          // main() + пользовательские
     void writeToFile();           // Запись
 
     std::vector<uint8_t> generateMainMethod(ClassTableElement* elem, MethodTableElement* main);
-    std::vector<uint8_t> generateMethod(MethodTableElement* method);
     std::vector<uint8_t> generateMethod(ClassTableElement* elem, MethodTableElement *method);
+    std::vector<uint8_t> generateInitMethod(MethodTableElement* method);
 
     int findClassConstantIndex(const std::string& className);
 };

@@ -363,38 +363,43 @@ std::vector<uint8_t> BytecodeGenerator::generateBytesForConstantTable(ConstantTa
 }
 
 std::vector<uint8_t> BytecodeGenerator::generateBytesForConstantTableItem(ConstantTableElement *elem) {
-    std::vector<uint8_t> res = intToByteVector(elem->type, 1);
+    std::vector<uint8_t> res = intToByteVector(static_cast<uint8_t>(elem->type), 1);
 
     switch (elem->type) {
-        case (UTF8): {
-            uint16_t len = elem->utf8String.length();
-            std::vector<uint8_t> lenBytes = intToByteVector(len, 2);
-            appendToByteArray(&res, lenBytes.data(), lenBytes.size());
-            const std::string& str = elem->utf8String;
-            res.insert(res.end(), str.begin(), str.end());
-        } break;
-        case (String):
-        case (Class): {
-            std::vector<uint8_t> ref = intToByteVector(elem->firstRef, 2);
-            appendToByteArray(&res, ref.data(), ref.size());
-        } break;
-        case (NameAndType):
-        case (MethodRef):
-        case (FieldRef): {
-            std::vector<uint8_t> firstRef = intToByteVector(elem->firstRef, 2);
-            std::vector<uint8_t> secondRef = intToByteVector(elem->secondRef, 2);
-            appendToByteArray(&res, firstRef.data(), firstRef.size());
-            appendToByteArray(&res, secondRef.data(), secondRef.size());
-        } break;
-        case (Integer): {
-            std::vector<uint8_t> num = intToByteVector(elem->intValue, 4);
-            appendToByteArray(&res, num.data(), num.size());
-        } break;
-        case (Float): {
-            std::vector<uint8_t> num = intToByteVector(elem->doubleValue, 8);
-            appendToByteArray(&res, num.data(), num.size());
-        } break;
+        case UTF8: {
+            uint16_t len = static_cast<uint16_t>(elem->utf8String.length());
+            auto lenBytes = intToByteVector(len, 2);
+            res.insert(res.end(), lenBytes.begin(), lenBytes.end());
+            res.insert(res.end(), elem->utf8String.begin(), elem->utf8String.end());
+            break;
+        }
+        case String:
+        case Class: {
+            auto ref = intToByteVector(elem->firstRef, 2);
+            res.insert(res.end(), ref.begin(), ref.end());
+            break;
+        }
+        case NameAndType:
+        case MethodRef:
+        case FieldRef: {
+            auto firstRef = intToByteVector(elem->firstRef, 2);
+            auto secondRef = intToByteVector(elem->secondRef, 2);
+            res.insert(res.end(), firstRef.begin(), firstRef.end());
+            res.insert(res.end(), secondRef.begin(), secondRef.end());
+            break;
+        }
+        case Integer: {
+            auto num = intToByteVector(elem->intValue, 4);
+            res.insert(res.end(), num.begin(), num.end());
+            break;
+        }
+        case Float: {
+            float f = static_cast<float>(elem->doubleValue);
+            uint32_t bits = *reinterpret_cast<uint32_t*>(&f);
+            auto num = intToByteVector(bits, 4);
+            res.insert(res.end(), num.begin(), num.end());
+            break;
+        }
     }
-
     return res;
 }

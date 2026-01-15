@@ -23,6 +23,12 @@ public:
         int secondRef = 0
     );
 
+    int findConstantUTF8(const std::string& utf8String);
+    int findConstantClass(int utf8Index);
+    int findConstantMethodRef(int classIndex, int nameAndTypeIndex);
+    int findConstantNameAndType(int nameIndex, int descriptorIndex);
+    int findConstantInteger(int intValue);
+
 private:
     // return - найденный номер в таблице констант
     int findConstant(

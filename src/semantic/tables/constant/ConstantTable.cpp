@@ -120,3 +120,23 @@ int ConstantTable::findConstant(
     // Константа не найдена
     return -1;
 }
+
+int ConstantTable::findConstantUTF8(const std::string& utf8String) {
+    return findConstant(UTF8, utf8String);
+}
+
+int ConstantTable::findConstantClass(int utf8Index) {
+    return findConstant(Class, "", 0, 0, utf8Index);
+}
+
+int ConstantTable::findConstantMethodRef(int classIndex, int nameAndTypeIndex) {
+    return findConstant(MethodRef, "", 0, 0, classIndex, nameAndTypeIndex);
+}
+
+int ConstantTable::findConstantNameAndType(int nameIndex, int descriptorIndex) {
+    return findConstant(NameAndType, "", 0, 0, nameIndex, descriptorIndex);
+}
+
+int ConstantTable::findConstantInteger(int intValue) {
+    return findConstant(Integer, "", intValue);
+}
