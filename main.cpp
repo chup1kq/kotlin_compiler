@@ -3,6 +3,7 @@
 
 #include "lexer-build/parser.hpp"
 #include "src/generation/ClassGeneration.h"
+#include "src/generation/KotlinCodeGenerator.h"
 #include "src/nodes/topLevel/KotlinFileNode.h"
 #include "src/semantic/tables/class/ClassTable.h"
 #include "src/semantic/tables/constant/ConstantTable.h"
@@ -47,6 +48,8 @@ int main() {
     classTable->buildClassTable(root);
 
     classTableToCSV(classTable, "tables");
+
+    KotlinCodeGenerator::items = classTable->items;
 
     ClassGeneration *classGeneration = new ClassGeneration(classTable->items["MainKt"]);
     classGeneration->generateClassFile("MainKt");

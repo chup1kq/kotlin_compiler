@@ -5,6 +5,8 @@
 
 #include "BytecodeGenerator.h"
 
+std::map<std::string, ClassTableElement*> KotlinCodeGenerator::items;
+
 std::vector<uint8_t> KotlinCodeGenerator::generate(ClassTableElement *classElement, MethodTableElement *methodElement) {
     return generateMethodAttribute(classElement, methodElement);
 }

@@ -79,7 +79,7 @@ void ClassGeneration::generate() {
     // ===== 7.2 обычные методы (кроме main) =====
     for (auto &pair : m_class->methods->methods) {
         if (!pair.second) continue;
-        if (pair.first == "<init>_()V" || pair.first == "main_()LUnit;") continue;
+        if (pair.first == "<init>_()V" || pair.first == "main_([LJavaRTL/String;)V") continue;
 
         auto m = generateMethod(m_class, pair.second);
         methodsBytes.insert(methodsBytes.end(), m.begin(), m.end());
@@ -87,8 +87,8 @@ void ClassGeneration::generate() {
     }
 
     // ===== 7.3 main =====
-    if (m_class->methods->methods.count("main_()LUnit;")) {
-        auto mainMethod = generateMainMethod(m_class, m_class->methods->methods["main_()LUnit;"]);
+    if (m_class->methods->methods.count("main_([LJavaRTL/String;)V")) {
+        auto mainMethod = generateMainMethod(m_class, m_class->methods->methods["main_([LJavaRTL/String;)V"]);
         methodsBytes.insert(methodsBytes.end(), mainMethod.begin(), mainMethod.end());
         methodsCount++;
     }
@@ -148,7 +148,7 @@ std::vector<uint8_t> ClassGeneration::generateMainMethod(ClassTableElement* elem
     int mainNameUTF8 = elem->constants->findConstantUTF8("main");
     writeU2Local(res, mainNameUTF8);
 
-    int jvmMainDesc = elem->constants->findOrAddConstant(UTF8, "([Ljava/lang/String;)V");
+    int jvmMainDesc = elem->constants->findOrAddConstant(UTF8, "([LJavaRTL/String;)V");
     writeU2Local(res, jvmMainDesc);
 
     writeU2Local(res, 1);
@@ -164,8 +164,8 @@ std::vector<uint8_t> ClassGeneration::generateMainMethod(ClassTableElement* elem
         int selfRef = elem->constants->findConstantMethodRef(
             m_thisClassIndex, nameAndTypeIdx);
         if (selfRef != -1) {
-            auto invoke = BytecodeGenerator::invokestatic(selfRef);
-            codeBytes.insert(codeBytes.end(), invoke.begin(), invoke.end());
+            // auto invoke = BytecodeGenerator::invokestatic(selfRef);
+            // codeBytes.insert(codeBytes.end(), invoke.begin(), invoke.end());
         }
     }
 

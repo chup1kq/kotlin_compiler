@@ -13,6 +13,10 @@ public class Boolean extends Any {
 
     public Boolean toBoolean() { return this; }
 
+    public boolean getValue() {
+        return value;
+    }
+
     public Boolean equals(Boolean o) { return new Boolean(value == o.value); }
     public Boolean notEquals(Boolean o) { return new Boolean(value != o.value); }
     public Boolean not() { return new Boolean(!value); }

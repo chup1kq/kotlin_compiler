@@ -730,6 +730,12 @@ void ClassTable::fillMethodRefs(ClassTableElement *elem) {
 
     // ✅ УПРОЩЕНО: один цикл по плоской map
     for (auto& [fullMethodName, method] : elem->methods->methods) {
+        int n = method->methodName;
+        int d = method->descriptor;
+        int nat = elem->constants->findOrAddConstant(NameAndType, "", 0, 0, n, d);
+        int cls = elem->thisClass;
+        int mRef = elem->constants->findOrAddConstant(MethodRef, "", 0, 0, cls, nat);
+
         if (!method || !method->start || !method->start->stmts)
             continue;
 
