@@ -29,6 +29,14 @@ void OperatorsTransformator::transformExpressionBody(ExprNode* expr) {
             expr->params = new ExprListNode();
             expr->right = nullptr;
         }
+        else if (expr->type == _NOT) {
+            ExprNode* operand = expr->left;
+            expr->type = _FUNC_ACCESS;
+            expr->identifierName = "not";
+            expr->left = operand;
+            expr->params = new ExprListNode();
+            expr->right = nullptr;
+        }
     }
 
     // ----------------------- бинарные операции -----------------------
@@ -72,49 +80,49 @@ void OperatorsTransformator::transformExpressionBody(ExprNode* expr) {
 
         else if (expr->type == _LESS) {
             expr->type = _FUNC_ACCESS;
-            expr->identifierName =  "lt";
+            expr->identifierName =  "less";
             expr->params = new ExprListNode(expr->right);
             expr->right = nullptr;
         }
         else if (expr->type == _GREAT) {
             expr->type = _FUNC_ACCESS;
-            expr->identifierName =  "gt";
+            expr->identifierName =  "greater";
             expr->params = new ExprListNode(expr->right);
             expr->right = nullptr;
         }
         else if (expr->type == _LESS_EQUAL) {
             expr->type = _FUNC_ACCESS;
-            expr->identifierName =  "le";
+            expr->identifierName =  "lessEquals";
             expr->params = new ExprListNode(expr->right);
             expr->right = nullptr;
         }
         else if (expr->type == _GREAT_EQUAL) {
             expr->type = _FUNC_ACCESS;
-            expr->identifierName =  "ge";
+            expr->identifierName =  "greaterEquals";
             expr->params = new ExprListNode(expr->right);
             expr->right = nullptr;
         }
         else if (expr->type == _EQUAL) {
             expr->type = _FUNC_ACCESS;
-            expr->identifierName =  "eq";
+            expr->identifierName =  "equals";
             expr->params = new ExprListNode(expr->right);
             expr->right = nullptr;
         }
         else if (expr->type == _NOT_EQUAL) {
             expr->type = _FUNC_ACCESS;
-            expr->identifierName =  "neq";
+            expr->identifierName =  "notEquals";
             expr->params = new ExprListNode(expr->right);
             expr->right = nullptr;
         }
         else if (expr->type == _DISJUNCTION) {
             expr->type = _FUNC_ACCESS;
-            expr->identifierName =  "dis";
+            expr->identifierName =  "or";
             expr->params = new ExprListNode(expr->right);
             expr->right = nullptr;
         }
         else if (expr->type == _CONJUNCTION) {
             expr->type = _FUNC_ACCESS;
-            expr->identifierName =  "con";
+            expr->identifierName =  "and";
             expr->params = new ExprListNode(expr->right);
             expr->right = nullptr;
         }
@@ -171,56 +179,67 @@ void OperatorsTransformator::transformExpressionBody(ExprNode* expr) {
 
         // TODO зарефакторить, чтобы перезаписывался expr-> либо внутри вспомогательного метода, либо снаружи
         else if (expr->type == _RANGE) {
-            ExprNode* newExpr = transformRangeToArrayOf(expr);
-
-            expr->type = newExpr->type;
-            expr->typeElements = newExpr->typeElements;
-            expr->elements = newExpr->elements;
-
-            expr->left = nullptr;
+            expr->type = _FUNC_ACCESS;
+            expr->identifierName =  "range";
+            expr->params = new ExprListNode(expr->right);
             expr->right = nullptr;
-
-            delete newExpr;
+            // ExprNode* newExpr = transformRangeToArrayOf(expr);
+            //
+            // expr->type = newExpr->type;
+            // expr->typeElements = newExpr->typeElements;
+            // expr->elements = newExpr->elements;
+            //
+            // expr->left = nullptr;
+            // expr->right = nullptr;
+            //
+            // delete newExpr;
         }
         else if (expr->type == _DOWN_TO) {
-            ExprNode* newExpr = transformRangeToArrayOf(expr);
-
-            expr->type = newExpr->type;
-            expr->typeElements = newExpr->typeElements;
-            expr->elements = newExpr->elements;
-
-            expr->left = nullptr;
+            expr->type = _FUNC_ACCESS;
+            expr->identifierName =  "downTo";
+            expr->params = new ExprListNode(expr->right);
             expr->right = nullptr;
 
-            delete newExpr;
+            // ExprNode* newExpr = transformRangeToArrayOf(expr);
+            //
+            // expr->type = newExpr->type;
+            // expr->typeElements = newExpr->typeElements;
+            // expr->elements = newExpr->elements;
+            //
+            // expr->left = nullptr;
+            // expr->right = nullptr;
+            //
+            // delete newExpr;
         }
         else if (expr->type == _UNTIL) {
-            ExprNode* newExpr = transformRangeToArrayOf(expr);
-
-            expr->type = newExpr->type;
-            expr->typeElements = newExpr->typeElements;
-            expr->elements = newExpr->elements;
-
-            expr->left = nullptr;
+            expr->type = _FUNC_ACCESS;
+            expr->identifierName =  "until";
+            expr->params = new ExprListNode(expr->right);
             expr->right = nullptr;
 
-            delete newExpr;
+            // ExprNode* newExpr = transformRangeToArrayOf(expr);
+            //
+            // expr->type = newExpr->type;
+            // expr->typeElements = newExpr->typeElements;
+            // expr->elements = newExpr->elements;
+            //
+            // expr->left = nullptr;
+            // expr->right = nullptr;
+            //
+            // delete newExpr;
         }
         else if (expr->type == _STEP) {
-            addStepToArrayOf(expr);
+            expr->type = _FUNC_ACCESS;
+            expr->identifierName =  "step";
+            expr->params = new ExprListNode(expr->right);
+            expr->right = nullptr;
+
+            // addStepToArrayOf(expr);
         }
     }
 }
 
 ExprNode *OperatorsTransformator::transformRangeToArrayOf(ExprNode *range) {
-    if (range->type == _RANGE || range->type == _DOWN_TO || range->type == _UNTIL) {
-        if (range->left->type != _INTEGER_LITERAL)
-            throw SemanticError::invalidRangeType(exprTypeToString(range->left->type));
-
-        if (range->right->type != _INTEGER_LITERAL)
-            throw SemanticError::invalidRangeType(exprTypeToString(range->right->type));
-    }
-
     if (range->type == _RANGE) {
         return createArrayOfFromRange(range->left, range->right);
     }
@@ -239,10 +258,6 @@ ExprNode *OperatorsTransformator::createArrayOfFromRange(ExprNode *start, ExprNo
     int startNumber = start->intValue;
     int endNumber = end->intValue;
 
-    if (startNumber > endNumber) {
-        throw SemanticError::invalidRangeParams(start->intValue, end->intValue);
-    }
-
     ExprListNode* exprs = new ExprListNode();
     for (int i = startNumber; i <= endNumber; i++) {
         std::cout << i << std::endl;
@@ -258,10 +273,6 @@ ExprNode *OperatorsTransformator::createArrayOfFromRange(ExprNode *start, ExprNo
 void OperatorsTransformator::addStepToArrayOf(ExprNode *expr) {
     if (expr->type != _STEP) {
         return;
-    }
-
-    if (expr->right->type != _INTEGER_LITERAL) {
-        throw SemanticError::invalidRangeType(exprTypeToString(expr->right->type));
     }
 
     int step = expr->right->intValue;

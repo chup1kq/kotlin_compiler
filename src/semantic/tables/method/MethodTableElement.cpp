@@ -28,3 +28,17 @@ MethodTableElement::MethodTableElement(int methodName, int descriptorName, std::
     this->localVarTable = new LocalVariableTable();
     this->params = std::move(params);
 }
+
+std::string MethodTableElement::getParamsFromDescriptor() {
+    const std::string& desc = strDesc;
+    if (desc.empty() || desc[0] != '(') {
+        return "";
+    }
+
+    size_t closeParenPos = desc.find(')', 1);  // Ищем ) после (
+    if (closeParenPos == std::string::npos) {
+        return "";  // Нет закрывающей скобки
+    }
+
+    return desc.substr(0, closeParenPos + 1);  // "(params)"
+}

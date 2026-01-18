@@ -32,6 +32,8 @@ public:
         StmtListNode* start,
         SemanticType* retType,
         vector<FuncParam*> params);
+
+    std::string getParamsFromDescriptor();
 };
 
 #endif //KOTLIN_COMPILER_METHODTABLEELEMENT_H

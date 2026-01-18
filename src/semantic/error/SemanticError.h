@@ -53,6 +53,8 @@ public:
     static SemanticError invalidRangeParams(int start, int end);
     static SemanticError invalidStepValue(int stepValue);
     static SemanticError invalidIteratorType(std::string iterType, std::string elementsRangeType);
+    static SemanticError notIdInArrayAccess(const ExprType &type);
+    static SemanticError notIntIndexTypeInArrayAccess(const std::string &typeName);
 
 };
 

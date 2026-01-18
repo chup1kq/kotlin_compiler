@@ -30,6 +30,7 @@ public:
 
     void attributeAndFillLocalsInClasses();
     void attributeAndFillLocals(MethodTableElement* method);
+    void attributeAndFillLocalsForMethodParams(MethodTableElement* method, std::vector<FuncParam *> params);
     void attributeAndFillLocalsInStatement(MethodTableElement* method, StmtNode* stmt);
 
     void attributeExpression(MethodTableElement* method, ExprNode* expr, bool isStatementContext = false);
@@ -45,6 +46,7 @@ public:
     void attributeAssignmentExpr(LocalVariableTable *table, ExprNode* expr);
     void attributeArrayCreatingExpr(MethodTableElement *method, ExprNode* expr);
     void attributeFuncOrMethodCall(MethodTableElement* currentMethod, ExprNode* expr);
+    void attributeArrayAccess(MethodTableElement* currentMethod, ExprNode* expr);
     bool isMethodBaseClassConstructorOrInputOutput(ExprNode* expr);
 
     void fillConstructorMethodRefs(ClassTableElement* cls);

@@ -265,4 +265,18 @@ SemanticError SemanticError::invalidIteratorType(std::string iterType, std::stri
     );
 }
 
+SemanticError SemanticError::notIdInArrayAccess(const ExprType &type) {
+    return SemanticError(
+        NOT_IDENTIFIER_IN_ARRAY_ACCESS,
+        "Left array access must have ID type, but current type is '" + exprTypeToString(type) + "'"
+    );
+}
+
+SemanticError SemanticError::notIntIndexTypeInArrayAccess(const std::string &typeName) {
+    return SemanticError(
+        NOT_INT_INDEX_TYPE,
+        "Index in array access must have semantic type JavaRTL/Int, but current type is '" + typeName + "'"
+    );
+}
+
 

@@ -24,12 +24,32 @@ void MethodTable::addMethod(
 }
 
 bool MethodTable::contains(const std::string& methodName, const std::string& descriptor) const {
-    std::string fullKey = methodName + "_" + descriptor;
-    return methods.count(fullKey) > 0;
+    // std::string fullKey = methodName + "_" + descriptor;
+    // return methods.count(fullKey) > 0;
+    for (auto& m : methods) {
+        if (m.second->strName == methodName && m.second->getParamsFromDescriptor() == descriptor) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
-MethodTableElement* MethodTable::getMethod(const std::string& methodName, const std::string& descriptor) const {
-    std::string fullKey = methodName + "_" + descriptor;
-    auto it = methods.find(fullKey);
-    return (it != methods.end()) ? it->second : nullptr;
+MethodTableElement* MethodTable::getMethod(const std::string& methodName, const std::string& paramsPart) const {
+    // Формируем префикс поиска: "methodName_(params)"
+    std::string prefix = methodName + "_" + paramsPart;
+
+    // lower_bound находит первый ключ >= prefix
+    auto it = methods.lower_bound(prefix);
+
+    // Проверяем, начинается ли ключ с префикса
+    while (it != methods.end()) {
+        const std::string& key = it->first;
+        if (key.size() < prefix.size() || key.compare(0, prefix.size(), prefix) != 0) {
+            break;  // Ключи больше префикса или не совпадают
+        }
+        return it->second;  // Найден подходящий метод (первый по алфавиту)
+    }
+
+    return nullptr;  // Не найден
 }

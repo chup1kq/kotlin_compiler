@@ -217,8 +217,21 @@ void ClassTable::attributeAndFillLocals(MethodTableElement *method) {
     if (!method || !method->start || !method->start->stmts)
         return;
 
+    if (!method->params.empty()) {
+        attributeAndFillLocalsForMethodParams(method, method->params);
+    }
+
     for (auto* stmt : *method->start->stmts) {
         attributeAndFillLocalsInStatement(method, stmt);
+    }
+}
+
+void ClassTable::attributeAndFillLocalsForMethodParams(MethodTableElement *method, std::vector<FuncParam *> params) {
+    for (auto* param : params) {
+        if (method->localVarTable->contains(param->name)) {
+            throw SemanticError::redefinition(param->name);
+        }
+        method->localVarTable->findOrAddLocalVar(param->name, param->type, 0, 1);
     }
 }
 
@@ -490,6 +503,10 @@ void ClassTable::attributeExpression(MethodTableElement *method, ExprNode *expr,
             attributeFuncOrMethodCall(method, expr);
             return;
         }
+        case _ARRAY_ACCESS: {
+            attributeArrayAccess(method, expr);
+            return;
+        }
 
         // TODO посмотреть, может что-то еще нужно проатрибутировать
 
@@ -521,13 +538,8 @@ void ClassTable::attributeAssignmentExpr(LocalVariableTable *table, ExprNode* ex
 
     // --- CASE: присваивание массиву ---
     if (left->type == _ARRAY_ACCESS) {
-        // Проверяем, что тип слева массив
-        if (!left->semanticType->isArray()) {
-            throw SemanticError::invalidArrayAssignment(left->identifierName);
-        }
-
         // Просто проверяем, что right можно присвоить elementType массива
-        if (!left->semanticType->elementType->isReplaceable(*right->semanticType)) {
+        if (!left->semanticType->isReplaceable(*right->semanticType)) {
             throw SemanticError::assignmentTypeMismatch(
                 left->semanticType->elementType->className,
                 right->semanticType->className
@@ -694,16 +706,16 @@ void ClassTable::attributeFuncOrMethodCall(MethodTableElement* currentMethod, Ex
         throw SemanticError::methodCandidateNotFound(relatedClassName, methodName, paramDesc);
     }
 
-    // TODO ОБЯЗАТЕЛЬНО дописать корректное возращаемое значение, тут Int для теста
-    if (isMethodBaseClassConstructorOrInputOutput(expr)) {
-        expr->semanticType = SemanticType::classType("JavaRTL/Int");
-    }
-    else {
-        expr->semanticType = chosen->retType;
-    }
+    expr->semanticType = chosen->retType;
 }
 
 bool ClassTable::isMethodBaseClassConstructorOrInputOutput(ExprNode *expr) {
+    if (expr->type == _FUNC_CALL && !expr->params) {
+        if (expr->identifierName == "println") {
+            return true;
+        }
+    }
+
     if (expr->type == _FUNC_CALL && expr->params->exprs->size() == 1) {
         if (expr->identifierName == "Int" ||
             expr->identifierName == "Float" ||
@@ -719,6 +731,20 @@ bool ClassTable::isMethodBaseClassConstructorOrInputOutput(ExprNode *expr) {
         }
     }
     return false;
+}
+
+void ClassTable::attributeArrayAccess(MethodTableElement *currentMethod, ExprNode *expr) {
+    if (expr->left->type != _IDENTIFIER) {
+        throw SemanticError::notIdInArrayAccess(expr->left->type);
+    }
+
+    attributeExpression(currentMethod, expr->right);
+
+    if (expr->right->semanticType->className != "JavaRTL/Int") {
+        throw SemanticError::notIntIndexTypeInArrayAccess(expr->right->semanticType->className);
+    }
+
+    expr->semanticType = SemanticType::classType(expr->left->semanticType->elementType->className);
 }
 
 void ClassTable::fillLiterals(ClassTableElement *elem) {
@@ -1098,7 +1124,9 @@ void ClassTable::initStdClasses() {
     addMethod("JavaRTL/Int", "uPlus", SemanticType::classType("JavaRTL/Int"), "()", "()LJavaRTL/Int;");
     addMethod("JavaRTL/Int", "uMinus", SemanticType::classType("JavaRTL/Int"), "()", "()LJavaRTL/Int;");
     /* 1.4 Массив */
-    addMethod("JavaRTL/Int", "rangeTo", SemanticType::arrayType(SemanticType::classType("JavaRTL/Int")), "(LJavaRTL/Int;)", "(LJavaRTL/Int;)[LJavaRTL/Int;");
+    addMethod("JavaRTL/Int", "range", SemanticType::arrayType(SemanticType::classType("JavaRTL/Int")), "(LJavaRTL/Int;)", "(LJavaRTL/Int;)[LJavaRTL/Int;");
+    addMethod("JavaRTL/Int", "until", SemanticType::arrayType(SemanticType::classType("JavaRTL/Int")), "(LJavaRTL/Int;)", "(LJavaRTL/Int;)[LJavaRTL/Int;");
+    addMethod("JavaRTL/Int", "downTo", SemanticType::arrayType(SemanticType::classType("JavaRTL/Int")), "(LJavaRTL/Int;)", "(LJavaRTL/Int;)[LJavaRTL/Int;");
     /* 1.5 Сравнение */
     addMethod("JavaRTL/Int", "greater", SemanticType::classType("JavaRTL/Boolean"), "(LJavaRTL/Int;)", "(LJavaRTL/Int;)LJavaRTL/Boolean;");
     addMethod("JavaRTL/Int", "less", SemanticType::classType("JavaRTL/Boolean"), "(LJavaRTL/Int;)", "(LJavaRTL/Int;)LJavaRTL/Boolean;");
@@ -1191,6 +1219,7 @@ void ClassTable::initStdClasses() {
     addMethod("JavaRTL/InputOutput", "print", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Boolean;)", "(LJavaRTL/Boolean;)LJavaRTL/Unit;");
 
     // println для всех типов
+    addMethod("JavaRTL/InputOutput", "println", SemanticType::classType("JavaRTL/Unit"), "()", "()LJavaRTL/Unit;");
     addMethod("JavaRTL/InputOutput", "println", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Int;)", "(LJavaRTL/Int;)LJavaRTL/Unit;");
     addMethod("JavaRTL/InputOutput", "println", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Float;)", "(LJavaRTL/Float;)LJavaRTL/Unit;");
     addMethod("JavaRTL/InputOutput", "println", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Double;)", "(LJavaRTL/Double;)LJavaRTL/Unit;");

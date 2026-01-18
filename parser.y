@@ -206,7 +206,7 @@ expr: INT_LITERAL { $$ = ExprNode::createIntNode($1); }
     | '(' expr ')' { $$ = ExprNode::createBracketExprNode($2); }
     | ID '(' ')' { $$ = ExprNode::createFunctionCallExprNode($1, NULL); }
     | ID '(' expr_list ')' { $$ = ExprNode::createFunctionCallExprNode($1, $3); }
-    | expr '=' ele expr { $$ = ExprNode::createExprNode(_EQUAL, $1, $4); }
+    | expr '=' ele expr { $$ = ExprNode::createExprNode(_ASSIGNMENT, $1, $4); }
     | expr '+' ele expr { $$ = ExprNode::createExprNode(_PLUS, $1, $4); }
     | expr '-' ele expr { $$ = ExprNode::createExprNode(_MINUS, $1, $4); }
     | expr '*' ele expr { $$ = ExprNode::createExprNode(_MUL, $1, $4); }
