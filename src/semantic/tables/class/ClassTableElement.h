@@ -32,6 +32,7 @@ public:
 
     void addMethodsToTable(std::list<FunNode *> funcList);
     void addMethodToTable(FunNode* method);
+    void addStandardMethodToTable(const std::string& methodName, SemanticType* returnType, const std::string& fullDesc);
 
     static std::string createMethodDescriptor(vector<FuncParam*> params, SemanticType* returnType);
     static std::string createMethodDescriptor(vector<SemanticType*> params, SemanticType* returnType);

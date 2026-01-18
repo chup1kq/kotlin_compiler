@@ -157,6 +157,21 @@ void ClassTableElement::addMethodToTable(FunNode *func) {
     }
 }
 
+void ClassTableElement::addStandardMethodToTable(
+    const std::string &methodName,
+    SemanticType *returnType,
+    const std::string &fullDesc
+) {
+    int methodNameNumber = this->constants->findOrAddConstant(UTF8, methodName);
+    int methodDescNumber = this->constants->findOrAddConstant(UTF8, fullDesc);
+
+    MethodTableElement* methodElem = new MethodTableElement(
+       methodNameNumber, methodDescNumber, methodName, fullDesc,
+       nullptr, returnType, vector<FuncParam*>());
+
+    this->methods->addMethod(methodName, fullDesc, methodElem);
+}
+
 // Остальные методы НЕ ИЗМЕНЕНЫ
 std::string ClassTableElement::createVoidMethodDescriptor(vector<FuncParam *> params) {
     std::string desc = addParamsToMethodDescriptor(params);

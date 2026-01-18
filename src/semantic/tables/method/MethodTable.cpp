@@ -30,6 +30,11 @@ bool MethodTable::contains(const std::string& methodName, const std::string& des
         if (m.second->strName == methodName && m.second->getParamsFromDescriptor() == descriptor) {
             return true;
         }
+        else if (m.second->strName == MethodTableElement::transformNameToConstructorIfNeeded(methodName) &&
+            m.second->getParamsFromDescriptor() == MethodTableElement::transformRTLTypeToJVMType(descriptor)
+        ) {
+            return true;
+        }
     }
 
     return false;
@@ -53,3 +58,4 @@ MethodTableElement* MethodTable::getMethod(const std::string& methodName, const 
 
     return nullptr;  // Не найден
 }
+

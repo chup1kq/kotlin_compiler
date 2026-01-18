@@ -34,6 +34,8 @@ public:
         vector<FuncParam*> params);
 
     std::string getParamsFromDescriptor();
+    static std::string transformNameToConstructorIfNeeded(const std::string& methodName);
+    static std::string transformRTLTypeToJVMType(const std::string& descriptor);
 };
 
 #endif //KOTLIN_COMPILER_METHODTABLEELEMENT_H

@@ -11,8 +11,8 @@ ClassTable::ClassTable(const std::string& fileName) {
 }
 
 void ClassTable::buildClassTable(KotlinFileNode* root) {
-    initStdClasses();
     addBaseClass();
+    initStdClasses();
 
     // ✅ ОТЛАДКА:
     std::cout << "=== DEBUG topLevelList ===" << std::endl;
@@ -671,7 +671,7 @@ void ClassTable::attributeFuncOrMethodCall(MethodTableElement* currentMethod, Ex
         relatedClassName = expr->left->semanticType->className;
     }
 
-    const std::string& methodName = expr->identifierName;
+    std::string& methodName = expr->identifierName;
     if (!this->items.contains(relatedClassName))
         throw SemanticError::classNotFound(relatedClassName, methodName);
 
@@ -693,7 +693,11 @@ void ClassTable::attributeFuncOrMethodCall(MethodTableElement* currentMethod, Ex
                 break;
             }
         }
-        foundInBuiltin = isMethodBaseClassConstructorOrInputOutput(expr);
+        if (isMethodBaseClassConstructorOrInputOutput(expr)) {
+            foundInBuiltin = true;
+            methodName = MethodTableElement::transformNameToConstructorIfNeeded(expr->identifierName);
+        }
+        // foundInBuiltin = isMethodBaseClassConstructorOrInputOutput(expr);
         if (!foundInBuiltin) {
             throw SemanticError::methodNotFound(relatedClassName, methodName + paramDesc);
         }
@@ -706,7 +710,13 @@ void ClassTable::attributeFuncOrMethodCall(MethodTableElement* currentMethod, Ex
         throw SemanticError::methodCandidateNotFound(relatedClassName, methodName, paramDesc);
     }
 
-    expr->semanticType = chosen->retType;
+    // TODO ОБЯЗАТЕЛЬНО дописать корректное возращаемое значение, тут Int для теста
+    if (foundInBuiltin) {
+        expr->semanticType = SemanticType::classType("JavaRTL/Int");
+    }
+    else {
+        expr->semanticType = chosen->retType;
+    }
 }
 
 bool ClassTable::isMethodBaseClassConstructorOrInputOutput(ExprNode *expr) {
@@ -1207,28 +1217,29 @@ void ClassTable::initStdClasses() {
     addClass("JavaRTL/Unit");
 
     /* 8. I/O */
-    addClass("JavaRTL/InputOutput");
-    builtinFunctionClasses.push_back("JavaRTL/InputOutput");
+    // addClass("JavaRTL/InputOutput");
+    // builtinFunctionClasses.push_back("JavaRTL/InputOutput");
 
     // print для всех типов
-    addMethod("JavaRTL/InputOutput", "print", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Int;)", "(LJavaRTL/Int;)LJavaRTL/Unit;");
-    addMethod("JavaRTL/InputOutput", "print", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Float;)", "(LJavaRTL/Float;)LJavaRTL/Unit;");
-    addMethod("JavaRTL/InputOutput", "print", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Double;)", "(LJavaRTL/Double;)LJavaRTL/Unit;");
-    addMethod("JavaRTL/InputOutput", "print", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/String;)", "(LJavaRTL/String;)LJavaRTL/Unit;");
-    addMethod("JavaRTL/InputOutput", "print", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Char;)", "(LJavaRTL/Char;)LJavaRTL/Unit;");
-    addMethod("JavaRTL/InputOutput", "print", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Boolean;)", "(LJavaRTL/Boolean;)LJavaRTL/Unit;");
+    addMethod(this->topLevelClassName, "print", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Int;)", "(LJavaRTL/Int;)LJavaRTL/Unit;");
+    addMethod(this->topLevelClassName, "print", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Float;)", "(LJavaRTL/Float;)LJavaRTL/Unit;");
+    addMethod(this->topLevelClassName, "print", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Double;)", "(LJavaRTL/Double;)LJavaRTL/Unit;");
+    addMethod(this->topLevelClassName, "print", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/String;)", "(LJavaRTL/String;)LJavaRTL/Unit;");
+    addMethod(this->topLevelClassName, "print", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Char;)", "(LJavaRTL/Char;)LJavaRTL/Unit;");
+    addMethod(this->topLevelClassName, "print", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Boolean;)", "(LJavaRTL/Boolean;)LJavaRTL/Unit;");
 
     // println для всех типов
-    addMethod("JavaRTL/InputOutput", "println", SemanticType::classType("JavaRTL/Unit"), "()", "()LJavaRTL/Unit;");
-    addMethod("JavaRTL/InputOutput", "println", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Int;)", "(LJavaRTL/Int;)LJavaRTL/Unit;");
-    addMethod("JavaRTL/InputOutput", "println", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Float;)", "(LJavaRTL/Float;)LJavaRTL/Unit;");
-    addMethod("JavaRTL/InputOutput", "println", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Double;)", "(LJavaRTL/Double;)LJavaRTL/Unit;");
-    addMethod("JavaRTL/InputOutput", "println", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/String;)", "(LJavaRTL/String;)LJavaRTL/Unit;");
-    addMethod("JavaRTL/InputOutput", "println", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Char;)", "(LJavaRTL/Char;)LJavaRTL/Unit;");
-    addMethod("JavaRTL/InputOutput", "println", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Boolean;)", "(LJavaRTL/Boolean;)LJavaRTL/Unit;");
+    this->items[topLevelClassName]->addStandardMethodToTable("println", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Int;)V");
+    addMethod(this->topLevelClassName, "println", SemanticType::classType("JavaRTL/Unit"), "()", "()LJavaRTL/Unit;");
+    // addMethod(this->topLevelClassName, "println", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Int;)", "(LJavaRTL/Int;)LJavaRTL/Unit;");
+    addMethod(this->topLevelClassName, "println", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Float;)", "(LJavaRTL/Float;)LJavaRTL/Unit;");
+    addMethod(this->topLevelClassName, "println", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Double;)", "(LJavaRTL/Double;)LJavaRTL/Unit;");
+    addMethod(this->topLevelClassName, "println", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/String;)", "(LJavaRTL/String;)LJavaRTL/Unit;");
+    addMethod(this->topLevelClassName, "println", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Char;)", "(LJavaRTL/Char;)LJavaRTL/Unit;");
+    addMethod(this->topLevelClassName, "println", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Boolean;)", "(LJavaRTL/Boolean;)LJavaRTL/Unit;");
 
     // readLine
-    addMethod("JavaRTL/InputOutput", "readLine", SemanticType::classType("JavaRTL/String"), "()", "()LJavaRTL/String;");
+    addMethod(this->topLevelClassName, "readLine", SemanticType::classType("JavaRTL/String"), "()", "()LJavaRTL/String;");
 
 }
 

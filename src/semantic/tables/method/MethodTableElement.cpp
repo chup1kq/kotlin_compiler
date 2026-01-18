@@ -42,3 +42,25 @@ std::string MethodTableElement::getParamsFromDescriptor() {
 
     return desc.substr(0, closeParenPos + 1);  // "(params)"
 }
+
+std::string MethodTableElement::transformNameToConstructorIfNeeded(const std::string &methodName) {
+    if (methodName == "Int" ||
+        methodName == "Float" ||
+        methodName == "String" ||
+        methodName == "Bool" ||
+        methodName == "Char" ||
+        methodName == "Boolean"
+    ) {
+        return "<init>";
+    }
+
+    return methodName;
+}
+
+std::string MethodTableElement::transformRTLTypeToJVMType(const std::string& descriptor) {
+    if (descriptor == "(JavaRTL/Int)") {
+        return "I";
+    }
+
+    return descriptor;
+}
