@@ -793,6 +793,8 @@ void ClassTable::fillMethodRefs(ClassTableElement *elem) {
     for (auto& [fullMethodName, method] : elem->methods->methods) {
         int n = method->methodName;
         int d = method->descriptor;
+        if (n == 0 || d == 0 )
+            continue;
         int nat = elem->constants->findOrAddConstant(NameAndType, "", 0, 0, n, d);
         int cls = elem->thisClass;
         int mRef = elem->constants->findOrAddConstant(MethodRef, "", 0, 0, cls, nat);

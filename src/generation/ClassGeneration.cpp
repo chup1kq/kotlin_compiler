@@ -76,21 +76,21 @@ void ClassGeneration::generate() {
         methodsCount++;
     }
 
-    // ===== 7.2 обычные методы (кроме main) =====
-    for (auto &pair : m_class->methods->methods) {
-        if (!pair.second) continue;
-        if (pair.first == "<init>_()V" || pair.first == "main_()V") continue;
-
-        auto m = generateMethod(m_class, pair.second);
-        methodsBytes.insert(methodsBytes.end(), m.begin(), m.end());
-        methodsCount++;
-    }
-
-    // ===== 7.3 main =====
+    // ===== 7.2 main =====
     if (m_class->methods->methods.count("main_()V")) {
         auto mainMethod = generateMainMethod(m_class, m_class->methods->methods["main_()V"]);
         methodsBytes.insert(methodsBytes.end(), mainMethod.begin(), mainMethod.end());
         methodsCount++;
+    }
+
+    // ===== 7.3 обычные методы (кроме main) =====
+    for (auto &pair : m_class->methods->methods) {
+        if (!pair.second) continue;
+        if (pair.first == "<init>_()V" || pair.first == "main_()V") continue;
+
+        // auto m = generateMethod(m_class, pair.second);
+        // methodsBytes.insert(methodsBytes.end(), m.begin(), m.end());
+        // methodsCount++;
     }
 
     // ===== 7.4 записываем count методов и сами методы =====
@@ -201,37 +201,9 @@ std::vector<uint8_t> ClassGeneration::generateMethod(ClassTableElement* elem, Me
 
     std::vector<uint8_t> code;
 
-    if (method->strName == "<init>") {
-        // Конструктор
-        writeU4Local(res, 7);       // attribute_length = 7 (3 байта кода + 2*2 байта stack/locals)
-        writeU2Local(code, 1);      // max_stack = 1
-        writeU2Local(code, 1);      // max_locals = 1
-        writeU4Local(code, 3);      // code_length = 3
-        code.push_back(0x2a);              // 0: aload_0
-
-        // 1-2: invokespecial java/lang/Object.<init>
-        int superInit = elem->constants->findOrAddConstant(
-            MethodRef, "", 0, 0,
-            elem->superClass,
-            elem->constants->findOrAddConstant(
-                NameAndType, "", 0, 0,
-                elem->constants->findOrAddConstant(UTF8, "<init>"),
-                elem->constants->findOrAddConstant(UTF8, "()V")
-            )
-        );
-        std::vector<uint8_t> inv = BytecodeGenerator::intToByteVector(superInit, 2);
-        code.push_back(0xb7);  // invokespecial
-        code.push_back(inv[0]);
-        code.push_back(inv[1]);
-
-        code.push_back(0xb1);              // return
-        writeU2Local(code, 0);      // exception_table_length = 0
-        writeU2Local(code, 0);      // attributes_count = 0
-    } else {
-        // Обычные методы
-        auto codeAttr = KotlinCodeGenerator::generate(elem, method);
-        code.insert(code.end(), codeAttr.begin(), codeAttr.end());
-    }
+    // Обычные методы
+    auto codeAttr = KotlinCodeGenerator::generate(elem, method);
+    code.insert(code.end(), codeAttr.begin(), codeAttr.end());
 
     BytecodeGenerator::appendToByteArray(&res, code.data(), code.size());   // добавляем код в атрибуты
 
@@ -282,7 +254,16 @@ std::vector<uint8_t> ClassGeneration::generateInitMethod(MethodTableElement* met
     // Код конструктора: aload_0; invokespecial java/lang/Object.<init>; return
     std::vector<uint8_t> codeBytes;
     codeBytes.push_back(0x2A);               // aload_0
-    codeBytes.push_back(0xB7); codeBytes.push_back(0x00); codeBytes.push_back(0x0B); // invokespecial Object.<init>
+    codeBytes.push_back(0xB7);
+
+    int objectClassIdx = m_constants->findOrAddConstant(UTF8, "java/lang/Object");
+    int objectClassRefIdx = m_constants->findOrAddConstant(Class, "", 0, 0, objectClassIdx);
+    int initNameIdx = m_constants->findOrAddConstant(UTF8, "<init>");
+    int initDescIdx = m_constants->findOrAddConstant(UTF8, "()V");
+    int nameAndTypeIdx = m_constants->findOrAddConstant(NameAndType, "", 0, 0, initNameIdx, initDescIdx);
+    int initMethodRefIndex = m_constants->findOrAddConstant(MethodRef, "", 0, 0, objectClassRefIdx, nameAndTypeIdx);
+    writeU2Local(codeBytes, initMethodRefIndex); // invokespecial Object.<init>
+
     codeBytes.push_back(0xB1);               // return
 
     // attribute_length = max_stack + max_locals + code_length_field + code + exception_table + attributes_count
