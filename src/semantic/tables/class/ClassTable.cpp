@@ -1248,24 +1248,37 @@ void ClassTable::initStdClasses() {
     // builtinFunctionClasses.push_back("JavaRTL/InputOutput");
 
     // print для всех типов
+    this->items[topLevelClassName]->addStandardMethodToTable("print", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Int;)LJavaRTL/Unit;");
     // addMethod(this->topLevelClassName, "print", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Int;)", "(LJavaRTL/Int;)LJavaRTL/Unit;");
+    this->items[topLevelClassName]->addStandardMethodToTable("print", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Float;)LJavaRTL/Unit;");
     // addMethod(this->topLevelClassName, "print", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Float;)", "(LJavaRTL/Float;)LJavaRTL/Unit;");
+    this->items[topLevelClassName]->addStandardMethodToTable("print", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Double;)LJavaRTL/Unit;");
     // addMethod(this->topLevelClassName, "print", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Double;)", "(LJavaRTL/Double;)LJavaRTL/Unit;");
+    this->items[topLevelClassName]->addStandardMethodToTable("print", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/String;)LJavaRTL/Unit;");
     // addMethod(this->topLevelClassName, "print", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/String;)", "(LJavaRTL/String;)LJavaRTL/Unit;");
+    this->items[topLevelClassName]->addStandardMethodToTable("print", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Char;)LJavaRTL/Unit;");
     // addMethod(this->topLevelClassName, "print", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Char;)", "(LJavaRTL/Char;)LJavaRTL/Unit;");
+    this->items[topLevelClassName]->addStandardMethodToTable("print", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Boolean;)LJavaRTL/Unit;");
     // addMethod(this->topLevelClassName, "print", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Boolean;)", "(LJavaRTL/Boolean;)LJavaRTL/Unit;");
 
     // println для всех типов
     this->items[topLevelClassName]->addStandardMethodToTable("println", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Int;)V");
     // addMethod(this->topLevelClassName, "println", SemanticType::classType("JavaRTL/Unit"), "()", "()LJavaRTL/Unit;");
+    this->items[topLevelClassName]->addStandardMethodToTable("println", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Int;)LJavaRTL/Unit;");
     // // addMethod(this->topLevelClassName, "println", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Int;)", "(LJavaRTL/Int;)LJavaRTL/Unit;");
+    this->items[topLevelClassName]->addStandardMethodToTable("println", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Float;)LJavaRTL/Unit;");
     // addMethod(this->topLevelClassName, "println", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Float;)", "(LJavaRTL/Float;)LJavaRTL/Unit;");
+    this->items[topLevelClassName]->addStandardMethodToTable("println", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Double;)LJavaRTL/Unit;");
     // addMethod(this->topLevelClassName, "println", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Double;)", "(LJavaRTL/Double;)LJavaRTL/Unit;");
+    this->items[topLevelClassName]->addStandardMethodToTable("println", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/String;)LJavaRTL/Unit;");
     // addMethod(this->topLevelClassName, "println", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/String;)", "(LJavaRTL/String;)LJavaRTL/Unit;");
+    this->items[topLevelClassName]->addStandardMethodToTable("println", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Char;)LJavaRTL/Unit;");
     // addMethod(this->topLevelClassName, "println", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Char;)", "(LJavaRTL/Char;)LJavaRTL/Unit;");
+    this->items[topLevelClassName]->addStandardMethodToTable("println", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Boolean;)LJavaRTL/Unit;");
     // addMethod(this->topLevelClassName, "println", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Boolean;)", "(LJavaRTL/Boolean;)LJavaRTL/Unit;");
     //
     // // readLine
+    this->items[topLevelClassName]->addStandardMethodToTable("readLine", SemanticType::classType("JavaRTL/String"), "()LJavaRTL/String;");
     // addMethod(this->topLevelClassName, "readLine", SemanticType::classType("JavaRTL/String"), "()", "()LJavaRTL/String;");
 
 }
