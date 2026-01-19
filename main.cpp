@@ -10,6 +10,7 @@
 #include "src/semantic/transformations/attributing/javaRTLTypesTransformator/JavaRTLTypesTransformator.h"
 #include "src/semantic/transformations/attributing/baseTypes/BaseTypesAttributing.h"
 #include "src/semantic/transformations/literals/LiteralsTransformator.h"
+#include "src/semantic/transformations/modifiers/ModifiersTransformator.h"
 #include "src/semantic/transformations/operators/OperatorsTransformator.h"
 
 void createDotTree(KotlinFileNode* root, const std::string& filename);
@@ -29,6 +30,9 @@ int main() {
     }
 
     createDotTree(root, "ast_tree.txt");
+
+    ModifiersTransformator *modifiersTransformator = new ModifiersTransformator();
+    modifiersTransformator->transform(root);
 
     OperatorsTransformator *operatorsTransformator = new OperatorsTransformator();
     operatorsTransformator->transform(root);

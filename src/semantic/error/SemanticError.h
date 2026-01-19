@@ -58,6 +58,7 @@ public:
     static SemanticError invalidFieldType(const std::string &fieldName, const std::string &typeName);
     static SemanticError fieldNotInitialized(const std::string &fieldName, const std::string &className);
     static SemanticError fieldAlreadyExists(const std::string &fieldName, const std::string &className);
+    static SemanticError invalidTopLevelModifier(const std::string &functionName, const std::string &modifier);
 
 
 };

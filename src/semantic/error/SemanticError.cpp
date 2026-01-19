@@ -300,4 +300,12 @@ SemanticError SemanticError::fieldAlreadyExists(const std::string &fieldName, co
     );
 }
 
+SemanticError SemanticError::invalidTopLevelModifier(const std::string &functionName, const std::string &modifier) {
+    return SemanticError(
+        INVALID_TOP_LEVEL_FUNCTION_MODIFIER,
+        "Invalid modifier '" + modifier + "' for tol level function '" + functionName + "'"
+    );
+}
+
+
 

@@ -17,6 +17,17 @@ public:
     static ModifierMap* createEnumModifiers(ModifierType visibility);
     static ModifierMap* createEnumConstructorModifiers(ModifierType visibility);
 
+    ModifierType getVisibility();
+    ModifierType getInheritance();
+    ModifierType getOverride();
+
+    bool isOpen();
+    bool isFinal();
+    bool isPublic();
+    bool isProtected();
+    bool isPrivate();
+    bool isOverride();
+
     string toDot() const override;
     string getDotLabel() const override;
 };
