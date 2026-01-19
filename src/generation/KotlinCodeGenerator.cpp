@@ -104,6 +104,52 @@ std::vector<uint8_t> KotlinCodeGenerator::generateFuncAccess(ExprNode *expr, Cla
 
 }
 
+std::vector<uint8_t> KotlinCodeGenerator::generateFuncCall(ExprNode *expr, ClassTableElement *classElement, MethodTableElement *methodElement) {
+    if (expr->isBaseLiteral()) {
+        return generateLiteralCreation(expr, classElement, methodElement);
+    }
+
+    // TODO дописать
+}
+
+std::vector<uint8_t> KotlinCodeGenerator::generateLiteralCreation(ExprNode *expr, ClassTableElement *classElement, MethodTableElement *methodElement) {
+    std::vector<uint8_t> res;
+    int clas;
+    if (expr->fromLiteral == _FROM_INT) {
+        int n = classElement->constants->findOrAddConstant(UTF8, "JavaRTL/Int");
+        clas = classElement->constants->findOrAddConstant(Class, "", 0, 0, n);
+
+        if (n == -1) {
+            return res;
+        }
+
+        res = BytecodeGenerator::_new(clas);
+        std::vector<uint8_t> dup = BytecodeGenerator::dup();
+        BytecodeGenerator::appendToByteArray(&res, dup.data(), dup.size());
+
+        // Параметры
+        if (expr->intValue < -32768 || expr->intValue > 32767) {
+            int ic = classElement->constants->findOrAddConstant(Integer, "", expr->intValue);
+            std::vector<uint8_t> p = BytecodeGenerator::ldc(ic);
+            BytecodeGenerator::appendToByteArray(&res, p.data(), p.size());
+        }
+        else {
+            std::vector<uint8_t> p = BytecodeGenerator::iconstBipushSipush(expr->intValue);
+            BytecodeGenerator::appendToByteArray(&res, p.data(), p.size());
+        }
+
+        // invokespecial
+        int mn = classElement->constants->findOrAddConstant(UTF8, "<init>");
+        int md = classElement->constants->findOrAddConstant(UTF8, "(I)V");
+        int nat = classElement->constants->findOrAddConstant(NameAndType, "", 0, 0, mn, md);
+        int mref = classElement->constants->findOrAddConstant(MethodRef, "", 0, 0, clas, nat);
+        std::vector<uint8_t> is = BytecodeGenerator::invokespecial(mref);
+        BytecodeGenerator::appendToByteArray(&res, is.data(), is.size());
+    }
+
+    // TODO дописать
+}
+
 
 std::vector<uint8_t> KotlinCodeGenerator::generateReturnStatement(StmtNode *stmt, ClassTableElement *classElement,
                                                                   MethodTableElement *methodElement) {

@@ -305,3 +305,17 @@ string ExprNode::toDot() const {
 
     return dot;
 }
+
+bool ExprNode::isBaseLiteral() const {
+    if (type == _INTEGER_LITERAL ||
+        type == _FLOAT_LITERAL ||
+        type == _DOUBLE_LITERAL ||
+        type == _BOOL_LITERAL ||
+        type == _CHAR_LITERAL ||
+        type == _STRING_LITERAL
+    ) {
+        return true;
+    }
+
+    return false;
+}

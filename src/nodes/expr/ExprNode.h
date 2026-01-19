@@ -60,6 +60,8 @@ public:
 
     string toDot() const override;
     string getDotLabel() const override;
+
+    bool isBaseLiteral() const;
 };
 
 

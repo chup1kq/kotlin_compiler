@@ -88,9 +88,9 @@ void ClassGeneration::generate() {
         if (!pair.second) continue;
         if (pair.first == "<init>_()V" || pair.first == "main_()V") continue;
 
-        // auto m = generateMethod(m_class, pair.second);
-        // methodsBytes.insert(methodsBytes.end(), m.begin(), m.end());
-        // methodsCount++;
+        auto m = generateMethod(m_class, pair.second);
+        methodsBytes.insert(methodsBytes.end(), m.begin(), m.end());
+        methodsCount++;
     }
 
     // ===== 7.4 записываем count методов и сами методы =====

@@ -29,7 +29,10 @@ private:
     static std::vector<uint8_t> generateValOrVar(StmtNode* stmt, ClassTableElement* classElement, MethodTableElement* methodElement);
 
     static std::vector<uint8_t> generateIdentifier(ExprNode* expr, ClassTableElement* classElement, MethodTableElement* methodElement);
+    static std::vector<uint8_t> generateFuncCall(ExprNode* expr, ClassTableElement* classElement, MethodTableElement* methodElement);
     static std::vector<uint8_t> generateFuncAccess(ExprNode* expr, ClassTableElement* classElement, MethodTableElement* methodElement);
+
+    static std::vector<uint8_t> generateLiteralCreation(ExprNode* expr, ClassTableElement* classElement, MethodTableElement* methodElement);
 
     static std::vector<uint8_t> generateArrayCreation(ExprNode* expr, ClassTableElement* classElement, MethodTableElement* methodElement);
     static std::vector<uint8_t> generateArrayAccess(ExprNode* expr, ClassTableElement* classElement, MethodTableElement* methodElement);
