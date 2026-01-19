@@ -182,9 +182,11 @@ void ClassTable::addClassesToClassTable(ClassTableElement *baseClass, std::list<
         }
         newClass->addDefaultConstructorIfNeeded();
 
-        // TODO заполнить поля
+        newClass->addFieldsToTable(classNode->body->fields);
 
-        newClass->addMethodsToTable(*classNode->body->methods);
+        if (classNode->body && classNode->body->methods) {
+            newClass->addMethodsToTable(*classNode->body->methods);
+        }
     }
 }
 

@@ -279,4 +279,25 @@ SemanticError SemanticError::notIntIndexTypeInArrayAccess(const std::string &typ
     );
 }
 
+SemanticError SemanticError::invalidFieldType(const std::string &fieldName, const std::string &typeName) {
+    return SemanticError(
+        INVALID_FIELD_TYPE,
+        "Field '" + fieldName + "' has wrong type '" + typeName + "'"
+    );
+}
+
+SemanticError SemanticError::fieldNotInitialized(const std::string &fieldName, const std::string &className) {
+    return SemanticError(
+        FIELD_NOT_INITIALIZED,
+        "Field '" + fieldName + "' in class  '" + className + "' was not initialized "
+    );
+}
+
+SemanticError SemanticError::fieldAlreadyExists(const std::string &fieldName, const std::string &className) {
+    return SemanticError(
+        FIELD_ALREADY_EXISTS,
+        "Field '" + fieldName + "' in class '" + className + "' already exists"
+    );
+}
+
 

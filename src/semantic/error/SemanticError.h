@@ -55,6 +55,10 @@ public:
     static SemanticError invalidIteratorType(std::string iterType, std::string elementsRangeType);
     static SemanticError notIdInArrayAccess(const ExprType &type);
     static SemanticError notIntIndexTypeInArrayAccess(const std::string &typeName);
+    static SemanticError invalidFieldType(const std::string &fieldName, const std::string &typeName);
+    static SemanticError fieldNotInitialized(const std::string &fieldName, const std::string &className);
+    static SemanticError fieldAlreadyExists(const std::string &fieldName, const std::string &className);
+
 
 };
 

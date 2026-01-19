@@ -9,6 +9,14 @@ public:
     std::map<std::string, FieldTableElement*> fields;
 
     FieldTable();
+
+    void addField(
+        const std::string& name,
+        const std::string& descriptor,
+        FieldTableElement* element
+    );
+
+    bool contains(const std::string& filedName);
 };
 
 #endif //KOTLIN_COMPILER_FIELDTABLE_H

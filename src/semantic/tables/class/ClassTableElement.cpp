@@ -172,7 +172,56 @@ void ClassTableElement::addStandardMethodToTable(
     this->methods->addMethod(methodName, fullDesc, methodElem);
 }
 
-// Остальные методы НЕ ИЗМЕНЕНЫ
+void ClassTableElement::addFieldsToTable(StmtListNode *fields) {
+    if (!fields || !fields->stmts) {
+        return;
+    }
+
+    for (auto& field : *fields->stmts) {
+        addFieldToTable(field);
+    }
+}
+
+void ClassTableElement::addFieldToTable(StmtNode *stmt) {
+    if (!stmt || (stmt->type != _VAL && stmt->type != _VAR)) {
+        return;
+    }
+
+    // Название поля
+    std::string fieldName = stmt->varDeclaration->varId;
+
+    if (this->fields->contains(fieldName)) {
+        throw SemanticError::fieldAlreadyExists(fieldName, this->clsName);
+    }
+
+    if (!stmt->varDeclaration->defaultValue) {
+        throw SemanticError::fieldNotInitialized(fieldName, this->clsName);
+    }
+
+    // Является ли константой
+    int isConst = 0;
+    if (stmt->type == _VAL) {
+        isConst = 1;
+    }
+
+    // Тип поля
+    if (!stmt->varDeclaration->varType) {
+        throw SemanticError::invalidFieldType(fieldName, typeToString(stmt->varDeclaration->varType->type));
+    }
+    SemanticType* fieldType = new SemanticType(stmt->varDeclaration->varType);
+
+    std::string descriptor = createTypeDescriptor(fieldType);
+
+    int fieldNameNumber = this->constants->findOrAddConstant(UTF8, fieldName);
+    int fieldDescNumber = this->constants->findOrAddConstant(UTF8, descriptor);
+
+    FieldTableElement* fieldElem = new FieldTableElement(
+        fieldNameNumber, fieldDescNumber, fieldName, descriptor, stmt->varModifiers, isConst
+    );
+
+    this->fields->addField(fieldName, fieldName, fieldElem);
+}
+
 std::string ClassTableElement::createVoidMethodDescriptor(vector<FuncParam *> params) {
     std::string desc = addParamsToMethodDescriptor(params);
     desc += "V";
@@ -260,3 +309,19 @@ std::string ClassTableElement::addParamsToMethodDescriptor(vector<SemanticType *
 
     return desc;
 }
+
+std::string ClassTableElement::createTypeDescriptor(SemanticType *type) {
+    std::string desc;
+    if (type->isArray()) {
+        desc += "[L";
+        desc += type->elementType->className;
+    }
+    else {
+        desc += "L";
+        desc += type->className;
+    }
+    desc += ";";
+
+    return desc;
+}
+

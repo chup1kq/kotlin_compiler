@@ -34,11 +34,15 @@ public:
     void addMethodToTable(FunNode* method);
     void addStandardMethodToTable(const std::string& methodName, SemanticType* returnType, const std::string& fullDesc);
 
+    void addFieldsToTable(StmtListNode* fields);
+    void addFieldToTable(StmtNode* stmt);
+
     static std::string createMethodDescriptor(vector<FuncParam*> params, SemanticType* returnType);
     static std::string createMethodDescriptor(vector<SemanticType*> params, SemanticType* returnType);
     static std::string createVoidMethodDescriptor(vector<FuncParam*> params);
     static std::string addParamsToMethodDescriptor(vector<FuncParam*> params);
     static std::string addParamsToMethodDescriptor(vector<SemanticType*> params);
+    static std::string createTypeDescriptor(SemanticType* type);
 };
 
 #endif //KOTLIN_COMPILER_CLASSTABLEELEMENT_H
