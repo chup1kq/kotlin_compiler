@@ -193,6 +193,12 @@ void ClassTable::addClassesToClassTable(ClassTableElement *baseClass, std::list<
 void ClassTable::attributeAndFillLocalsInClasses() {
     // ✅ УПРОЩЕНО: убраны вложенные циклы по перегрузкам
     for (auto& [className, cls] : items) {
+        if (!cls->fields->fields.empty()) {
+            for (auto& field : cls->fields->fields) {
+                attributeExpression(nullptr, field.second->fieldValue);
+            }
+        }
+
         for (auto& [fullMethodName, method] : cls->methods->methods) {
             std::cout << "Processing class=" << className
                       << " method=" << fullMethodName << std::endl;
@@ -411,7 +417,7 @@ void ClassTable::attributeReturn(MethodTableElement *method, StmtNode *stmt) {
 
     if (stmt->expr == nullptr) {
         // Если return без expr, а возвращаемое значение функции не void
-        if (retType->className != "Unit") {
+        if (retType->className != "JavaRTL/Unit") {
             throw SemanticError::missingReturnValue(method->strName + method->strDesc);
         }
         return;
@@ -465,22 +471,27 @@ void ClassTable::attributeExpression(MethodTableElement *method, ExprNode *expr,
             return;
         }
         case _FLOAT_LITERAL: {
+            expr->fromLiteral = _FROM_FLOAT;
             expr->semanticType = SemanticType::classType("JavaRTL/Float");
             return;
         }
         case _DOUBLE_LITERAL: {
+            expr->fromLiteral = _FROM_DOUBLE;
             expr->semanticType = SemanticType::classType("JavaRTL/Double");
             return;
         }
         case _STRING_LITERAL: {
+            expr->fromLiteral = _FROM_STRING;
             expr->semanticType = SemanticType::classType("JavaRTL/String");
             return;
         }
         case _CHAR_LITERAL: {
+            expr->fromLiteral = _FROM_CHAR;
             expr->semanticType = SemanticType::classType("JavaRTL/Char");
             return;
         }
         case _BOOL_LITERAL: {
+            expr->fromLiteral = _FROM_BOOLEAN;
             expr->semanticType = SemanticType::classType("JavaRTL/Boolean");
             return;
         }
@@ -667,13 +678,22 @@ void ClassTable::attributeFuncOrMethodCall(MethodTableElement* currentMethod, Ex
 
     // Определяем класс
     std::string relatedClassName;
+    bool isConstructor = false;
+    std::string& methodName = expr->identifierName;
     if (expr->type == _FUNC_CALL) {
         relatedClassName = this->topLevelClassName;
+
+        // TODO посмотреть что это может быть конструктор класса
+        if (this->items.contains(methodName) && !expr->params) {
+            relatedClassName = this->items[methodName]->clsName;
+            isConstructor = true;
+            methodName = "<init>";
+        }
     } else if (expr->type == _FUNC_ACCESS) {
         relatedClassName = expr->left->semanticType->className;
     }
 
-    std::string& methodName = expr->identifierName;
+
     if (!this->items.contains(relatedClassName))
         throw SemanticError::classNotFound(relatedClassName, methodName);
 
@@ -682,7 +702,7 @@ void ClassTable::attributeFuncOrMethodCall(MethodTableElement* currentMethod, Ex
 
     auto* cls = this->items[relatedClassName];
     bool foundInBuiltin = false;
-    if (!cls->methods->contains(methodName, paramDesc)) {
+    if (!isConstructor && !cls->methods->contains(methodName, paramDesc)) {
         // Поиск в builtin классах
         for (const auto& builtinClassName : builtinFunctionClasses) {
             if (!this->items.contains(builtinClassName))
@@ -697,7 +717,7 @@ void ClassTable::attributeFuncOrMethodCall(MethodTableElement* currentMethod, Ex
         }
         if (isMethodBaseClassConstructorOrInputOutput(expr)) {
             foundInBuiltin = true;
-            methodName = MethodTableElement::transformNameToConstructorIfNeeded(expr->identifierName);
+            methodName = MethodTableElement::transformNameToConstructorIfNeeded(methodName);
         }
         // foundInBuiltin = isMethodBaseClassConstructorOrInputOutput(expr);
         if (!foundInBuiltin) {
@@ -714,7 +734,10 @@ void ClassTable::attributeFuncOrMethodCall(MethodTableElement* currentMethod, Ex
 
     // TODO ОБЯЗАТЕЛЬНО дописать корректное возращаемое значение, тут Int для теста
     if (foundInBuiltin) {
-        expr->semanticType = SemanticType::classType("JavaRTL/Int");
+        expr->semanticType = SemanticType::classType(expr->typeElements->customName);
+    }
+    else if (isConstructor) {
+        expr->semanticType = SemanticType::classType(relatedClassName);
     }
     else {
         expr->semanticType = chosen->retType;

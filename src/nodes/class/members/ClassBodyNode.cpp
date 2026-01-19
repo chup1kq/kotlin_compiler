@@ -66,7 +66,7 @@ string ClassBodyNode::toDot() const {
         }
     }
 
-    addDotChild(dot, enumEntries, "enum_entries");
+    // addDotChild(dot, enumEntries, "enum_entries");
 
     return dot;
 }

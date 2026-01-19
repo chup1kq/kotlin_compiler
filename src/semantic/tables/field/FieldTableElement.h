@@ -12,13 +12,15 @@ public:
     std::string strDesc;
     ModifierMap* modifierMap; // список модификаторов поля
     int isConst; // является ли указанное поле изменяемым
+    ExprNode* fieldValue;
 
     FieldTableElement(int name,
                       int descriptor,
                       std::string strName,
                       std::string strDesc,
                       ModifierMap* modifierMap,
-                      bool isConst);
+                      bool isConst,
+                      ExprNode* fieldValue);
 };
 
 #endif //KOTLIN_COMPILER_FIELDTABLEELEMENT_H

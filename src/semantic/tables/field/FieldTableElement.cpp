@@ -6,13 +6,15 @@ FieldTableElement::FieldTableElement(
     std::string strName,
     std::string strDesc,
     ModifierMap* modifierMap,
-    bool isConst
+    bool isConst,
+    ExprNode* fieldValue
 )
     : name(name),
       descriptor(descriptor),
       strName(std::move(strName)),
       strDesc(std::move(strDesc)),
       modifierMap(modifierMap),
-      isConst(isConst ? 1 : 0)
+      isConst(isConst ? 1 : 0),
+      fieldValue((fieldValue))
 {
 }

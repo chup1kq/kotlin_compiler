@@ -216,7 +216,7 @@ void ClassTableElement::addFieldToTable(StmtNode *stmt) {
     int fieldDescNumber = this->constants->findOrAddConstant(UTF8, descriptor);
 
     FieldTableElement* fieldElem = new FieldTableElement(
-        fieldNameNumber, fieldDescNumber, fieldName, descriptor, stmt->varModifiers, isConst
+        fieldNameNumber, fieldDescNumber, fieldName, descriptor, stmt->varModifiers, isConst, stmt->varDeclaration->defaultValue
     );
 
     this->fields->addField(fieldName, fieldName, fieldElem);
