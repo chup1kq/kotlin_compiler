@@ -134,4 +134,6 @@ add_executable(kotlin_parser
         src/generation/BytecodeGenerator.h
         src/generation/KotlinCodeGenerator.cpp
         src/generation/KotlinCodeGenerator.h
+        src/semantic/transformations/modifiers/ModifiersTransformator.cpp
+        src/semantic/transformations/modifiers/ModifiersTransformator.h
 )
