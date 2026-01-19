@@ -1155,7 +1155,7 @@ void ClassTable::initStdClasses() {
     /* 1.2 Арифметические операции */
     addMethod("JavaRTL/Int", "plus", SemanticType::classType("JavaRTL/Int"), "(LJavaRTL/Int;)", "(LJavaRTL/Int;)LJavaRTL/Int;");
     addMethod("JavaRTL/Int", "minus", SemanticType::classType("JavaRTL/Int"), "(LJavaRTL/Int;)", "(LJavaRTL/Int;)LJavaRTL/Int;");
-    addMethod("JavaRTL/Int", "times", SemanticType::classType("JavaRTL/Int"), "(LJavaRTL/Int;)", "(LJavaRTL/Int;)LJavaRTL/Int;");
+    addMethod("JavaRTL/Int", "mul", SemanticType::classType("JavaRTL/Int"), "(LJavaRTL/Int;)", "(LJavaRTL/Int;)LJavaRTL/Int;");
     addMethod("JavaRTL/Int", "div", SemanticType::classType("JavaRTL/Int"), "(LJavaRTL/Int;)", "(LJavaRTL/Int;)LJavaRTL/Int;");
     /* 1.3 Унарные операции */
     addMethod("JavaRTL/Int", "uPlus", SemanticType::classType("JavaRTL/Int"), "()", "()LJavaRTL/Int;");
@@ -1180,7 +1180,7 @@ void ClassTable::initStdClasses() {
     /* 2.2 Арифметические операции */
     addMethod("JavaRTL/Float", "plus", SemanticType::classType("JavaRTL/Float"), "(LJavaRTL/Float;)", "(LJavaRTL/Int;)LJavaRTL/Float;");
     addMethod("JavaRTL/Float", "minus", SemanticType::classType("JavaRTL/Float"), "(LJavaRTL/Float;)", "(LJavaRTL/Int;)LJavaRTL/Float;");
-    addMethod("JavaRTL/Float", "times", SemanticType::classType("JavaRTL/Float"), "(LJavaRTL/Float;)", "(LJavaRTL/Int;)LJavaRTL/Float;");
+    addMethod("JavaRTL/Float", "mul", SemanticType::classType("JavaRTL/Float"), "(LJavaRTL/Float;)", "(LJavaRTL/Int;)LJavaRTL/Float;");
     addMethod("JavaRTL/Float", "div", SemanticType::classType("JavaRTL/Float"), "(LJavaRTL/Float;)", "(LJavaRTL/Int;)LJavaRTL/Float;");
     /* 2.3 Унарные операции */
     addMethod("JavaRTL/Float", "uPlus", SemanticType::classType("JavaRTL/Float"), "()", "()LJavaRTL/Float;");
@@ -1202,7 +1202,7 @@ void ClassTable::initStdClasses() {
     /* 3.2 Арифметические операции */
     addMethod("JavaRTL/Double", "plus", SemanticType::classType("JavaRTL/Double"), "(LJavaRTL/Double;)", "(LJavaRTL/Double;)LJavaRTL/Double;");
     addMethod("JavaRTL/Double", "minus", SemanticType::classType("JavaRTL/Double"), "(LJavaRTL/Double;)", "(LJavaRTL/Double;)LJavaRTL/Double;");
-    addMethod("JavaRTL/Double", "times", SemanticType::classType("JavaRTL/Double"), "(LJavaRTL/Double;)", "(LJavaRTL/Double;)LJavaRTL/Double;");
+    addMethod("JavaRTL/Double", "mul", SemanticType::classType("JavaRTL/Double"), "(LJavaRTL/Double;)", "(LJavaRTL/Double;)LJavaRTL/Double;");
     addMethod("JavaRTL/Double", "div", SemanticType::classType("JavaRTL/Double"), "(LJavaRTL/Double;)", "(LJavaRTL/Double;)LJavaRTL/Double;");
     /* 3.3 Унарные операции */
     addMethod("JavaRTL/Double", "uPlus", SemanticType::classType("JavaRTL/Double"), "()", "()LJavaRTL/Double;");
