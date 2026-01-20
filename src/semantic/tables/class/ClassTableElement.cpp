@@ -325,3 +325,113 @@ std::string ClassTableElement::createTypeDescriptor(SemanticType *type) {
     return desc;
 }
 
+void ClassTableElement::checkFieldsModifiers(ClassTableElement* superClass, std::map<std::string, ClassTableElement*> items) {
+    for (auto& field : this->fields->fields) {
+        checkFiledModifier(field.second, superClass, items);
+    }
+}
+
+void ClassTableElement::checkFiledModifier(FieldTableElement* field, ClassTableElement* superClass, std::map<std::string, ClassTableElement*> items) {
+    ModifierMap* thisFieldMods = field->modifierMap;
+
+    // Если супер класса нет
+    if (!superClass) {
+        if (thisFieldMods->isOverride()) {
+            throw SemanticError::hasNoSuperClassToOverride(this->clsName, field->strName);
+        }
+
+        setDefaultModifiers(thisFieldMods);
+
+        return;
+    }
+
+    // Тут супер класс есть
+    std::string superClassName = getClassNameForSuperField(field, superClass, items);
+    FieldTableElement* superField = items[superClassName]->fields->fields.at(field->strName);
+
+    // Если в супер классе (или ранее по цепочке наследования) НЕТ такого поля
+    if (!superField) {
+        if (thisFieldMods->isOverride()) {
+            throw SemanticError::hasNoElementToOverrideInSuperClasses(field->strName, this->clsName, superClassName);
+        }
+
+        return;
+    }
+
+    // В супер классе (или ранее по цепочке наследования) ЕСТЬ такое поле
+    ModifierMap* superFieldMods = superField->modifierMap;
+
+    // Супер поле PRIVATE, то есть оно не видно в наследниках
+    if (superFieldMods->isPrivate()) {
+        setDefaultModifiers(thisFieldMods);
+
+        return;
+    }
+
+    // Супер поле FINAL и его нельзя переопределить или создать такое же (а если мы тут, то мы уже создали такое же, ошибка)
+    if (superFieldMods->isFinal()) {
+        throw SemanticError::canNotOverrideFinalElement(field->strName, this->clsName, superClassName);
+    }
+
+    // Супер поле OPEN, но текущее поле не OVERRIDE
+    if (!thisFieldMods->isOverride()) {
+        throw SemanticError::elementNeedsOverride(field->strName, this->clsName, superClassName);
+    }
+
+    // ----------- Тут супер поле OPEN и текущее поле с OVERRIDE -----------
+
+    // Нельзя ослаблять видимость
+    if (thisFieldMods->isProtected() && superFieldMods->isPublic()) {
+        throw SemanticError::weakenVisibilityModifier(field->strName, this->clsName, superClassName);
+    }
+
+    // Нельзя переопределять тип
+    if (!field->fieldType->isReplaceable(*superField->fieldType)) {
+        throw SemanticError::notReplaceableTypeInSuperClass(
+            field->strName,
+            this->clsName,
+            field->fieldType->toString(),
+            superField->fieldType->toString()
+        );
+    }
+
+    // Нельзя менять VAL/VAR
+    if (field->isConst != superField->isConst) {
+        throw SemanticError::changeConsistencyInOverride(field->strName, this->clsName);
+    }
+
+    if (thisFieldMods->getVisibility() == NONE) {
+        thisFieldMods->modifiers->at("visibility") = superFieldMods->modifiers->at("visibility");
+    }
+    if (thisFieldMods->getInheritance() == NONE) {
+        thisFieldMods->modifiers->at("inheritance") = OPEN;
+    }
+}
+
+// Рекурсивно получаем поле по имени, идя по цепочке наследования
+std::string ClassTableElement::getClassNameForSuperField(FieldTableElement *field, ClassTableElement *superClass, std::map<std::string, ClassTableElement*> items) {
+    if (!superClass) {
+        return "";
+    }
+
+    // Наши в этом наследнике
+    if (superClass->fields->fields.contains(field->strName)) {
+        return superClass->clsName;
+    }
+
+    // Если больше наследника нет
+    if (superClass->superClsName.empty()) {
+        return "";
+    }
+
+    return getClassNameForSuperField(field, items.at(superClass->superClsName), items);
+}
+
+void ClassTableElement::setDefaultModifiers(ModifierMap *mods) {
+    if (mods->getVisibility() == NONE) {
+        mods->modifiers->at("visibility") = PUBLIC;
+    }
+    if (mods->getInheritance() == NONE) {
+        mods->modifiers->at("inheritance") = FINAL;
+    }
+}

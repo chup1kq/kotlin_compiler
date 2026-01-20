@@ -40,8 +40,10 @@ public:
     void addFieldsToTable(StmtListNode* fields);
     void addFieldToTable(StmtNode* stmt);
 
-    void checkFiledsModifiers();
-    void checkFiledModifier();
+    void checkFieldsModifiers(ClassTableElement* superClass, std::map<std::string, ClassTableElement*> items);
+    void checkFiledModifier(FieldTableElement* field, ClassTableElement* superClass, std::map<std::string, ClassTableElement*> items);
+    std::string getClassNameForSuperField(FieldTableElement* field, ClassTableElement* superClass, std::map<std::string, ClassTableElement*> items);
+    void setDefaultModifiers(ModifierMap* mods);
 
     static std::string createMethodDescriptor(vector<FuncParam*> params, SemanticType* returnType);
     static std::string createMethodDescriptor(vector<SemanticType*> params, SemanticType* returnType);

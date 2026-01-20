@@ -64,6 +64,15 @@ public:
     static SemanticError invalidModifierCombinationPrivateOpen(const std::string& keyword);
     static SemanticError incompatibleModifiers(const std::string& lexem, const std::string& incompatibleKeyword);
     static SemanticError unexpectedTokenAfterTopLevelKeyword(const std::string& previousKeyword, const std::string& input);
+    static SemanticError inheritanceFromPrivateClass(const std::string &thisClass, const std::string &superName);
+    static SemanticError hasNoSuperClassToOverride(const std::string &thisClass, const std::string &overrideName);
+    static SemanticError hasNoElementToOverrideInSuperClasses(const std::string &elementName, const std::string &thisClass, const std::string &superClass);
+    static SemanticError canNotOverrideFinalElement(const std::string &elementName, const std::string &thisClass, const std::string &superClass);
+    static SemanticError elementNeedsOverride(const std::string &elementName, const std::string &thisClass, const std::string &superClass);
+    static SemanticError weakenVisibilityModifier(const std::string &elementName, const std::string &thisClass, const std::string &superClass);
+    static SemanticError notReplaceableTypeInSuperClass(const std::string &elementName, const std::string &thisClass, const std::string &thisType, const std::string &superType);
+    static SemanticError changeConsistencyInOverride(const std::string &elementName, const std::string &thisClass);
+
 };
 
 #endif //KOTLIN_COMPILER_SEMANTIC_ERROR_H

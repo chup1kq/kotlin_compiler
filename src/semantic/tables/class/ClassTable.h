@@ -66,6 +66,9 @@ public:
     // Сгенерировать таблицу методанных
     void initStdClasses();
 
+    // Проверка на стандартный класс
+    bool isBuiltinClass(const std::string& className);
+
 private:
     bool isNeededType(const std::string& signature, const std::string& type);
     SemanticType checkSameElementsType(std::list<ExprNode*> *exprs);

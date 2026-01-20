@@ -327,7 +327,26 @@ SemanticError SemanticError::invalidModifierCombinationPrivateOpen(const std::st
         "Error in modifier. Modifier 'private' is incompatible with 'open' in " + keyword + " declaration."
     );
 }
+SemanticError SemanticError::inheritanceFromPrivateClass(const std::string &thisClass, const std::string &superName) {
+    return SemanticError(
+        INHERITANCE_FROM_FINAL_CLASS,
+        "Class '" + thisClass + "' can not inherit class '" + superName + "'. Class '" + superName + "' is private"
+    );
+}
 
+SemanticError SemanticError::hasNoSuperClassToOverride(const std::string &thisClass, const std::string &overrideName) {
+    return SemanticError(
+        HAS_NO_SUPER_CLASS_TO_OVERRIDE,
+        "Can not override '" + overrideName + "' in class '" + thisClass + "'. No inheritance in class '" + thisClass + "'"
+    );
+}
+
+SemanticError SemanticError::hasNoElementToOverrideInSuperClasses(const std::string &elementName, const std::string &thisClass, const std::string &superClass) {
+    return SemanticError(
+        HAS_NO_ELEMENT_TO_OVERRIDE_IN_SUPER_CLASSES,
+        "Can not override '" + elementName + "' in '" + thisClass + "'. No such element in '" + superClass + "' class"
+    );
+}
 
 SemanticError SemanticError::incompatibleModifiers(
     const std::string& lexem,
@@ -348,5 +367,39 @@ SemanticError SemanticError::unexpectedTokenAfterTopLevelKeyword(
         UNEXPECTED_TOKEN_AFTER_TOP_LEVEL_KEYWORD,
         "Error in modifier. Expecting top level keyword after '" +
         previousKeyword + "', but found: " + input
+    );
+}
+SemanticError SemanticError::canNotOverrideFinalElement(const std::string &elementName, const std::string &thisClass, const std::string &superClass) {
+    return SemanticError(
+        CAN_NOT_OVERRIDE_FINAL_ELEMENT,
+        "Can not override '" + elementName + "' in '" + thisClass + "'. It is final in '" + superClass + "' class"
+    );
+}
+
+SemanticError SemanticError::elementNeedsOverride(const std::string &elementName, const std::string &thisClass, const std::string &superClass) {
+    return SemanticError(
+        CAN_NOT_OVERRIDE_FINAL_ELEMENT,
+        "'" + elementName + "' in class '" + thisClass + "' needs override. It is open in '" + superClass + "' class"
+    );
+}
+
+SemanticError SemanticError::weakenVisibilityModifier(const std::string &elementName, const std::string &thisClass, const std::string &superClass) {
+    return SemanticError(
+        CAN_NOT_OVERRIDE_FINAL_ELEMENT,
+        "'" + elementName + "' in class '" + thisClass + "' can not weaken visibility modifier from '" + superClass + "' class"
+    );
+}
+
+SemanticError SemanticError::notReplaceableTypeInSuperClass(const std::string &elementName, const std::string &thisClass, const std::string &thisType, const std::string &superType) {
+    return SemanticError(
+        CAN_NOT_OVERRIDE_FINAL_ELEMENT,
+        "'" + elementName + "' in class '" + thisClass + "' can not change type to '" + thisType + "'. Must remain '" + superType + "' type"
+    );
+}
+
+SemanticError SemanticError::changeConsistencyInOverride(const std::string &elementName, const std::string &thisClass) {
+    return SemanticError(
+        CAN_NOT_CHANGE_VAR_VAL_IN_OVERRIDE,
+        "'" + elementName + "' in class '" + thisClass + "' can not change consistency"
     );
 }

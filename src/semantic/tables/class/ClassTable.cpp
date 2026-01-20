@@ -66,6 +66,8 @@ void ClassTable::buildClassTable(KotlinFileNode* root) {
     // Проверяем и заполняем локальные переменные в top level функциях
     attributeAndFillLocalsInClasses();
 
+    checkFieldsModifiers();
+
     std::cout << "MainKt methods AFTER ATTRIBUTE:" << std::endl;
     if (items.find(topLevelClassName) != items.end()) {
         auto* mainKt = items[topLevelClassName];
@@ -196,11 +198,20 @@ void ClassTable::addClassesToClassTable(ClassTableElement *baseClass, std::list<
 
 void ClassTable::setInheritanceToClasses(std::list<ClassNode *> classList) {
     for (auto& classNode : classList) {
+        ClassTableElement* thisClass = items[classNode->name];
+
+        if (thisClass->modifiers->getVisibility() == NONE) {
+            thisClass->modifiers->modifiers->at("visibility") = PUBLIC;
+        }
+        if (thisClass->modifiers->getInheritance() == NONE) {
+            thisClass->modifiers->modifiers->at("inheritance") = FINAL;
+        }
+
         // Проверили, что было объявлено наследование
         if (!classNode->inheritance) {
             continue;
         }
-        ClassTableElement* thisClass = items[classNode->name];
+
         std::string superClassName = classNode->inheritance->name;
 
         // Проверяем, что было правильно указано имя супер класса
@@ -213,6 +224,10 @@ void ClassTable::setInheritanceToClasses(std::list<ClassNode *> classList) {
         if (!superClass->isOpen) {
             throw SemanticError::inheritanceFromFinalClass(thisClass->clsName, superClassName);
         }
+        //Проверяем, что супер класс не PRIVATE
+        if (superClass->modifiers->isPrivate()) {
+            throw SemanticError::inheritanceFromPrivateClass(thisClass->clsName, superClassName);
+        }
 
         thisClass->superClsName = superClassName;
         int sn = thisClass->constants->findOrAddConstant(UTF8, superClassName);
@@ -222,6 +237,22 @@ void ClassTable::setInheritanceToClasses(std::list<ClassNode *> classList) {
         thisClass->superClass = sc;
     }
 }
+
+void ClassTable::checkFieldsModifiers() {
+    for (auto& cls : this->items) {
+        if (isBuiltinClass(cls.first) || cls.first == topLevelClassName) {
+            continue;
+        }
+
+        if (!cls.second->superClsName.empty()) {
+            cls.second->checkFieldsModifiers(items[cls.second->superClsName], this->items);
+        }
+        else {
+            cls.second->checkFieldsModifiers(nullptr, this->items);
+        }
+    }
+}
+
 
 void ClassTable::attributeAndFillLocalsInClasses() {
     // ✅ УПРОЩЕНО: убраны вложенные циклы по перегрузкам
@@ -1363,4 +1394,14 @@ std::string ClassTable::getTypeDescriptor(SemanticType* type) {
     } else {
         return "L" + type->className + ";"; // "Ljava/lang/Object;" мб
     }
+}
+
+bool ClassTable::isBuiltinClass(const std::string &className) {
+    for (auto& clsName : builtinFunctionClasses) {
+        if (className == clsName) {
+            return true;
+        }
+    }
+
+    return false;
 }
