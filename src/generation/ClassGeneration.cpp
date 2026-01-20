@@ -1,5 +1,6 @@
 #include "ClassGeneration.h"
 
+#include <filesystem>
 #include <iostream>
 
 #include "BytecodeGenerator.h"
@@ -30,8 +31,10 @@ uint16_t getMethodAccessFlags(MethodTableElement* method) {
 
 
 void ClassGeneration::generateClassFile(const std::string& className) {
-    m_filename = "" + className + ".class";
-    m_out.open(m_filename, ios::binary | ios::trunc);
+    std::string outDir = "bytecode";
+    std::filesystem::create_directories(outDir);
+    m_filename = outDir + "/" + className + ".class";
+    m_out.open(m_filename, std::ios::binary | std::ios::trunc);
 
     if (!m_out.is_open()) {
         throw runtime_error("Cannot create file: " + m_filename);
