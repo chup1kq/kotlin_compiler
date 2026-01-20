@@ -7,7 +7,8 @@ FieldTableElement::FieldTableElement(
     std::string strDesc,
     ModifierMap* modifierMap,
     bool isConst,
-    ExprNode* fieldValue
+    ExprNode* fieldValue,
+    SemanticType* fieldType
 )
     : name(name),
       descriptor(descriptor),
@@ -15,6 +16,7 @@ FieldTableElement::FieldTableElement(
       strDesc(std::move(strDesc)),
       modifierMap(modifierMap),
       isConst(isConst ? 1 : 0),
-      fieldValue((fieldValue))
+      fieldValue(fieldValue),
+      fieldType(fieldType)
 {
 }

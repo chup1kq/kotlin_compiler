@@ -3,6 +3,7 @@
 #include <string>
 
 #include "ModifierMap.h"
+#include "../type/SemanticType.h"
 
 class FieldTableElement {
 public:
@@ -13,6 +14,7 @@ public:
     ModifierMap* modifierMap; // список модификаторов поля
     int isConst; // является ли указанное поле изменяемым
     ExprNode* fieldValue;
+    SemanticType* fieldType;
 
     FieldTableElement(int name,
                       int descriptor,
@@ -20,7 +22,8 @@ public:
                       std::string strDesc,
                       ModifierMap* modifierMap,
                       bool isConst,
-                      ExprNode* fieldValue);
+                      ExprNode* fieldValue,
+                      SemanticType* fieldType);
 };
 
 #endif //KOTLIN_COMPILER_FIELDTABLEELEMENT_H

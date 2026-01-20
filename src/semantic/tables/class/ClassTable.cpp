@@ -226,9 +226,27 @@ void ClassTable::setInheritanceToClasses(std::list<ClassNode *> classList) {
 void ClassTable::attributeAndFillLocalsInClasses() {
     // ✅ УПРОЩЕНО: убраны вложенные циклы по перегрузкам
     for (auto& [className, cls] : items) {
+        // Аттрибутируем поля
         if (!cls->fields->fields.empty()) {
             for (auto& field : cls->fields->fields) {
                 attributeExpression(nullptr, field.second->fieldValue);
+
+                // Тут проверяем типы у типа поля и у значения
+                if (field.second->fieldType->className == "UNDEFINED") {
+                    field.second->fieldType = field.second->fieldValue->semanticType;
+
+                    // Тут ранее был записан мусор, перезаписываем его
+                    int undefinedId = cls->constants->findOrAddConstant(UTF8, "LUNDEFINED;");
+                    cls->constants->items.at(undefinedId)->utf8String = ClassTableElement::createTypeDescriptor(field.second->fieldType);
+                }
+
+                if (!field.second->fieldType->isReplaceable(*field.second->fieldValue->semanticType)) {
+                    throw SemanticError::notReplaceableTypesInStmtDeclaration(
+                        field.first,
+                        field.second->fieldType->toString(),
+                        field.second->fieldValue->semanticType->toString()
+                    );
+                }
             }
         }
 
