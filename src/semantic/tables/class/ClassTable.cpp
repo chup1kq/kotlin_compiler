@@ -1304,6 +1304,7 @@ void ClassTable::initStdClasses() {
     /* 4. Инициализация класса String */
     addClass("JavaRTL/String");
     builtinFunctionClasses.push_back("JavaRTL/String");
+    addMethod("JavaRTL/String", "plus", SemanticType::classType("JavaRTL/String"), "(LJavaRTL/String;)", "(LJavaRTL/String;)LJavaRTL/String;");
 
     addMethod("JavaRTL/String", "toInt", SemanticType::classType("JavaRTL/Int"), "()", "()LJavaRTL/Int;");
     addMethod("JavaRTL/String", "toFloat", SemanticType::classType("JavaRTL/Float"), "()", "()LJavaRTL/Float;");
