@@ -15,6 +15,7 @@ public:
     int name; // ссылка на константу с именем класса - номер константы
     int isOpen; // разрешено ли наследовать данный класс
     int superName; // ссылка на константу с именем родительского класса - номер константы
+    std::string superClsName;
     int thisClass; // ссылка на константу текущего класса.
     int superClass; // ссылка на константу родительского класса.
 
@@ -22,6 +23,8 @@ public:
     FieldTable* fields;
 
     ConstantTable* constants;
+
+    ModifierMap* modifiers;
 
     std::string clsName;
 

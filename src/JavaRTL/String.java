@@ -14,8 +14,8 @@ public class String extends Any {
 
     public Int length() { return new Int(value.length()); }
     public Int toInt() { return new Int(Integer.parseInt(value)); }
-//    public Float toFloat() { return new Float(Float.parseFloat(value)); }
-//    public Double toDouble() { return new Double(Double.parseDouble(value)); }
+    public Float toFloat() { return new Float(Float.parseFloat(value)); }
+    public Double toDouble() { return new Double(Double.parseDouble(value)); }
 
     public Boolean equals(String o) { return new Boolean(value.equals(o.value)); }
     public Boolean notEquals(String o) { return new Boolean(!value.equals(o.value)); }

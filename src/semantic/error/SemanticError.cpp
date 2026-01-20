@@ -307,5 +307,19 @@ SemanticError SemanticError::invalidTopLevelModifier(const std::string &function
     );
 }
 
+SemanticError SemanticError::superClassDoesNotExists(const std::string &thisClass, const std::string &superName) {
+    return SemanticError(
+        SUPER_CLASS_DOES_NOT_EXIST,
+        "Class '" + thisClass + "' can not inherit class '" + superName + "'. It does not exist"
+    );
+}
+
+SemanticError SemanticError::inheritanceFromFinalClass(const std::string &thisClass, const std::string &superName) {
+    return SemanticError(
+        INHERITANCE_FROM_FINAL_CLASS,
+        "Class '" + thisClass + "' can not inherit class '" + superName + "'. Class '" + superName + "' is final"
+    );
+}
+
 
 

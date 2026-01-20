@@ -49,6 +49,8 @@ void ClassTable::buildClassTable(KotlinFileNode* root) {
     if (root->topLevelList->classList)
         addClassesToClassTable(items[topLevelClassName], *root->topLevelList->classList);
 
+    setInheritanceToClasses(*root->topLevelList->classList);
+
     std::cout << items.size() << endl;
 
     std::cout << "MainKt methods AFTER added all classes:" << std::endl;
@@ -175,6 +177,8 @@ void ClassTable::addClassesToClassTable(ClassTableElement *baseClass, std::list<
         newClass->name = utf8;
         newClass->thisClass = cls;
 
+        newClass->modifiers = classNode->modifiers;
+
         this->items.insert(std::pair<std::string, ClassTableElement*>(className, newClass));
 
         if (classNode->primaryConstructor) {
@@ -187,6 +191,35 @@ void ClassTable::addClassesToClassTable(ClassTableElement *baseClass, std::list<
         if (classNode->body && classNode->body->methods) {
             newClass->addMethodsToTable(*classNode->body->methods);
         }
+    }
+}
+
+void ClassTable::setInheritanceToClasses(std::list<ClassNode *> classList) {
+    for (auto& classNode : classList) {
+        // Проверили, что было объявлено наследование
+        if (!classNode->inheritance) {
+            continue;
+        }
+        ClassTableElement* thisClass = items[classNode->name];
+        std::string superClassName = classNode->inheritance->name;
+
+        // Проверяем, что было правильно указано имя супер класса
+        ClassTableElement* superClass = this->items[superClassName];
+        if (!superClass) {
+            throw SemanticError::superClassDoesNotExists(thisClass->clsName, superClassName);
+        }
+
+        //Проверяем, что супер класс не FINAL
+        if (!superClass->isOpen) {
+            throw SemanticError::inheritanceFromFinalClass(thisClass->clsName, superClassName);
+        }
+
+        thisClass->superClsName = superClassName;
+        int sn = thisClass->constants->findOrAddConstant(UTF8, superClassName);
+        int sc = thisClass->constants->findOrAddConstant(Class, "", 0, 0, sn);
+
+        thisClass->superName = sn;
+        thisClass->superClass = sc;
     }
 }
 

@@ -59,6 +59,8 @@ public:
     static SemanticError fieldNotInitialized(const std::string &fieldName, const std::string &className);
     static SemanticError fieldAlreadyExists(const std::string &fieldName, const std::string &className);
     static SemanticError invalidTopLevelModifier(const std::string &functionName, const std::string &modifier);
+    static SemanticError superClassDoesNotExists(const std::string &thisClass, const std::string &superName);
+    static SemanticError inheritanceFromFinalClass(const std::string &thisClass, const std::string &superName);
 
 
 };
