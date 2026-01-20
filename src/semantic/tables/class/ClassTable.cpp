@@ -1309,6 +1309,7 @@ void ClassTable::initStdClasses() {
     addMethod("JavaRTL/String", "toInt", SemanticType::classType("JavaRTL/Int"), "()", "()LJavaRTL/Int;");
     addMethod("JavaRTL/String", "toFloat", SemanticType::classType("JavaRTL/Float"), "()", "()LJavaRTL/Float;");
     addMethod("JavaRTL/String", "toDouble", SemanticType::classType("JavaRTL/Double"), "()", "()LJavaRTL/Double;");
+    addMethod("JavaRTL/String", "toBoolean", SemanticType::classType("JavaRTL/Boolean"), "()", "()LJavaRTL/Boolean;");
     addMethod("JavaRTL/String", "length", SemanticType::classType("JavaRTL/Int"), "()", "()I");
 
     /* 5. Инициализация класса Char */
