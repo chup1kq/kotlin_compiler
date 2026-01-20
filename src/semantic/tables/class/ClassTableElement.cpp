@@ -57,7 +57,7 @@ void ClassTableElement::addPrimaryConstructor(Constructor* primaryConstructor) {
         // ✅ УПРОЩЕНО: используем addMethod
         this->methods->addMethod(ident, descriptor,
             new MethodTableElement(methodNameNumber, methodDescNumber, ident, descriptor,
-                                primaryConstructor->stmts, retVal, params));
+                                primaryConstructor->stmts, retVal, params, primaryConstructor->modifiers));
     }
 }
 
@@ -87,7 +87,8 @@ void ClassTableElement::addDefaultConstructorIfNeeded() const {
             emptyDesc,
             nullptr,
             unitType,
-            emptyParams
+            emptyParams,
+            ModifierMap::createClassConstructorModifiers(PUBLIC)
         )
     );
 
@@ -140,7 +141,7 @@ void ClassTableElement::addMethodToTable(FunNode *func) {
     // ✅ УПРОЩЕНО: используем addMethod
     MethodTableElement* methodElem = new MethodTableElement(
         methodNameNumber, methodDescNumber, ident, descriptor,
-        func->body, retVal, params);
+        func->body, retVal, params, func->modifiers);
 
     this->methods->addMethod(ident, descriptor, methodElem);
 
@@ -167,7 +168,7 @@ void ClassTableElement::addStandardMethodToTable(
 
     MethodTableElement* methodElem = new MethodTableElement(
        methodNameNumber, methodDescNumber, methodName, fullDesc,
-       nullptr, returnType, vector<FuncParam*>());
+       nullptr, returnType, vector<FuncParam*>(), nullptr);
 
     this->methods->addMethod(methodName, fullDesc, methodElem);
 }
@@ -327,11 +328,11 @@ std::string ClassTableElement::createTypeDescriptor(SemanticType *type) {
 
 void ClassTableElement::checkFieldsModifiers(ClassTableElement* superClass, std::map<std::string, ClassTableElement*> items) {
     for (auto& field : this->fields->fields) {
-        checkFiledModifier(field.second, superClass, items);
+        checkFieldModifier(field.second, superClass, items);
     }
 }
 
-void ClassTableElement::checkFiledModifier(FieldTableElement* field, ClassTableElement* superClass, std::map<std::string, ClassTableElement*> items) {
+void ClassTableElement::checkFieldModifier(FieldTableElement* field, ClassTableElement* superClass, std::map<std::string, ClassTableElement*> items) {
     ModifierMap* thisFieldMods = field->modifierMap;
 
     // Если супер класса нет
@@ -425,6 +426,116 @@ std::string ClassTableElement::getClassNameForSuperField(FieldTableElement *fiel
     }
 
     return getClassNameForSuperField(field, items.at(superClass->superClsName), items);
+}
+
+void ClassTableElement::checkMethodsModifiers(ClassTableElement *superClass, std::map<std::string, ClassTableElement *> items) {
+    for (auto& method : this->methods->methods) {
+        checkMethodModifier(method.second, superClass, items);
+    }
+}
+
+void ClassTableElement::checkMethodModifier(MethodTableElement *method, ClassTableElement *superClass, std::map<std::string, ClassTableElement *> items) {
+    if (method->strName == "<init>") {
+        return;
+    }
+
+    ModifierMap* thisMethodMods = method->modifierMap;
+
+    // Если супер класса нет
+    if (!superClass) {
+        if (thisMethodMods->isOverride()) {
+            throw SemanticError::hasNoSuperClassToOverride(this->clsName, method->strName);
+        }
+
+        setDefaultModifiers(thisMethodMods);
+
+        return;
+    }
+
+    // Тут супер класс есть
+    std::string superClassName = getClassNameForSuperMethod(method, superClass, items);
+
+
+    MethodTableElement* superMethod = nullptr;
+
+    // Если нашли класс с таким же методом, и хотим переопределить текущий метод
+    if (!superClassName.empty()) {
+        // Но вот сигнатура метода не совпала, то ошибка
+        if (!items[superClassName]->methods->methods.contains(method->strName + "_" + method->strDesc)) {
+            throw SemanticError::overrideMethodDifferentSignature(method->strName, superClass->clsName);
+        }
+
+        superMethod = items[superClassName]->methods->methods.at(method->strName + "_" + method->strDesc);
+    }
+
+    // Если в супер классе (или ранее по цепочке наследования) НЕТ такого метода
+    if (!superMethod) {
+        if (thisMethodMods->isOverride()) {
+            throw SemanticError::hasNoElementToOverrideInSuperClasses(method->strName, this->clsName, superClassName);
+        }
+
+        return;
+    }
+
+    // В супер классе (или ранее по цепочке наследования) ЕСТЬ такой метод
+    ModifierMap* superMethodMods = superMethod->modifierMap;
+
+    // Супер метод PRIVATE, то есть он не виден в наследниках
+    if (superMethodMods->isPrivate()) {
+        setDefaultModifiers(thisMethodMods);
+
+        return;
+    }
+
+    // Супер метод FINAL и его нельзя переопределить или создать такой же (а если мы тут, то мы уже создали такой же, ошибка)
+    if (superMethodMods->isFinal()) {
+        throw SemanticError::canNotOverrideFinalElement(method->strName, this->clsName, superClassName);
+    }
+
+    // Супер метод OPEN, но текущий метод не OVERRIDE
+    if (!thisMethodMods->isOverride()) {
+        throw SemanticError::elementNeedsOverride(method->strName, this->clsName, superClassName);
+    }
+
+    // ----------- Тут супер метод OPEN и текущий метод с OVERRIDE -----------
+
+    // Нельзя ослаблять видимость
+    if (thisMethodMods->isProtected() && superMethodMods->isPublic()) {
+        throw SemanticError::weakenVisibilityModifier(method->strName, this->clsName, superClassName);
+    }
+
+    if (thisMethodMods->getVisibility() == NONE) {
+        thisMethodMods->modifiers->at("visibility") = superMethodMods->modifiers->at("visibility");
+    }
+    if (thisMethodMods->getInheritance() == NONE) {
+        thisMethodMods->modifiers->at("inheritance") = OPEN;
+    }
+}
+
+// Рекурсивно получаем поле по имени, идя по цепочке наследования
+std::string ClassTableElement::getClassNameForSuperMethod(MethodTableElement *method, ClassTableElement *superClass, std::map<std::string, ClassTableElement*> items) {
+    if (!superClass) {
+        return "";
+    }
+
+    // Наши в этом наследнике
+    if (superClass->methods->methods.contains(method->strName + "_" + method->strDesc)) {
+        return superClass->clsName;
+    }
+
+    // Нашли, но не по полной сигнатуре
+    for (auto& sm : superClass->methods->methods) {
+        if (sm.second->strName == method->strName) {
+            return superClass->clsName;
+        }
+    }
+
+    // Если больше наследника нет
+    if (superClass->superClsName.empty()) {
+        return "";
+    }
+
+    return getClassNameForSuperMethod(method, items.at(superClass->superClsName), items);
 }
 
 void ClassTableElement::setDefaultModifiers(ModifierMap *mods) {

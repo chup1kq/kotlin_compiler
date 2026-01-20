@@ -29,7 +29,9 @@ public:
     void addClassesToClassTable(ClassTableElement *baseClass, std::list<ClassNode*> classList);
 
     void setInheritanceToClasses(std::list<ClassNode*> classList);
+
     void checkFieldsModifiers();
+    void checkMethodsModifiers();
 
     void attributeAndFillLocalsInClasses();
     void attributeAndFillLocals(MethodTableElement* method);

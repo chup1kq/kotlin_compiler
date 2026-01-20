@@ -2,6 +2,7 @@
 #define KOTLIN_COMPILER_METHODTABLEELEMENT_H
 #include <vector>
 
+#include "ModifierMap.h"
 #include "StmtListNode.h"
 #include "../params/FuncParam.h"
 #include "../type/SemanticType.h"
@@ -19,6 +20,7 @@ public:
     LocalVariableTable * localVarTable = new LocalVariableTable();
     int isFirst;
     int superConstructorCall = 0;
+    ModifierMap* modifierMap;
 
     MethodTableElement(int nameConst,
         int descConst,
@@ -31,7 +33,8 @@ public:
         std::string strDesc,
         StmtListNode* start,
         SemanticType* retType,
-        vector<FuncParam*> params);
+        vector<FuncParam*> params,
+        ModifierMap* modifierMap);
 
     std::string getParamsFromDescriptor();
     static std::string transformNameToConstructorIfNeeded(const std::string& methodName);

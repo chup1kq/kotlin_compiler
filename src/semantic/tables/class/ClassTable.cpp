@@ -67,6 +67,7 @@ void ClassTable::buildClassTable(KotlinFileNode* root) {
     attributeAndFillLocalsInClasses();
 
     checkFieldsModifiers();
+    checkMethodsModifiers();
 
     std::cout << "MainKt methods AFTER ATTRIBUTE:" << std::endl;
     if (items.find(topLevelClassName) != items.end()) {
@@ -252,6 +253,22 @@ void ClassTable::checkFieldsModifiers() {
         }
     }
 }
+
+void ClassTable::checkMethodsModifiers() {
+    for (auto& cls : this->items) {
+        if (isBuiltinClass(cls.first) || cls.first == topLevelClassName) {
+            continue;
+        }
+
+        if (!cls.second->superClsName.empty()) {
+            cls.second->checkMethodsModifiers(items[cls.second->superClsName], this->items);
+        }
+        else {
+            cls.second->checkMethodsModifiers(nullptr, this->items);
+        }
+    }
+}
+
 
 
 void ClassTable::attributeAndFillLocalsInClasses() {
@@ -1225,7 +1242,8 @@ void ClassTable::initStdClasses() {
                 fullDesc,     // strDesc = полный дескриптор
                 nullptr,      // start
                 returnType,   // retType
-                {}            // params
+                {},            // params
+                nullptr     // modifiers
             )
         );
     };

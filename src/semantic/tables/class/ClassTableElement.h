@@ -41,8 +41,13 @@ public:
     void addFieldToTable(StmtNode* stmt);
 
     void checkFieldsModifiers(ClassTableElement* superClass, std::map<std::string, ClassTableElement*> items);
-    void checkFiledModifier(FieldTableElement* field, ClassTableElement* superClass, std::map<std::string, ClassTableElement*> items);
+    void checkFieldModifier(FieldTableElement* field, ClassTableElement* superClass, std::map<std::string, ClassTableElement*> items);
     std::string getClassNameForSuperField(FieldTableElement* field, ClassTableElement* superClass, std::map<std::string, ClassTableElement*> items);
+
+    void checkMethodsModifiers(ClassTableElement* superClass, std::map<std::string, ClassTableElement*> items);
+    void checkMethodModifier(MethodTableElement* method, ClassTableElement* superClass, std::map<std::string, ClassTableElement*> items);
+    std::string getClassNameForSuperMethod(MethodTableElement* method, ClassTableElement* superClass, std::map<std::string, ClassTableElement*> items);
+
     void setDefaultModifiers(ModifierMap* mods);
 
     static std::string createMethodDescriptor(vector<FuncParam*> params, SemanticType* returnType);

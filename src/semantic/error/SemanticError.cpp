@@ -403,3 +403,10 @@ SemanticError SemanticError::changeConsistencyInOverride(const std::string &elem
         "'" + elementName + "' in class '" + thisClass + "' can not change consistency"
     );
 }
+
+SemanticError SemanticError::overrideMethodDifferentSignature(const std::string &methodName, const std::string &superClass) {
+    return SemanticError(
+        OVERRIDE_METHOD_DIFFERENT_SIGNATURE,
+        "Method '" + methodName + "' must have same full name like in '" + superClass + "' class"
+    );
+}

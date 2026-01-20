@@ -1,5 +1,7 @@
 #include "MethodTableElement.h"
 
+#include "ModifierMap.h"
+
 MethodTableElement::MethodTableElement(
     int nameConst,
     int descConst,
@@ -18,7 +20,7 @@ MethodTableElement::MethodTableElement(
 }
 
 MethodTableElement::MethodTableElement(int methodName, int descriptorName, std::string strName, std::string strDesc,
-    StmtListNode *start, SemanticType *retType, vector<FuncParam*> params) {
+    StmtListNode *start, SemanticType *retType, vector<FuncParam*> params, ModifierMap* modifierMap) {
     this->methodName = methodName;
     this->descriptor = descriptorName;
     this->strName = std::move(strName);
@@ -27,6 +29,7 @@ MethodTableElement::MethodTableElement(int methodName, int descriptorName, std::
     this->retType = retType;
     this->localVarTable = new LocalVariableTable();
     this->params = std::move(params);
+    this->modifierMap = modifierMap;
 }
 
 std::string MethodTableElement::getParamsFromDescriptor() {

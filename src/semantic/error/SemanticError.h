@@ -72,6 +72,7 @@ public:
     static SemanticError weakenVisibilityModifier(const std::string &elementName, const std::string &thisClass, const std::string &superClass);
     static SemanticError notReplaceableTypeInSuperClass(const std::string &elementName, const std::string &thisClass, const std::string &thisType, const std::string &superType);
     static SemanticError changeConsistencyInOverride(const std::string &elementName, const std::string &thisClass);
+    static SemanticError overrideMethodDifferentSignature(const std::string &methodName, const std::string &superClass);
 
 };
 

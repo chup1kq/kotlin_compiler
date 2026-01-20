@@ -30,7 +30,7 @@ bool MethodTable::contains(const std::string& methodName, const std::string& des
         if (m.second->strName == methodName && m.second->getParamsFromDescriptor() == descriptor) {
             return true;
         }
-        else if (m.second->strName == MethodTableElement::transformNameToConstructorIfNeeded(methodName) &&
+        if (m.second->strName == MethodTableElement::transformNameToConstructorIfNeeded(methodName) &&
             m.second->getParamsFromDescriptor() == MethodTableElement::transformRTLTypeToJVMType(descriptor)
         ) {
             return true;
@@ -39,6 +39,20 @@ bool MethodTable::contains(const std::string& methodName, const std::string& des
 
     return false;
 }
+
+bool MethodTable::contains(const std::string &methodName) const {
+    for (auto& m : methods) {
+        if (m.second->strName == methodName) {
+            return true;
+        }
+        if (m.second->strName == MethodTableElement::transformNameToConstructorIfNeeded(methodName)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 
 MethodTableElement* MethodTable::getMethod(const std::string& methodName, const std::string& paramsPart) const {
     // Формируем префикс поиска: "methodName_(params)"
