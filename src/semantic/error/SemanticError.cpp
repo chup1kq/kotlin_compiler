@@ -321,5 +321,32 @@ SemanticError SemanticError::inheritanceFromFinalClass(const std::string &thisCl
     );
 }
 
+SemanticError SemanticError::invalidModifierCombinationPrivateOpen(const std::string& keyword) {
+    return SemanticError(
+        INVALID_MODIFIER_COMBINATION_PRIVATE_OPEN,
+        "Error in modifier. Modifier 'private' is incompatible with 'open' in " + keyword + " declaration."
+    );
+}
 
 
+SemanticError SemanticError::incompatibleModifiers(
+    const std::string& lexem,
+    const std::string& incompatibleKeyword
+) {
+    return SemanticError(
+        INCOMPATIBLE_MODIFIERS,
+        "Error in modifier. Keyword '" + lexem +
+        "' is incompatible with previous modifier: " + incompatibleKeyword
+    );
+}
+
+SemanticError SemanticError::unexpectedTokenAfterTopLevelKeyword(
+    const std::string& previousKeyword,
+    const std::string& input
+) {
+    return SemanticError(
+        UNEXPECTED_TOKEN_AFTER_TOP_LEVEL_KEYWORD,
+        "Error in modifier. Expecting top level keyword after '" +
+        previousKeyword + "', but found: " + input
+    );
+}

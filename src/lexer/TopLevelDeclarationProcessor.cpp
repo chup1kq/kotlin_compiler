@@ -3,6 +3,8 @@
 #include <unordered_map>
 #include <vector>
 
+#include "../semantic/error/SemanticError.h"
+
 yytokentype TopLevelDeclarationProcessor::processAppropriateElement(const std::string& input) {
     if (isModifierKeyword(input)) {
         foundModifierKeyword(input);
@@ -173,10 +175,7 @@ yytokentype TopLevelDeclarationProcessor::foundEndKeyword(const std::string& key
     }
 
     if (has("private") && has("open")) {
-        std::cerr << "Error in modifier. Modifier 'private' is incompatible with 'open' in " << keyword <<" declaration." << std::endl;
-
-        this->prevLexems.clear();
-        return NON;
+        throw SemanticError::invalidModifierCombinationPrivateOpen(keyword);
     }
 
     std::cout << currentLexemToString(keyword) << std::endl;
@@ -285,9 +284,7 @@ yytokentype TopLevelDeclarationProcessor::combineEndLexem(const std::string& key
 bool TopLevelDeclarationProcessor::hasIncompatibleKeywords(const std::string &lexem) {
     std::string incompatibleKeyword = findIncompatibleKeyword(lexem);
     if (!incompatibleKeyword.empty()) {
-        std::cerr << "Error in modifier. Keyword '" << lexem <<"' is incompatible with previous modifier: " << incompatibleKeyword << std::endl;
-
-        return true;
+        throw SemanticError::incompatibleModifiers(lexem, incompatibleKeyword);
     }
 
     return false;
@@ -295,8 +292,6 @@ bool TopLevelDeclarationProcessor::hasIncompatibleKeywords(const std::string &le
 
 void TopLevelDeclarationProcessor::foundInappropriateLexem(const std::string& input) {
     if (!this->prevLexems.empty()) {
-        std::cerr << "Error in modifier. Expecting top level keyword after '" << currentLexemToString("") << "', but found: " << input << std::endl;
-
-        this->prevLexems.clear();
+        throw SemanticError::unexpectedTokenAfterTopLevelKeyword(currentLexemToString(""), input);
     }
 }

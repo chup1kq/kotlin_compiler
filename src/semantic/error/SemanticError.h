@@ -61,8 +61,9 @@ public:
     static SemanticError invalidTopLevelModifier(const std::string &functionName, const std::string &modifier);
     static SemanticError superClassDoesNotExists(const std::string &thisClass, const std::string &superName);
     static SemanticError inheritanceFromFinalClass(const std::string &thisClass, const std::string &superName);
-
-
+    static SemanticError invalidModifierCombinationPrivateOpen(const std::string& keyword);
+    static SemanticError incompatibleModifiers(const std::string& lexem, const std::string& incompatibleKeyword);
+    static SemanticError unexpectedTokenAfterTopLevelKeyword(const std::string& previousKeyword, const std::string& input);
 };
 
 #endif //KOTLIN_COMPILER_SEMANTIC_ERROR_H
