@@ -21,7 +21,7 @@ public class InputOutput extends Any {
     public static Unit print() { System.out.print(""); return Unit.getInstance(); }
     public static Unit println() { System.out.println(""); return Unit.getInstance(); }
 
-    public static String readLine() {
+    public static String readln() {
         try {
             BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
             return new String(reader.readLine());

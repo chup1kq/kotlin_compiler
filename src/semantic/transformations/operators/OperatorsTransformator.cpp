@@ -133,7 +133,7 @@ void OperatorsTransformator::transformExpressionBody(ExprNode* expr) {
             ExprNode* left = expr->left;
             ExprNode* right = expr->right;
             ExprNode* leftCopy = left->clone();
-            ExprNode* plusExpr = ExprNode::createExprNode(_PLUS, leftCopy, right);
+            ExprNode* plusExpr = ExprNode::createMethodAccessExprNode("plus", new ExprListNode(right), leftCopy);
             expr->type = _ASSIGNMENT;
             expr->left = left;
             expr->right = plusExpr;
@@ -142,7 +142,7 @@ void OperatorsTransformator::transformExpressionBody(ExprNode* expr) {
             ExprNode* left = expr->left;
             ExprNode* right = expr->right;
             ExprNode* leftCopy = left->clone();
-            ExprNode* minusExpr = ExprNode::createExprNode(_MINUS, leftCopy, right);
+            ExprNode* minusExpr = ExprNode::createMethodAccessExprNode("minus", new ExprListNode(right), leftCopy);
             expr->type = _ASSIGNMENT;
             expr->left = left;
             expr->right = minusExpr;
@@ -151,7 +151,7 @@ void OperatorsTransformator::transformExpressionBody(ExprNode* expr) {
             ExprNode* left = expr->left;
             ExprNode* right = expr->right;
             ExprNode* leftCopy = left->clone();
-            ExprNode* mulExpr = ExprNode::createExprNode(_MUL, leftCopy, right);
+            ExprNode* mulExpr = ExprNode::createMethodAccessExprNode("mul", new ExprListNode(right), leftCopy);
             expr->type = _ASSIGNMENT;
             expr->left = left;
             expr->right = mulExpr;
@@ -160,7 +160,7 @@ void OperatorsTransformator::transformExpressionBody(ExprNode* expr) {
             ExprNode* left = expr->left;
             ExprNode* right = expr->right;
             ExprNode* leftCopy = left->clone();
-            ExprNode* divExpr = ExprNode::createExprNode(_DIV, leftCopy, right);
+            ExprNode* divExpr = ExprNode::createMethodAccessExprNode("div", new ExprListNode(right), leftCopy);
             expr->type = _ASSIGNMENT;
             expr->left = left;
             expr->right = divExpr;
@@ -169,7 +169,7 @@ void OperatorsTransformator::transformExpressionBody(ExprNode* expr) {
             ExprNode* left = expr->left;
             ExprNode* right = expr->right;
             ExprNode* leftCopy = left->clone();
-            ExprNode* modExpr = ExprNode::createExprNode(_MOD, leftCopy, right);
+            ExprNode* modExpr = ExprNode::createMethodAccessExprNode("mod", new ExprListNode(right), leftCopy);
             expr->type = _ASSIGNMENT;
             expr->left = left;
             expr->right = modExpr;

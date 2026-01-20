@@ -760,7 +760,7 @@ bool ClassTable::isMethodBaseClassConstructorOrInputOutput(ExprNode *expr) {
             expr->identifierName == "Boolean" ||
             expr->identifierName == "print" ||
             expr->identifierName == "println" ||
-            expr->identifierName == "readLine"
+            expr->identifierName == "readln"
         ) {
             return true;
         }
@@ -772,6 +772,7 @@ void ClassTable::attributeArrayAccess(MethodTableElement *currentMethod, ExprNod
     if (expr->left->type != _IDENTIFIER) {
         throw SemanticError::notIdInArrayAccess(expr->left->type);
     }
+    attributeExpression(currentMethod, expr->left);
 
     attributeExpression(currentMethod, expr->right);
 
@@ -943,7 +944,7 @@ void ClassTable::fillMethodRefsInExpression(ExprNode *expr, ClassTableElement *e
 
     if (expr->type == _FUNC_CALL) {
         // println -> JavaRTL/InputOutput.println
-        if (expr->identifierName == "print" || expr->identifierName == "println" || expr->identifierName == "readLine") {
+        if (expr->identifierName == "print" || expr->identifierName == "println" || expr->identifierName == "readln") {
             int ioClassName = elem->constants->findOrAddConstant(UTF8, "JavaRTL/InputOutput");
             int ioClass = elem->constants->findOrAddConstant(Class, "", 0, 0, ioClassName);
             elem->constants->findOrAddConstant(MethodRef, "", 0, 0, ioClass, nameAndType);
@@ -1280,9 +1281,9 @@ void ClassTable::initStdClasses() {
     this->items[topLevelClassName]->addStandardMethodToTable("println", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Boolean;)LJavaRTL/Unit;");
     // addMethod(this->topLevelClassName, "println", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Boolean;)", "(LJavaRTL/Boolean;)LJavaRTL/Unit;");
     //
-    // // readLine
-    this->items[topLevelClassName]->addStandardMethodToTable("readLine", SemanticType::classType("JavaRTL/String"), "()LJavaRTL/String;");
-    // addMethod(this->topLevelClassName, "readLine", SemanticType::classType("JavaRTL/String"), "()", "()LJavaRTL/String;");
+    // // readln
+    this->items[topLevelClassName]->addStandardMethodToTable("readln", SemanticType::classType("JavaRTL/String"), "()LJavaRTL/String;");
+    // addMethod(this->topLevelClassName, "readln", SemanticType::classType("JavaRTL/String"), "()", "()LJavaRTL/String;");
 
 }
 
