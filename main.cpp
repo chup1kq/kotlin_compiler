@@ -53,8 +53,6 @@ int main() {
 
     classTableToCSV(classTable, "tables");
 
-    KotlinCodeGenerator::items = classTable->items;
-
     ClassGeneration *classGeneration = new ClassGeneration(classTable->items["MainKt"]);
     classGeneration->generateClassFile("MainKt");
 

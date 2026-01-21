@@ -5,8 +5,6 @@
 
 #include "BytecodeGenerator.h"
 
-std::map<std::string, ClassTableElement*> KotlinCodeGenerator::items;
-
 std::vector<uint8_t> KotlinCodeGenerator::generate(ClassTableElement *classElement, MethodTableElement *methodElement) {
     return generateMethodAttribute(classElement, methodElement);
 }
@@ -143,7 +141,7 @@ std::vector<uint8_t> KotlinCodeGenerator::generateFuncAccess(ExprNode *expr, Cla
     int cn = classElement->constants->findOrAddConstant(UTF8, clsn);
     int cls = classElement->constants->findOrAddConstant(Class, "", 0, 0, cn);
 
-    SemanticType* r = items[clsn]->methods->methods[expr->identifierName]->retType;
+    SemanticType* r = ClassTable::items[clsn]->methods->methods[expr->identifierName]->retType;
     if (r->isArray()) {
         desc += "[L";
         desc += r->elementType->className;

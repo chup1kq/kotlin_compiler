@@ -11,7 +11,7 @@
 
 class ClassTable {
 public:
-    std::map<std::string, ClassTableElement*> items;
+    static std::map<std::string, ClassTableElement*> items;
     std::string topLevelClassName;
     std::vector<std::string> builtinFunctionClasses;
 
@@ -49,12 +49,14 @@ public:
     void attributeFor(MethodTableElement* method, StmtNode* stmt);
     void attributeReturn(MethodTableElement* method, StmtNode* stmt);
 
-    void attributeIdentifierExpr(LocalVariableTable *table, ExprNode* expr);
+    void attributeIdentifierExpr(MethodTableElement* method, ExprNode* expr);
     void attributeAssignmentExpr(LocalVariableTable *table, ExprNode* expr);
     void attributeArrayCreatingExpr(MethodTableElement *method, ExprNode* expr);
     void attributeFuncOrMethodCall(MethodTableElement* currentMethod, ExprNode* expr);
     void attributeArrayAccess(MethodTableElement* currentMethod, ExprNode* expr);
     bool isMethodBaseClassConstructorOrInputOutput(ExprNode* expr);
+
+    FieldTableElement* hasSuperClassesField(MethodTableElement* method, std::string fieldName);
 
     void fillConstructorMethodRefs(ClassTableElement* cls);
 

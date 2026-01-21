@@ -50,6 +50,8 @@ public:
 
     void setDefaultModifiers(ModifierMap* mods);
 
+    FieldTableElement* getFieldOnCalling(std::string fieldName, bool isForChild = false);
+
     static std::string createMethodDescriptor(vector<FuncParam*> params, SemanticType* returnType);
     static std::string createMethodDescriptor(vector<SemanticType*> params, SemanticType* returnType);
     static std::string createVoidMethodDescriptor(vector<FuncParam*> params);

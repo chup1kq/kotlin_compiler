@@ -5,10 +5,11 @@
 #include "ClassTableElement.h"
 #include "../constant/ConstantTable.h"
 
+std::map<std::string, ClassTableElement*> ClassTable::items;
 std::vector<std::string> ClassTable::allClassesTypes;
 
 ClassTable::ClassTable(const std::string& fileName) {
-    this->items.clear();
+    items.clear();
     this->topLevelClassName = makeTopLevelClassName(fileName);
 }
 
@@ -82,13 +83,13 @@ void ClassTable::buildClassTable(KotlinFileNode* root) {
     }
 
     // TODO Доделать, строка не появляется
-    for (auto& cls : this->items) {
+    for (auto& cls : items) {
         fillConstructorMethodRefs(cls.second);
     }
 
     std::cout << "=== STARTING fillLiterals ===" << std::endl;
     int classIdx = 0;
-    for (auto& cls : this->items) {
+    for (auto& cls : items) {
         std::cout << "Class " << classIdx++ << ": " << cls.first << std::endl;
         if (cls.second->methods) {
             std::cout << "  Methods: " << cls.second->methods->methods.size() << std::endl;
@@ -99,7 +100,7 @@ void ClassTable::buildClassTable(KotlinFileNode* root) {
 
     std::cout << "=== STARTING fillMethodRefs ===" << std::endl;
     classIdx = 0;
-    for (auto& cls : this->items) {
+    for (auto& cls : items) {
         std::cout << "Class " << classIdx++ << ": " << cls.first << std::endl;
         fillMethodRefs(cls.second);
     }
@@ -165,7 +166,7 @@ void ClassTable::addClassesToClassTable(ClassTableElement *baseClass, std::list<
     for (auto* classNode : classList) {
         std::string className = classNode->name;
 
-        if (this->items.find(className) != this->items.end()) {
+        if (items.find(className) != items.end()) {
             throw SemanticError::classAlreadyExists(className);
         }
 
@@ -187,7 +188,7 @@ void ClassTable::addClassesToClassTable(ClassTableElement *baseClass, std::list<
         allClassesTypes.push_back(newClass->clsName);
         std:cout << "New class type: " << allClassesTypes.back() << std::endl;
 
-        this->items.insert(std::pair<std::string, ClassTableElement*>(className, newClass));
+        items.insert(std::pair<std::string, ClassTableElement*>(className, newClass));
 
         if (classNode->primaryConstructor) {
             newClass->addPrimaryConstructor(classNode->primaryConstructor);
@@ -221,7 +222,7 @@ void ClassTable::setInheritanceToClasses(std::list<ClassNode *> classList) {
         std::string superClassName = classNode->inheritance->name;
 
         // Проверяем, что было правильно указано имя супер класса
-        ClassTableElement* superClass = this->items[superClassName];
+        ClassTableElement* superClass = items[superClassName];
         if (!superClass) {
             throw SemanticError::superClassDoesNotExists(thisClass->clsName, superClassName);
         }
@@ -245,31 +246,31 @@ void ClassTable::setInheritanceToClasses(std::list<ClassNode *> classList) {
 }
 
 void ClassTable::checkFieldsModifiers() {
-    for (auto& cls : this->items) {
+    for (auto& cls : items) {
         if (isBuiltinClass(cls.first) || cls.first == topLevelClassName) {
             continue;
         }
 
         if (!cls.second->superClsName.empty()) {
-            cls.second->checkFieldsModifiers(items[cls.second->superClsName], this->items);
+            cls.second->checkFieldsModifiers(items[cls.second->superClsName], items);
         }
         else {
-            cls.second->checkFieldsModifiers(nullptr, this->items);
+            cls.second->checkFieldsModifiers(nullptr, items);
         }
     }
 }
 
 void ClassTable::checkMethodsModifiers() {
-    for (auto& cls : this->items) {
+    for (auto& cls : items) {
         if (isBuiltinClass(cls.first) || cls.first == topLevelClassName) {
             continue;
         }
 
         if (!cls.second->superClsName.empty()) {
-            cls.second->checkMethodsModifiers(items[cls.second->superClsName], this->items);
+            cls.second->checkMethodsModifiers(items[cls.second->superClsName], items);
         }
         else {
-            cls.second->checkMethodsModifiers(nullptr, this->items);
+            cls.second->checkMethodsModifiers(nullptr, items);
         }
     }
 }
@@ -481,7 +482,6 @@ void ClassTable::attributeFor(MethodTableElement *method, StmtNode *stmt) {
     // Пока что только для одного проверяем
     VarDeclaration* iter = stmt->forIteratorList->decls->front();
 
-    // TODO тут можно не выкидывать исключение, а проверять, что в таблице локальных переменных i имеет такой же тип, что и элементы массива
     if (method->localVarTable->contains(iter->varId)) {
         LocalVariableTableElement* localIter = method->localVarTable->items.at(iter->varId);
 
@@ -615,7 +615,7 @@ void ClassTable::attributeExpression(MethodTableElement *method, ExprNode *expr,
             return;
         }
         case _IDENTIFIER: {
-            attributeIdentifierExpr(method->localVarTable, expr);
+            attributeIdentifierExpr(method, expr);
             return;
         }
         case _ASSIGNMENT: {
@@ -643,18 +643,44 @@ void ClassTable::attributeExpression(MethodTableElement *method, ExprNode *expr,
     }
 }
 
-void ClassTable::attributeIdentifierExpr(LocalVariableTable *table, ExprNode* expr) {
-    if (!table->items.contains(expr->identifierName)) {
-        throw SemanticError::undefinedVariable(expr->identifierName);
-    }
+void ClassTable::attributeIdentifierExpr(MethodTableElement* method, ExprNode* expr) {
+    LocalVariableTableElement* var = nullptr;
+    if (!method->localVarTable->items.contains(expr->identifierName)) {
+        FieldTableElement* fieldInClass = hasSuperClassesField(method, expr->identifierName);
 
-    LocalVariableTableElement* var = table->items[expr->identifierName];
+        if (!fieldInClass) {
+            throw SemanticError::undefinedVariable(expr->identifierName);
+        }
+        var = new LocalVariableTableElement(
+            expr->identifierName, -1, fieldInClass->fieldType, 0, 1
+        );
+
+    }
+    else {
+        var = method->localVarTable->items[expr->identifierName];
+    }
 
     if (!var->isInitialized) {
         throw SemanticError::uninitializedVariable(expr->identifierName);
     }
 
     expr->semanticType = var->type;
+}
+
+FieldTableElement* ClassTable::hasSuperClassesField(MethodTableElement *method, std::string fieldName) {
+    if (!method) {
+        return nullptr;
+    }
+
+    // Метод не относится к классу
+    if (method->relatedClass == "") {
+        return nullptr;
+    }
+
+    // Если содержится в этом классе
+    ClassTableElement* relatedClass = items.at(method->relatedClass);
+
+    return relatedClass->getFieldOnCalling(fieldName, !method->relatedClass.empty());
 }
 
 void ClassTable::attributeAssignmentExpr(LocalVariableTable *table, ExprNode* expr) {
@@ -776,6 +802,8 @@ void ClassTable::attributeFuncOrMethodCall(MethodTableElement* currentMethod, Ex
     std::cout << "Entered ClassTable::attributeFuncOrMethodCall" << std::endl;
     std::vector<SemanticType*> paramTypes;
 
+    //TODO забыл проатрибутировать Identifier
+
     // Атрибутируем параметры
     if (expr->params && expr->params->exprs) {
         for (ExprNode* param : *expr->params->exprs) {
@@ -799,8 +827,8 @@ void ClassTable::attributeFuncOrMethodCall(MethodTableElement* currentMethod, Ex
         relatedClassName = this->topLevelClassName;
 
         // TODO посмотреть что это может быть конструктор класса
-        if (this->items.contains(methodName) && !expr->params) {
-            relatedClassName = this->items[methodName]->clsName;
+        if (items.contains(methodName) && !expr->params) {
+            relatedClassName = items[methodName]->clsName;
             isConstructor = true;
             methodName = "<init>";
         }
@@ -809,23 +837,23 @@ void ClassTable::attributeFuncOrMethodCall(MethodTableElement* currentMethod, Ex
     }
 
 
-    if (!this->items.contains(relatedClassName))
+    if (!items.contains(relatedClassName))
         throw SemanticError::classNotFound(relatedClassName, methodName);
 
     // ✅ УПРОЩЕНО: ищем полный ключ "methodName_paramDesc"
     std::string fullMethodKey = methodName + "_" + paramDesc;
 
-    auto* cls = this->items[relatedClassName];
+    auto* cls = items[relatedClassName];
     bool foundInBuiltin = false;
     if (!isConstructor && !cls->methods->contains(methodName, paramDesc)) {
         // Поиск в builtin классах
         for (const auto& builtinClassName : builtinFunctionClasses) {
-            if (!this->items.contains(builtinClassName))
+            if (!items.contains(builtinClassName))
                 continue;
 
-            if (this->items[builtinClassName]->methods->contains(methodName, paramDesc)) {
+            if (items[builtinClassName]->methods->contains(methodName, paramDesc)) {
                 relatedClassName = builtinClassName;
-                cls = this->items[builtinClassName];
+                cls = items[builtinClassName];
                 foundInBuiltin = true;
                 break;
             }
@@ -1233,11 +1261,11 @@ void ClassTable::fillConstructorMethodRefs(ClassTableElement* cls) {
 
 void ClassTable::initStdClasses() {
     auto addClass = [&](const std::string& name, bool isOpen = false) {
-        if (this->items.contains(name)) return this->items[name];
+        if (items.contains(name)) return items[name];
         ClassTableElement* cls = new ClassTableElement();
         cls->clsName = name;
         cls->isOpen = isOpen;
-        this->items[name] = cls;
+        items[name] = cls;
         return cls;
     };
 
@@ -1249,7 +1277,7 @@ void ClassTable::initStdClasses() {
                      const std::string& fullDesc) {   // "(LJavaRTL/String;)LJavaRTL/Unit;"
 
         // ✅ Прямой вызов addMethod с плоским ключом
-        ClassTableElement* cls = this->items[className];
+        ClassTableElement* cls = items[className];
         cls->methods->addMethod(methodName, paramsDesc,
             new MethodTableElement(
                 0,            // methodNameNumber
@@ -1370,37 +1398,37 @@ void ClassTable::initStdClasses() {
     // builtinFunctionClasses.push_back("JavaRTL/InputOutput");
 
     // print для всех типов
-    this->items[topLevelClassName]->addStandardMethodToTable("print", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Int;)LJavaRTL/Unit;");
+    items[topLevelClassName]->addStandardMethodToTable("print", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Int;)LJavaRTL/Unit;");
     // addMethod(this->topLevelClassName, "print", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Int;)", "(LJavaRTL/Int;)LJavaRTL/Unit;");
-    this->items[topLevelClassName]->addStandardMethodToTable("print", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Float;)LJavaRTL/Unit;");
+    items[topLevelClassName]->addStandardMethodToTable("print", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Float;)LJavaRTL/Unit;");
     // addMethod(this->topLevelClassName, "print", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Float;)", "(LJavaRTL/Float;)LJavaRTL/Unit;");
-    this->items[topLevelClassName]->addStandardMethodToTable("print", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Double;)LJavaRTL/Unit;");
+    items[topLevelClassName]->addStandardMethodToTable("print", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Double;)LJavaRTL/Unit;");
     // addMethod(this->topLevelClassName, "print", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Double;)", "(LJavaRTL/Double;)LJavaRTL/Unit;");
-    this->items[topLevelClassName]->addStandardMethodToTable("print", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/String;)LJavaRTL/Unit;");
+    items[topLevelClassName]->addStandardMethodToTable("print", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/String;)LJavaRTL/Unit;");
     // addMethod(this->topLevelClassName, "print", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/String;)", "(LJavaRTL/String;)LJavaRTL/Unit;");
-    this->items[topLevelClassName]->addStandardMethodToTable("print", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Char;)LJavaRTL/Unit;");
+    items[topLevelClassName]->addStandardMethodToTable("print", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Char;)LJavaRTL/Unit;");
     // addMethod(this->topLevelClassName, "print", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Char;)", "(LJavaRTL/Char;)LJavaRTL/Unit;");
-    this->items[topLevelClassName]->addStandardMethodToTable("print", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Boolean;)LJavaRTL/Unit;");
+    items[topLevelClassName]->addStandardMethodToTable("print", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Boolean;)LJavaRTL/Unit;");
     // addMethod(this->topLevelClassName, "print", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Boolean;)", "(LJavaRTL/Boolean;)LJavaRTL/Unit;");
 
     // println для всех типов
-    this->items[topLevelClassName]->addStandardMethodToTable("println", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Int;)V");
+    items[topLevelClassName]->addStandardMethodToTable("println", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Int;)V");
     // addMethod(this->topLevelClassName, "println", SemanticType::classType("JavaRTL/Unit"), "()", "()LJavaRTL/Unit;");
-    this->items[topLevelClassName]->addStandardMethodToTable("println", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Int;)LJavaRTL/Unit;");
+    items[topLevelClassName]->addStandardMethodToTable("println", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Int;)LJavaRTL/Unit;");
     // // addMethod(this->topLevelClassName, "println", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Int;)", "(LJavaRTL/Int;)LJavaRTL/Unit;");
-    this->items[topLevelClassName]->addStandardMethodToTable("println", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Float;)LJavaRTL/Unit;");
+    items[topLevelClassName]->addStandardMethodToTable("println", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Float;)LJavaRTL/Unit;");
     // addMethod(this->topLevelClassName, "println", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Float;)", "(LJavaRTL/Float;)LJavaRTL/Unit;");
-    this->items[topLevelClassName]->addStandardMethodToTable("println", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Double;)LJavaRTL/Unit;");
+    items[topLevelClassName]->addStandardMethodToTable("println", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Double;)LJavaRTL/Unit;");
     // addMethod(this->topLevelClassName, "println", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Double;)", "(LJavaRTL/Double;)LJavaRTL/Unit;");
-    this->items[topLevelClassName]->addStandardMethodToTable("println", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/String;)LJavaRTL/Unit;");
+    items[topLevelClassName]->addStandardMethodToTable("println", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/String;)LJavaRTL/Unit;");
     // addMethod(this->topLevelClassName, "println", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/String;)", "(LJavaRTL/String;)LJavaRTL/Unit;");
-    this->items[topLevelClassName]->addStandardMethodToTable("println", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Char;)LJavaRTL/Unit;");
+    items[topLevelClassName]->addStandardMethodToTable("println", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Char;)LJavaRTL/Unit;");
     // addMethod(this->topLevelClassName, "println", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Char;)", "(LJavaRTL/Char;)LJavaRTL/Unit;");
-    this->items[topLevelClassName]->addStandardMethodToTable("println", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Boolean;)LJavaRTL/Unit;");
+    items[topLevelClassName]->addStandardMethodToTable("println", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Boolean;)LJavaRTL/Unit;");
     // addMethod(this->topLevelClassName, "println", SemanticType::classType("JavaRTL/Unit"), "(LJavaRTL/Boolean;)", "(LJavaRTL/Boolean;)LJavaRTL/Unit;");
     //
     // // readln
-    this->items[topLevelClassName]->addStandardMethodToTable("readln", SemanticType::classType("JavaRTL/String"), "()LJavaRTL/String;");
+    items[topLevelClassName]->addStandardMethodToTable("readln", SemanticType::classType("JavaRTL/String"), "()LJavaRTL/String;");
     // addMethod(this->topLevelClassName, "readln", SemanticType::classType("JavaRTL/String"), "()", "()LJavaRTL/String;");
 
 }

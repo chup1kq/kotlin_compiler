@@ -2,6 +2,7 @@
 
 #include <iostream>
 
+#include "ClassTable.h"
 #include "../semantic/error/SemanticError.h"
 
 ClassTableElement::ClassTableElement()
@@ -137,11 +138,13 @@ void ClassTableElement::addMethodToTable(FunNode *func) {
         methodDescNumber = this->constants->findOrAddConstant(UTF8, descriptor);
     }
 
-
     // ✅ УПРОЩЕНО: используем addMethod
     MethodTableElement* methodElem = new MethodTableElement(
         methodNameNumber, methodDescNumber, ident, descriptor,
-        func->body, retVal, params, func->modifiers);
+        func->body, retVal, params, func->modifiers
+    );
+
+    methodElem->relatedClass = this->clsName;
 
     this->methods->addMethod(ident, descriptor, methodElem);
 
@@ -545,4 +548,34 @@ void ClassTableElement::setDefaultModifiers(ModifierMap *mods) {
     if (mods->getInheritance() == NONE) {
         mods->modifiers->at("inheritance") = FINAL;
     }
+}
+
+FieldTableElement* ClassTableElement::getFieldOnCalling(std::string fieldName, bool isForChild) {
+    if (!this->fields->fields.contains(fieldName)) {
+        // Рекурсивный обход по предкам ранее
+        if (!this->superClsName.empty()) {
+            return ClassTable::items.at(this->superClsName)->getFieldOnCalling(fieldName, isForChild);
+        }
+
+        return nullptr;
+    }
+
+    // Нашли поле в данном классе
+    FieldTableElement* field = this->fields->fields.at(fieldName);
+
+    // Если запращивает наследник
+    if (isForChild) {
+        // Можем отдать любое, кроме PRIVATE
+        if (field->modifierMap->isPrivate()) {
+            return nullptr;
+        }
+    }
+    else {
+        // Можем отдать только PUBLIC
+        if (!field->modifierMap->isPublic()) {
+            return nullptr;
+        }
+    }
+
+    return field;
 }

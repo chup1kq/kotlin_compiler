@@ -13,9 +13,6 @@ struct ArrayDimensions {
 
 class KotlinCodeGenerator {
 public:
-    // тут будет лежать просто ссылка на все классы для поиска имен
-    static std::map<std::string, ClassTableElement*> items;
-
     KotlinCodeGenerator(ClassTableElement* mainClassElement);
 
     static std::vector<uint8_t> generate(ClassTableElement* classElement, MethodTableElement* methodElement);

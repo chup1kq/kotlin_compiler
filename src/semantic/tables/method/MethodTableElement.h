@@ -21,6 +21,7 @@ public:
     int isFirst;
     int superConstructorCall = 0;
     ModifierMap* modifierMap;
+    std::string relatedClass;
 
     MethodTableElement(int nameConst,
         int descConst,
