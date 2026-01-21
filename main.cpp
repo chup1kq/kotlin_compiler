@@ -53,8 +53,8 @@ int main() {
 
     classTableToCSV(classTable, "tables");
 
-    ClassGeneration *classGeneration = new ClassGeneration(classTable->items["MainKt"]);
-    classGeneration->generateClassFile("MainKt");
+    ClassGeneration *classGeneration = new ClassGeneration(classTable);
+    classGeneration->generateAllClassesFiles();
 
     return 0;
 }

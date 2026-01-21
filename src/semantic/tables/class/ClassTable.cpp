@@ -1411,7 +1411,9 @@ void ClassTable::initStdClasses() {
     addMethod("JavaRTL/Boolean", "notEquals", SemanticType::classType("JavaRTL/Boolean"), "(LJavaRTL/Boolean;)", "(LJavaRTL/Boolean;)LJavaRTL/Boolean;");
 
     /* 7. Инициализация класса Any и Unit */
+    builtinFunctionClasses.push_back("JavaRTL/Any");
     addClass("JavaRTL/Any", true);
+    builtinFunctionClasses.push_back("JavaRTL/Unit");
     addClass("JavaRTL/Unit");
 
     /* 8. I/O */

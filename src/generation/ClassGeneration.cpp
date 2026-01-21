@@ -6,12 +6,8 @@
 #include "BytecodeGenerator.h"
 #include "KotlinCodeGenerator.h"
 
-ClassGeneration::ClassGeneration(ClassTableElement* cls)
-    : m_class(cls),
-      m_constants(cls->constants),
-      m_accessFlags(0x0021),
-      m_superClassIndex(0),
-      m_thisClassIndex(0) {
+ClassGeneration::ClassGeneration(ClassTable* cls)
+    : m_classes(cls) {
 }
 
 uint16_t getMethodAccessFlags(MethodTableElement* method) {
@@ -29,9 +25,19 @@ uint16_t getMethodAccessFlags(MethodTableElement* method) {
     return 0x0001; // ACC_PUBLIC
 }
 
+void ClassGeneration::generateAllClassesFiles() {
+    for (auto cls : m_classes->items) {
+        if (m_classes->isBuiltinClass(cls.first)) {
+            continue;
+        }
 
-void ClassGeneration::generateClassFile(const std::string& className) {
+        generateClassFile(cls.second);
+    }
+}
+
+void ClassGeneration::generateClassFile(ClassTableElement* cls) {
     std::string outDir = "bytecode";
+    std::string className = cls->clsName;
     std::filesystem::create_directories(outDir);
     m_filename = outDir + "/" + className + ".class";
     m_out.open(m_filename, std::ios::binary | std::ios::trunc);
@@ -41,57 +47,50 @@ void ClassGeneration::generateClassFile(const std::string& className) {
     }
 
     m_buffer.clear();
-    generate();
+    generate(cls);
     m_out.close();
     printf("Generated: %s\n", m_filename.c_str());
 }
 
-void ClassGeneration::generate() {
+void ClassGeneration::generate(ClassTableElement* cls) {
     m_buffer.clear();
 
-    m_thisClassIndex = findClassConstantIndex(m_class->clsName);
-    m_superClassIndex = findClassConstantIndex("java/lang/Object");
+    int m_thisClassIndex = findClassConstantIndex(cls, cls->clsName);
+    int m_superClassIndex = findClassConstantIndex(cls, "java/lang/Object");
 
-    // Заголовок
-    writeHeader();
-
-    // AccessFlags
+    writeHeader(cls);
     writeU2(0x0021); // ACC_PUBLIC | ACC_SUPER
 
     // THIS / SUPER
-    writeU2(m_thisClassIndex);    // index класса MainKt
-    writeU2(m_superClassIndex);   // index java/lang/Object
+    writeU2(m_thisClassIndex);
+    writeU2(m_superClassIndex);
 
-    // interfaces count
     writeU2(0); // interfaces_count
-
-    // fields count
     writeU2(0); // fields_count
 
-    // methods
     std::vector<uint8_t> methodsBytes;
     uint16_t methodsCount = 0;
 
     // ===== 7.1 <init> =====
-    if (m_class->methods->methods.count("<init>_()V")) {
-        auto initMethod = generateInitMethod(m_class->methods->methods["<init>_()V"]);
+    if (cls->methods->methods.count("<init>_()V")) {
+        auto initMethod = generateInitMethod(cls, cls->methods->methods["<init>_()V"]);
         methodsBytes.insert(methodsBytes.end(), initMethod.begin(), initMethod.end());
         methodsCount++;
     }
 
     // ===== 7.2 main =====
-    if (m_class->methods->methods.count("main_()V")) {
-        auto mainMethod = generateMainMethod(m_class, m_class->methods->methods["main_()V"]);
+    if (cls->methods->methods.count("main_()V")) {
+        auto mainMethod = generateMainMethod(cls, cls->methods->methods["main_()V"]);
         methodsBytes.insert(methodsBytes.end(), mainMethod.begin(), mainMethod.end());
         methodsCount++;
     }
 
     // ===== 7.3 обычные методы (кроме main) =====
-    for (auto &pair : m_class->methods->methods) {
+    for (auto &pair : cls->methods->methods) {
         if (!pair.second) continue;
         if (pair.first == "<init>_()V" || pair.first == "main_()V") continue;
 
-        auto m = generateMethod(m_class, pair.second);
+        auto m = generateMethod(cls, pair.second);
         methodsBytes.insert(methodsBytes.end(), m.begin(), m.end());
         methodsCount++;
     }
@@ -108,33 +107,32 @@ void ClassGeneration::generate() {
 }
 
 
-void ClassGeneration::writeHeader() {
+void ClassGeneration::writeHeader(ClassTableElement* cls) {
     writeU4(0xCAFEBABE);    // Magic number
     writeU2(0x0000);        // Minor version
     writeU2(0x0041);        // Major version (Java 21)
 
     // constantPool + size
-    std::cout << "Constant table size: " + to_string(m_class->constants->items.size()) << std::endl;
-    uint16_t cpCount = static_cast<uint16_t>(m_constants->items.size() + 1);
+    std::cout << "Constant table size: " + to_string(cls->constants->items.size()) << std::endl;
+    uint16_t cpCount = static_cast<uint16_t>(cls->constants->items.size() + 1);
     writeU2(cpCount);
-    std::vector<uint8_t> cpBytes = BytecodeGenerator::generateBytesForConstantTable(m_constants);
+    std::vector<uint8_t> cpBytes = BytecodeGenerator::generateBytesForConstantTable(cls->constants);
     m_buffer.insert(m_buffer.end(), cpBytes.begin(), cpBytes.end());
 }
 
-void ClassGeneration::writeClassInfo() {
+void ClassGeneration::writeClassInfo(ClassTableElement* cls) {
     // this_class — индекс класса в constant pool
-    m_thisClassIndex = findClassConstantIndex(m_class->clsName);
-    writeU2(m_thisClassIndex);
+    int thisClassIndex = findClassConstantIndex(cls, cls->clsName);
+    writeU2(thisClassIndex);
 
     // super_class = java/lang/Object (индекс 2 обычно)
-    m_superClassIndex = findClassConstantIndex("java/lang/Object");
-    writeU2(m_superClassIndex);
+    int superClassIndex = findClassConstantIndex(cls, "java/lang/Object");
+    writeU2(superClassIndex);
 
-    // interfaces_count = 0
-    writeU2(0);
+    writeU2(0); // interfaces_count = 0
 }
 
-void ClassGeneration::writeFields() {
+void ClassGeneration::writeFields(ClassTableElement* cls) {
     writeU2(0);
 }
 
@@ -153,9 +151,6 @@ std::vector<uint8_t> ClassGeneration::generateMainMethod(ClassTableElement* elem
 
     int jvmMainDesc = elem->constants->findOrAddConstant(UTF8, "([Ljava/lang/String;)V");
 
-    // kotlinMain->descriptor = jvmMainDesc;
-    // kotlinMain->strDesc = "([Ljava/lang/String;)V";
-
     writeU2Local(res, jvmMainDesc);
 
     writeU2Local(res, 1);
@@ -169,7 +164,7 @@ std::vector<uint8_t> ClassGeneration::generateMainMethod(ClassTableElement* elem
         kotlinMain->methodName, kotlinMain->descriptor);
     if (nameAndTypeIdx != -1) {
         int selfRef = elem->constants->findConstantMethodRef(
-            m_thisClassIndex, nameAndTypeIdx);
+            elem->name, nameAndTypeIdx);
         if (selfRef != -1) {
             // auto invoke = BytecodeGenerator::invokestatic(selfRef);
             // codeBytes.insert(codeBytes.end(), invoke.begin(), invoke.end());
@@ -199,7 +194,7 @@ std::vector<uint8_t> ClassGeneration::generateMethod(ClassTableElement* elem, Me
     BytecodeGenerator::appendToByteArray(&res, BytecodeGenerator::intToByteVector(method->descriptor, 2).data(), 2);
     BytecodeGenerator::appendToByteArray(&res, BytecodeGenerator::intToByteVector(1, 2).data(), 2); // attributes_count = 1
 
-    int codeNameIdx = m_constants->findOrAddConstant(UTF8, "Code");
+    int codeNameIdx = elem->constants->findOrAddConstant(UTF8, "Code");
     writeU2Local(res, codeNameIdx);
 
     std::vector<uint8_t> code;
@@ -225,9 +220,9 @@ void ClassGeneration::writeU4(uint32_t value) {
     m_buffer.push_back(value & 0xFF);
 }
 
-int ClassGeneration::findClassConstantIndex(const std::string& className) {
-    int utf8Index = m_constants->findOrAddConstant(UTF8, className); // Ищем Utf8 constant
-    return m_constants->findOrAddConstant(Class, "", 0, 0, utf8Index);  // Ищем/добавляем Class constant
+int ClassGeneration::findClassConstantIndex(ClassTableElement* cls, const std::string& className) {
+    int utf8Index = cls->constants->findOrAddConstant(UTF8, className);
+    return cls->constants->findOrAddConstant(Class, "", 0, 0, utf8Index);
 }
 
 void ClassGeneration::writeU2Local(std::vector<uint8_t>& buffer, uint16_t value) {
@@ -242,7 +237,7 @@ void ClassGeneration::writeU4Local(std::vector<uint8_t>& buffer, uint32_t value)
     buffer.push_back(value & 0xFF);          // байт 0 (младший)
 }
 
-std::vector<uint8_t> ClassGeneration::generateInitMethod(MethodTableElement* method) {
+std::vector<uint8_t> ClassGeneration::generateInitMethod(ClassTableElement* cls, MethodTableElement* method) {
     std::vector<uint8_t> res;
 
     writeU2Local(res, 0x0001);            // access_flags = public
@@ -251,7 +246,7 @@ std::vector<uint8_t> ClassGeneration::generateInitMethod(MethodTableElement* met
     writeU2Local(res, 1);                 // attributes_count = 1 (Code)
 
     // Code attribute
-    int codeNameIdx = m_constants->findOrAddConstant(UTF8, "Code");
+    int codeNameIdx = cls->constants->findOrAddConstant(UTF8, "Code");
     writeU2Local(res, codeNameIdx);
 
     // Код конструктора: aload_0; invokespecial java/lang/Object.<init>; return
@@ -259,12 +254,12 @@ std::vector<uint8_t> ClassGeneration::generateInitMethod(MethodTableElement* met
     codeBytes.push_back(0x2A);               // aload_0
     codeBytes.push_back(0xB7);
 
-    int objectClassIdx = m_constants->findOrAddConstant(UTF8, "java/lang/Object");
-    int objectClassRefIdx = m_constants->findOrAddConstant(Class, "", 0, 0, objectClassIdx);
-    int initNameIdx = m_constants->findOrAddConstant(UTF8, "<init>");
-    int initDescIdx = m_constants->findOrAddConstant(UTF8, "()V");
-    int nameAndTypeIdx = m_constants->findOrAddConstant(NameAndType, "", 0, 0, initNameIdx, initDescIdx);
-    int initMethodRefIndex = m_constants->findOrAddConstant(MethodRef, "", 0, 0, objectClassRefIdx, nameAndTypeIdx);
+    int objectClassIdx = cls->constants->findOrAddConstant(UTF8, "java/lang/Object");
+    int objectClassRefIdx = cls->constants->findOrAddConstant(Class, "", 0, 0, objectClassIdx);
+    int initNameIdx = cls->constants->findOrAddConstant(UTF8, "<init>");
+    int initDescIdx = cls->constants->findOrAddConstant(UTF8, "()V");
+    int nameAndTypeIdx = cls->constants->findOrAddConstant(NameAndType, "", 0, 0, initNameIdx, initDescIdx);
+    int initMethodRefIndex = cls->constants->findOrAddConstant(MethodRef, "", 0, 0, objectClassRefIdx, nameAndTypeIdx);
     writeU2Local(codeBytes, initMethodRefIndex); // invokespecial Object.<init>
 
     codeBytes.push_back(0xB1);               // return
