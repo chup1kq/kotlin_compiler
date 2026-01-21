@@ -425,3 +425,9 @@ SemanticError SemanticError::fieldAccessFromNotDeclaredObject(const std::string 
     );
 }
 
+SemanticError SemanticError::useThisInTopLevelClass() {
+    return SemanticError(
+        CAN_NOT_USE_THIS_IN_TOP_LEVEL_CLASS,
+        "Can not use 'this' in top level class"
+    );
+}

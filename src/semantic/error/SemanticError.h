@@ -75,6 +75,7 @@ public:
     static SemanticError overrideMethodDifferentSignature(const std::string &methodName, const std::string &superClass);
     static SemanticError unknownType(const std::string &type);
     static SemanticError fieldAccessFromNotDeclaredObject(const std::string &objectName, const std::string &fieldName);
+    static SemanticError useThisInTopLevelClass();
 };
 
 #endif //KOTLIN_COMPILER_SEMANTIC_ERROR_H

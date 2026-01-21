@@ -639,6 +639,14 @@ void ClassTable::attributeExpression(MethodTableElement *method, ExprNode *expr,
             attributeFieldAccess(method, expr);
             return;
         }
+        case _SUPER: {
+            attributeSuper(method, expr);
+            return;
+        }
+        case _THIS: {
+            attributeThis(method, expr);
+            return;
+        }
 
         // TODO посмотреть, может что-то еще нужно проатрибутировать
 
@@ -944,6 +952,29 @@ void ClassTable::attributeFieldAccess(MethodTableElement *currentMethod, ExprNod
     }
 
     expr->semanticType = foundFiled->fieldType;
+}
+
+void ClassTable::attributeSuper(MethodTableElement *currentMethod, ExprNode *expr) {
+    ClassTableElement* methodRelatedClass = items[currentMethod->relatedClass];
+
+    if (methodRelatedClass->superClsName.empty()) {
+        expr->semanticType = SemanticType::classType("JavaRTL/Any");
+    }
+    else {
+        expr->semanticType = SemanticType::classType(methodRelatedClass->superClsName);
+    }
+
+    std::cout << "super class type " << expr->semanticType->className << std::endl;
+}
+
+void ClassTable::attributeThis(MethodTableElement *currentMethod, ExprNode *expr) {
+    ClassTableElement* methodRelatedClass = items[currentMethod->relatedClass];
+
+    if (methodRelatedClass->clsName == topLevelClassName) {
+        throw SemanticError::useThisInTopLevelClass();
+    }
+
+    expr->semanticType = SemanticType::classType(methodRelatedClass->clsName);
 }
 
 
