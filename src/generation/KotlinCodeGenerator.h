@@ -41,6 +41,9 @@ private:
     static std::string getArrayTypeDescriptor(SemanticType* type);
 
     static std::vector<uint8_t> generateMethodAttribute(ClassTableElement* classElement, MethodTableElement* methodElement);
+    static std::vector<uint8_t> generateUnaryExpression(ExprNode* expr, ClassTableElement* classElement, MethodTableElement* methodElement);
+    static std::vector<uint8_t> generateBinaryOperation(ExprNode* expr, ClassTableElement* classElement, MethodTableElement* methodElement);
+    static std::vector<uint8_t> generateAssignment(ExprNode* expr, ClassTableElement* classElement, MethodTableElement* methodElement);
 };
 
 

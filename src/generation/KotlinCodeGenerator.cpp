@@ -27,23 +27,87 @@ std::vector<uint8_t> KotlinCodeGenerator::generateStatement(StmtNode *stmt, Clas
     return {};
 }
 
-std::vector<uint8_t> KotlinCodeGenerator::generateExpression(ExprNode *expr, ClassTableElement *classElement,
-                                                             MethodTableElement *methodElement) {
-    // TODO
-    if (expr->type == _IDENTIFIER) {
-        return generateIdentifier(expr, classElement, methodElement);
-    }
-    else if (expr->type == _FUNC_ACCESS) {
-        return generateFuncAccess(expr, classElement, methodElement);
-    }
-    else if (expr->type == _ARRAY_EXPR) {
+std::vector<uint8_t> KotlinCodeGenerator::generateExpression(
+    ExprNode *expr,
+    ClassTableElement *classElement,
+    MethodTableElement *methodElement
+) {
+    if (!expr)
         return {};
-    }
-    else if (expr->type == _ARRAY_ACCESS) {
-        return {};
+
+    switch (expr->type) {
+
+        /* ---------- ЛИТЕРАЛЫ ---------- */
+        case _INTEGER_LITERAL:
+        case _FLOAT_LITERAL:
+        case _DOUBLE_LITERAL:
+        case _CHAR_LITERAL:
+        case _STRING_LITERAL:
+        case _BOOL_LITERAL:
+            return generateLiteralCreation(expr, classElement, methodElement);
+
+        /* ---------- ИДЕНТИФИКАТОР ---------- */
+        case _IDENTIFIER:
+            return generateIdentifier(expr, classElement, methodElement);
+
+        /* ---------- СКОБКИ ---------- */
+        case _BRACKETS:
+            return generateExpression(expr->left, classElement, methodElement);
+
+        /* ---------- ВЫЗОВЫ ---------- */
+        case _FUNC_CALL:
+            return generateFuncCall(expr, classElement, methodElement);
+
+        case _FUNC_ACCESS:
+            return generateFuncAccess(expr, classElement, methodElement);
+
+        /* ---------- МАССИВЫ ---------- */
+        case _ARRAY_EXPR:
+            return generateArrayCreation(expr, classElement, methodElement);
+
+        case _ARRAY_ACCESS:
+            return generateArrayAccess(expr, classElement, methodElement);
+
+        /* ---------- УНАРНЫЕ ---------- */
+        case _UNARY_PLUS:
+        case _UNARY_MINUS:
+        case _NOT:
+        case _PREF_INCREMENT:
+        case _PREF_DECREMENT:
+        case _POST_INCREMENT:
+        case _POST_DECREMENT:
+            return generateUnaryExpression(expr, classElement, methodElement);
+
+        /* ---------- БИНАРНЫЕ ---------- */
+        case _PLUS:
+        case _MINUS:
+        case _MUL:
+        case _DIV:
+        case _MOD:
+        case _LESS:
+        case _GREAT:
+        case _LESS_EQUAL:
+        case _GREAT_EQUAL:
+        case _EQUAL:
+        case _NOT_EQUAL:
+        case _DISJUNCTION:
+        case _CONJUNCTION:
+            return generateBinaryOperation(expr, classElement, methodElement);
+
+        /* ---------- ПРИСВАИВАНИЯ ---------- */
+        case _ASSIGNMENT:
+        case _PLUS_ASSIGNMENT:
+        case _MINUS_ASSIGNMENT:
+        case _MUL_ASSIGNMENT:
+        case _DIV_ASSIGNMENT:
+        case _MOD_ASSIGNMENT:
+            return generateAssignment(expr, classElement, methodElement);
+
+        default: return {};
     }
     return {};
 }
+
 
 std::vector<uint8_t> KotlinCodeGenerator::generateFuncAccess(ExprNode *expr, ClassTableElement* classElement, MethodTableElement *methodElement) {
     std::vector<uint8_t> result;
@@ -98,19 +162,50 @@ std::vector<uint8_t> KotlinCodeGenerator::generateFuncAccess(ExprNode *expr, Cla
     std::vector<uint8_t> iv = BytecodeGenerator::invokevirtual(mref);
     BytecodeGenerator::appendToByteArray(&result, iv.data(), iv.size());
 
-    // TODO дописать для AND и OR
-
     return result;
 
 }
 
-std::vector<uint8_t> KotlinCodeGenerator::generateFuncCall(ExprNode *expr, ClassTableElement *classElement, MethodTableElement *methodElement) {
-    if (expr->isBaseLiteral()) {
-        return generateLiteralCreation(expr, classElement, methodElement);
+std::vector<uint8_t> KotlinCodeGenerator::generateFuncCall(
+    ExprNode *expr,
+    ClassTableElement *classElement,
+    MethodTableElement *methodElement
+) {
+    std::vector<uint8_t> res;
+
+    // 1. Загрузить this
+    auto aload0 = BytecodeGenerator::aload(0);
+    BytecodeGenerator::appendToByteArray(&res, aload0.data(), aload0.size());
+
+    // 2. Аргументы
+    for (auto &arg : *expr->params->exprs) {
+        auto a = generateExpression(arg, classElement, methodElement);
+        BytecodeGenerator::appendToByteArray(&res, a.data(), a.size());
     }
 
-    // TODO дописать
+    // 3. Дескриптор
+    std::string desc = "(";
+    for (auto &arg : *expr->params->exprs) {
+        desc += "L" + arg->semanticType->className + ";";
+    }
+    desc += ")L" + expr->semanticType->className + ";";
+
+    int cn = classElement->constants->findOrAddConstant(
+        UTF8, classElement->clsName
+    );
+    int cls = classElement->constants->findOrAddConstant(Class, "", 0, 0, cn);
+
+    int mn = classElement->constants->findOrAddConstant(UTF8, expr->identifierName);
+    int md = classElement->constants->findOrAddConstant(UTF8, desc);
+    int nat = classElement->constants->findOrAddConstant(NameAndType, "", 0, 0, mn, md);
+    int mref = classElement->constants->findOrAddConstant(MethodRef, "", 0, 0, cls, nat);
+
+    auto inv = BytecodeGenerator::invokevirtual(mref);
+    BytecodeGenerator::appendToByteArray(&res, inv.data(), inv.size());
+
+    return res;
 }
+
 
 std::vector<uint8_t> KotlinCodeGenerator::generateLiteralCreation(ExprNode *expr, ClassTableElement *classElement, MethodTableElement *methodElement) {
     std::vector<uint8_t> res;
@@ -145,9 +240,76 @@ std::vector<uint8_t> KotlinCodeGenerator::generateLiteralCreation(ExprNode *expr
         int mref = classElement->constants->findOrAddConstant(MethodRef, "", 0, 0, clas, nat);
         std::vector<uint8_t> is = BytecodeGenerator::invokespecial(mref);
         BytecodeGenerator::appendToByteArray(&res, is.data(), is.size());
-    }
+    } else if (expr->fromLiteral == _FROM_BOOLEAN) {
+        int cn = classElement->constants->findOrAddConstant(UTF8, "JavaRTL/Boolean");
+        int cls = classElement->constants->findOrAddConstant(Class, "", 0, 0, cn);
 
-    // TODO дописать
+        res = BytecodeGenerator::_new(cls);
+        BytecodeGenerator::appendToByteArray(&res, BytecodeGenerator::dup().data(), 1);
+
+        auto v = BytecodeGenerator::iconstBipushSipush(expr->boolValue ? 1 : 0);
+        BytecodeGenerator::appendToByteArray(&res, v.data(), v.size());
+
+        int mn = classElement->constants->findOrAddConstant(UTF8, "<init>");
+        int md = classElement->constants->findOrAddConstant(UTF8, "(I)V");
+        int nat = classElement->constants->findOrAddConstant(NameAndType, "", 0, 0, mn, md);
+        int mref = classElement->constants->findOrAddConstant(MethodRef, "", 0, 0, cls, nat);
+
+        auto is = BytecodeGenerator::invokespecial(mref);
+        BytecodeGenerator::appendToByteArray(&res, is.data(), is.size());
+    } else if (expr->fromLiteral == _FROM_STRING) {
+        int s = classElement->constants->findOrAddConstant(
+            String,
+            "",
+            classElement->constants->findOrAddConstant(UTF8, expr->stringValue)
+        );
+        auto ldc = BytecodeGenerator::ldc(s);
+        BytecodeGenerator::appendToByteArray(&res, ldc.data(), ldc.size());
+    } else if (expr->fromLiteral == _FROM_CHAR) {
+        int cn = classElement->constants->findOrAddConstant(UTF8, "JavaRTL/Char");
+        int cls = classElement->constants->findOrAddConstant(Class, "", 0, 0, cn);
+
+        res = BytecodeGenerator::_new(cls);
+
+        auto dup = BytecodeGenerator::dup();
+        BytecodeGenerator::appendToByteArray(&res, dup.data(), dup.size());
+
+        // char → int
+        auto v = BytecodeGenerator::iconstBipushSipush((int)expr->charValue);
+        BytecodeGenerator::appendToByteArray(&res, v.data(), v.size());
+
+        int mn = classElement->constants->findOrAddConstant(UTF8, "<init>");
+        int md = classElement->constants->findOrAddConstant(UTF8, "(I)V");
+        int nat = classElement->constants->findOrAddConstant(NameAndType, "", 0, 0, mn, md);
+        int mref = classElement->constants->findOrAddConstant(MethodRef, "", 0, 0, cls, nat);
+
+        auto is = BytecodeGenerator::invokespecial(mref);
+        BytecodeGenerator::appendToByteArray(&res, is.data(), is.size());
+
+        return res;
+    } else if (expr->fromLiteral == _FROM_FLOAT) {
+        int cn = classElement->constants->findOrAddConstant(UTF8, "JavaRTL/Float");
+        int cls = classElement->constants->findOrAddConstant(Class, "", 0, 0, cn);
+
+        res = BytecodeGenerator::_new(cls);
+
+        auto dup = BytecodeGenerator::dup();
+        BytecodeGenerator::appendToByteArray(&res, dup.data(), dup.size());
+
+        int fc = classElement->constants->findOrAddConstant(Float, "", 0, expr->floatValue);
+        auto ldc = BytecodeGenerator::ldc(fc);
+        BytecodeGenerator::appendToByteArray(&res, ldc.data(), ldc.size());
+
+        int mn = classElement->constants->findOrAddConstant(UTF8, "<init>");
+        int md = classElement->constants->findOrAddConstant(UTF8, "(F)V");
+        int nat = classElement->constants->findOrAddConstant(NameAndType, "", 0, 0, mn, md);
+        int mref = classElement->constants->findOrAddConstant(MethodRef, "", 0, 0, cls, nat);
+
+        auto is = BytecodeGenerator::invokespecial(mref);
+        BytecodeGenerator::appendToByteArray(&res, is.data(), is.size());
+
+        return res;
+    }
 }
 
 
@@ -466,3 +628,248 @@ std::vector<uint8_t> KotlinCodeGenerator::generateMethodAttribute(ClassTableElem
 
     return res;
 }
+
+std::vector<uint8_t> KotlinCodeGenerator::generateUnaryExpression(
+    ExprNode *expr,
+    ClassTableElement *classElement,
+    MethodTableElement *methodElement
+) {
+    std::vector<uint8_t> res;
+
+    switch (expr->type) {
+        case _UNARY_PLUS:
+            return generateExpression(expr->left, classElement, methodElement);
+
+        case _UNARY_MINUS: {
+            auto v = generateExpression(expr->left, classElement, methodElement);
+            BytecodeGenerator::appendToByteArray(&res, v.data(), v.size());
+
+            std::string clsName = expr->left->semanticType->className;
+
+            int cn = classElement->constants->findOrAddConstant(UTF8, clsName);
+            int cls = classElement->constants->findOrAddConstant(Class, "", 0, 0, cn);
+
+            int mn = classElement->constants->findOrAddConstant(UTF8, "neg");
+            int md = classElement->constants->findOrAddConstant(
+                UTF8, "()L" + clsName + ";"
+            );
+            int nat = classElement->constants->findOrAddConstant(NameAndType, "", 0, 0, mn, md);
+            int mref = classElement->constants->findOrAddConstant(MethodRef, "", 0, 0, cls, nat);
+
+            auto iv = BytecodeGenerator::invokevirtual(mref);
+            BytecodeGenerator::appendToByteArray(&res, iv.data(), iv.size());
+            return res;
+        }
+        case _NOT: {
+            auto v = generateExpression(expr->left, classElement, methodElement);
+            BytecodeGenerator::appendToByteArray(&res, v.data(), v.size());
+
+            int cn = classElement->constants->findOrAddConstant(UTF8, "JavaRTL/Boolean");
+            int cls = classElement->constants->findOrAddConstant(Class, "", 0, 0, cn);
+
+            int mn = classElement->constants->findOrAddConstant(UTF8, "not");
+            int md = classElement->constants->findOrAddConstant(
+                UTF8, "()LJavaRTL/Boolean;"
+            );
+            int nat = classElement->constants->findOrAddConstant(NameAndType, "", 0, 0, mn, md);
+            int mref = classElement->constants->findOrAddConstant(MethodRef, "", 0, 0, cls, nat);
+
+            auto iv = BytecodeGenerator::invokevirtual(mref);
+            BytecodeGenerator::appendToByteArray(&res, iv.data(), iv.size());
+            return res;
+        }
+        case _PREF_INCREMENT: {
+            // load
+            auto load = generateIdentifier(expr->left, classElement, methodElement);
+            BytecodeGenerator::appendToByteArray(&res, load.data(), load.size());
+
+            // add 1
+            auto one = BytecodeGenerator::iconstBipushSipush(1);
+            BytecodeGenerator::appendToByteArray(&res, one.data(), one.size());
+
+            auto add = BytecodeGenerator::iadd();
+            BytecodeGenerator::appendToByteArray(&res, add.data(), add.size());
+
+            // store
+            int id = methodElement->localVarTable->items[expr->left->identifierName]->id;
+            auto store = BytecodeGenerator::istore(id);
+            BytecodeGenerator::appendToByteArray(&res, store.data(), store.size());
+
+            // reload (результат выражения)
+            auto reload = BytecodeGenerator::iload(id);
+            BytecodeGenerator::appendToByteArray(&res, reload.data(), reload.size());
+
+            return res;
+        }
+        case _POST_INCREMENT: {
+            int id = methodElement->localVarTable->items[expr->left->identifierName]->id;
+
+            // load old
+            auto old = BytecodeGenerator::iload(id);
+            BytecodeGenerator::appendToByteArray(&res, old.data(), old.size());
+
+            // load again
+            auto cur = BytecodeGenerator::iload(id);
+            BytecodeGenerator::appendToByteArray(&res, cur.data(), cur.size());
+
+            auto one = BytecodeGenerator::iconstBipushSipush(1);
+            BytecodeGenerator::appendToByteArray(&res, one.data(), one.size());
+
+            auto add = BytecodeGenerator::iadd();
+            BytecodeGenerator::appendToByteArray(&res, add.data(), add.size());
+
+            auto store = BytecodeGenerator::istore(id);
+            BytecodeGenerator::appendToByteArray(&res, store.data(), store.size());
+
+            return res;
+        }
+    }
+}
+
+std::vector<uint8_t> KotlinCodeGenerator::generateBinaryOperation(
+    ExprNode *expr,
+    ClassTableElement *classElement,
+    MethodTableElement *methodElement
+) {
+    std::vector<uint8_t> res;
+
+    // left operand
+    auto left = generateExpression(expr->left, classElement, methodElement);
+    BytecodeGenerator::appendToByteArray(&res, left.data(), left.size());
+
+    // right operand
+    auto right = generateExpression(expr->right, classElement, methodElement);
+    BytecodeGenerator::appendToByteArray(&res, right.data(), right.size());
+
+    std::string methodName;
+
+    switch (expr->type) {
+        case _PLUS:           methodName = "add"; break;
+        case _MINUS:          methodName = "sub"; break;
+        case _MUL:            methodName = "mul"; break;
+        case _DIV:            methodName = "div"; break;
+        case _MOD:            methodName = "mod"; break;
+
+        case _LESS:           methodName = "lt";  break;
+        case _GREAT:          methodName = "gt";  break;
+        case _LESS_EQUAL:     methodName = "le";  break;
+        case _GREAT_EQUAL:    methodName = "ge";  break;
+        case _EQUAL:          methodName = "eq";  break;
+        case _NOT_EQUAL:      methodName = "ne";  break;
+
+        case _DISJUNCTION:    methodName = "or";  break;
+        case _CONJUNCTION:    methodName = "and"; break;
+
+        default:
+            throw std::runtime_error("Unsupported binary operator");
+    }
+
+    std::string className = expr->left->semanticType->className;
+
+    int cn = classElement->constants->findOrAddConstant(UTF8, className);
+    int cls = classElement->constants->findOrAddConstant(Class, "", 0, 0, cn);
+
+    std::string desc =
+        "(L" + expr->right->semanticType->className + ";)"
+        "L" + expr->semanticType->className + ";";
+
+    int mn = classElement->constants->findOrAddConstant(UTF8, methodName);
+    int md = classElement->constants->findOrAddConstant(UTF8, desc);
+    int nat = classElement->constants->findOrAddConstant(NameAndType, "", 0, 0, mn, md);
+    int mref = classElement->constants->findOrAddConstant(MethodRef, "", 0, 0, cls, nat);
+
+    auto iv = BytecodeGenerator::invokevirtual(mref);
+    BytecodeGenerator::appendToByteArray(&res, iv.data(), iv.size());
+
+    return res;
+}
+
+
+std::vector<uint8_t> KotlinCodeGenerator::generateAssignment(
+    ExprNode *expr,
+    ClassTableElement *classElement,
+    MethodTableElement *methodElement
+) {
+    std::vector<uint8_t> res;
+
+    // имя переменной
+    std::string name = expr->left->identifierName;
+    auto var = methodElement->localVarTable->items[name];
+    int id = var->id;
+
+    bool isInt = (var->type->className == "I");
+
+    // ===== a = b =====
+    if (expr->type == _ASSIGNMENT) {
+        auto value = generateExpression(expr->right, classElement, methodElement);
+        BytecodeGenerator::appendToByteArray(&res, value.data(), value.size());
+
+        auto store = isInt
+            ? BytecodeGenerator::istore(id)
+            : BytecodeGenerator::astore(id);
+        BytecodeGenerator::appendToByteArray(&res, store.data(), store.size());
+
+        // результат выражения — новое значение
+        auto load = isInt
+            ? BytecodeGenerator::iload(id)
+            : BytecodeGenerator::aload(id);
+        BytecodeGenerator::appendToByteArray(&res, load.data(), load.size());
+
+        return res;
+    }
+
+    // ===== a += b, a -= b ... =====
+    // load a
+    auto loadA = isInt
+        ? BytecodeGenerator::iload(id)
+        : BytecodeGenerator::aload(id);
+    BytecodeGenerator::appendToByteArray(&res, loadA.data(), loadA.size());
+
+    // load b
+    auto value = generateExpression(expr->right, classElement, methodElement);
+    BytecodeGenerator::appendToByteArray(&res, value.data(), value.size());
+
+    // выбрать операцию
+    std::string method;
+    switch (expr->type) {
+        case _PLUS_ASSIGNMENT:  method = "add"; break;
+        case _MINUS_ASSIGNMENT: method = "sub"; break;
+        case _MUL_ASSIGNMENT:   method = "mul"; break;
+        case _DIV_ASSIGNMENT:   method = "div"; break;
+        case _MOD_ASSIGNMENT:   method = "mod"; break;
+        default:
+            method = "add";
+    }
+
+    std::string className = var->type->className;
+
+    int cn = classElement->constants->findOrAddConstant(UTF8, className);
+    int cls = classElement->constants->findOrAddConstant(Class, "", 0, 0, cn);
+
+    std::string desc =
+        "(L" + expr->right->semanticType->className + ";)"
+        "L" + className + ";";
+
+    int mn = classElement->constants->findOrAddConstant(UTF8, method);
+    int md = classElement->constants->findOrAddConstant(UTF8, desc);
+    int nat = classElement->constants->findOrAddConstant(NameAndType, "", 0, 0, mn, md);
+    int mref = classElement->constants->findOrAddConstant(MethodRef, "", 0, 0, cls, nat);
+
+    auto iv = BytecodeGenerator::invokevirtual(mref);
+    BytecodeGenerator::appendToByteArray(&res, iv.data(), iv.size());
+
+    // store result
+    auto store = isInt
+        ? BytecodeGenerator::istore(id)
+        : BytecodeGenerator::astore(id);
+    BytecodeGenerator::appendToByteArray(&res, store.data(), store.size());
+
+    // load result as expression value
+    auto reload = isInt
+        ? BytecodeGenerator::iload(id)
+        : BytecodeGenerator::aload(id);
+    BytecodeGenerator::appendToByteArray(&res, reload.data(), reload.size());
+
+    return res;
+}
+
