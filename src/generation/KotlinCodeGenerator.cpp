@@ -593,8 +593,6 @@ std::vector<uint8_t> KotlinCodeGenerator::generateMethodAttribute(ClassTableElem
     std::vector<uint8_t> ret = BytecodeGenerator::_return();  // 0xB1
     BytecodeGenerator::appendToByteArray(&codeBytes, ret.data(), ret.size());
 
-    printf("Code bytes len: %d\n", codeBytes.size());  // Должно быть >=1!
-
     // 4. attribute_length = 12 + code_length (JVMS §4.7.3)
     uint32_t attrLength = 12 + codeBytes.size();
     std::vector<uint8_t> lengthBytes = BytecodeGenerator::intToByteVector(attrLength, 4);
