@@ -418,3 +418,10 @@ SemanticError SemanticError::unknownType(const std::string &type) {
     );
 }
 
+SemanticError SemanticError::fieldAccessFromNotDeclaredObject(const std::string &objectName, const std::string &fieldName) {
+    return SemanticError(
+        CANNOT_FIELD_CALL_FROM_NOT_DECLARED_OBJECT,
+        "Can not access field '" + fieldName + "'. '" + objectName + "' is not related to any declared class "
+    );
+}
+

@@ -98,3 +98,13 @@ bool SemanticType::isTypeExist(std::string type) {
 
     return false;
 }
+
+std::string SemanticType::isDeclaredClass() const {
+    for (auto& clsType: ClassTable::allClassesTypes) {
+        if (clsType == this->className) {
+            return this->className;
+        }
+    }
+
+    return "";
+}

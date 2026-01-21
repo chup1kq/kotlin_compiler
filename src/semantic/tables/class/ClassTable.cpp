@@ -635,6 +635,10 @@ void ClassTable::attributeExpression(MethodTableElement *method, ExprNode *expr,
             attributeArrayAccess(method, expr);
             return;
         }
+        case _FIELD_ACCESS: {
+            attributeFieldAccess(method, expr);
+            return;
+        }
 
         // TODO посмотреть, может что-то еще нужно проатрибутировать
 
@@ -679,7 +683,6 @@ FieldTableElement* ClassTable::hasSuperClassesField(MethodTableElement *method, 
 
     // Если содержится в этом классе
     ClassTableElement* relatedClass = items.at(method->relatedClass);
-
     return relatedClass->getFieldOnCalling(fieldName, !method->relatedClass.empty());
 }
 
@@ -925,6 +928,24 @@ void ClassTable::attributeArrayAccess(MethodTableElement *currentMethod, ExprNod
 
     expr->semanticType = SemanticType::classType(expr->left->semanticType->elementType->className);
 }
+
+// TODO добавить super обработку
+void ClassTable::attributeFieldAccess(MethodTableElement *currentMethod, ExprNode *expr) {
+    std::string leftClassName = expr->left->semanticType->isDeclaredClass();
+    if (leftClassName.empty()) {
+        throw SemanticError::fieldAccessFromNotDeclaredObject(expr->left->identifierName, expr->identifierName);
+    }
+
+    ClassTableElement* objectRelatedClass = items[leftClassName];
+    bool isCurrentMethodInClass = currentMethod->relatedClass == leftClassName;
+    FieldTableElement* foundFiled = objectRelatedClass->getFieldOnCalling(expr->identifierName, isCurrentMethodInClass);
+    if (!foundFiled) {
+        throw SemanticError::undefinedVariable(expr->identifierName);
+    }
+
+    expr->semanticType = foundFiled->fieldType;
+}
+
 
 void ClassTable::fillLiterals(ClassTableElement *elem) {
     std::cout << "Entered fillLiterals::" << elem->clsName << std::endl;

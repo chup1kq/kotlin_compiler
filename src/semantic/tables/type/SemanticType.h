@@ -25,6 +25,7 @@ public:
     bool isArray() const;
     int arrayDimension() const;
     bool isReplaceable(const SemanticType& other) const;
+    std::string isDeclaredClass() const;
 
     SemanticType();
     explicit SemanticType(TypeNode* typeNode);

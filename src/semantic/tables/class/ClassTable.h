@@ -54,6 +54,7 @@ public:
     void attributeArrayCreatingExpr(MethodTableElement *method, ExprNode* expr);
     void attributeFuncOrMethodCall(MethodTableElement* currentMethod, ExprNode* expr);
     void attributeArrayAccess(MethodTableElement* currentMethod, ExprNode* expr);
+    void attributeFieldAccess(MethodTableElement* currentMethod, ExprNode* expr);
     bool isMethodBaseClassConstructorOrInputOutput(ExprNode* expr);
 
     FieldTableElement* hasSuperClassesField(MethodTableElement* method, std::string fieldName);

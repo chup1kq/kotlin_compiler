@@ -74,6 +74,7 @@ public:
     static SemanticError changeConsistencyInOverride(const std::string &elementName, const std::string &thisClass);
     static SemanticError overrideMethodDifferentSignature(const std::string &methodName, const std::string &superClass);
     static SemanticError unknownType(const std::string &type);
+    static SemanticError fieldAccessFromNotDeclaredObject(const std::string &objectName, const std::string &fieldName);
 };
 
 #endif //KOTLIN_COMPILER_SEMANTIC_ERROR_H

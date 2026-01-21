@@ -351,7 +351,10 @@ void ClassTableElement::checkFieldModifier(FieldTableElement* field, ClassTableE
 
     // Тут супер класс есть
     std::string superClassName = getClassNameForSuperField(field, superClass, items);
-    FieldTableElement* superField = items[superClassName]->fields->fields.at(field->strName);
+    FieldTableElement* superField = nullptr;
+    if (!superClassName.empty()) {
+        superField = items[superClassName]->fields->fields.at(field->strName);
+    }
 
     // Если в супер классе (или ранее по цепочке наследования) НЕТ такого поля
     if (!superField) {
