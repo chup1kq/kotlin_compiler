@@ -46,9 +46,18 @@ bool SemanticType::isReplaceable(const SemanticType& other) const {
         return elementType->isReplaceable(*other.elementType);
     }
 
-    // TODO учитывать, что null нельзя присвоить
     // TODO учитывать наследование через classTableElement
-    return className == other.className;
+    // Типы совпадают сами по себе
+    if (className == other.className) {
+        return true;
+    }
+
+    // Хотя бы один из типов представлен не как объявленный класс
+    if (this->isDeclaredClass().empty() || other.isDeclaredClass().empty()) {
+        return false;
+    }
+
+    return this->isChildType(this->className, other.className);
 }
 
 SemanticType* SemanticType::classType(const std::string& className, bool nullable) {
@@ -107,4 +116,18 @@ std::string SemanticType::isDeclaredClass() const {
     }
 
     return "";
+}
+
+bool SemanticType::isChildType(const std::string& parent, const std::string& child) const {
+     ClassTableElement* childClass = ClassTable::items[child];
+
+    if (childClass->superClsName == parent) {
+        return true;
+    }
+
+    if (childClass->superClsName == "") {
+        return false;
+    }
+
+    return isChildType(parent, childClass->superClsName);
 }

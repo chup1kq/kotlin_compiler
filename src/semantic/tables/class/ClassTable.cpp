@@ -742,8 +742,8 @@ void ClassTable::attributeAssignmentExpr(LocalVariableTable *table, ExprNode* ex
             );
         }
 
-        // Тип результата — Unit
-        expr->semanticType = SemanticType::classType("Unit");
+        // TODO ТУТ ПОМЕНЯЛ Тип результата — Unit
+        expr->semanticType = SemanticType::classType(right->semanticType->className);
         return;
     }
 
