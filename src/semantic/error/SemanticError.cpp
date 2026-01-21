@@ -410,3 +410,11 @@ SemanticError SemanticError::overrideMethodDifferentSignature(const std::string 
         "Method '" + methodName + "' must have same full name like in '" + superClass + "' class"
     );
 }
+
+SemanticError SemanticError::unknownType(const std::string &type) {
+    return SemanticError(
+        UNKNOWN_TYPE,
+        "Unknown type '" + type + "'"
+    );
+}
+

@@ -15,6 +15,8 @@ public:
     std::string topLevelClassName;
     std::vector<std::string> builtinFunctionClasses;
 
+    static std::vector<std::string> allClassesTypes;
+
     void buildClassTable(KotlinFileNode* root);
 
     ClassTable(const std::string& fileName);

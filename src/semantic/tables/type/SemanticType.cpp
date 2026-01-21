@@ -1,5 +1,7 @@
 #include "SemanticType.h"
 
+#include "../class/ClassTable.h"
+
 SemanticType::SemanticType()
     : isNullable(false),
       classTableElement(nullptr),
@@ -22,7 +24,7 @@ SemanticType::SemanticType(TypeNode* typeNode)
     } else {
         className = typeNode->customName.empty()
             ? typeToString(typeNode->type)
-            : typeNode->customName;
+            : SemanticType::classType(typeNode->customName)->className;
     }
 }
 
@@ -51,6 +53,9 @@ bool SemanticType::isReplaceable(const SemanticType& other) const {
 
 SemanticType* SemanticType::classType(const std::string& className, bool nullable) {
     SemanticType* t = new SemanticType();
+    if (!isTypeExist(className)) {
+        throw SemanticError::unknownType(className);
+    }
     t->className = className;
     t->isNullable = nullable;
     return t;
@@ -71,3 +76,24 @@ std::string SemanticType::toString() const {
     return "Array<" + elementType->toString() + ">";
 }
 
+// Массивы не проверяет
+bool SemanticType::isTypeExist(std::string type) {
+    for (auto& clsType: ClassTable::allClassesTypes) {
+        if (clsType == type) {
+            return true;
+        }
+    }
+
+    if (type == "JavaRTL/Int" ||
+        type == "JavaRTL/String" ||
+        type == "JavaRTL/Char" ||
+        type == "JavaRTL/Boolean" ||
+        type == "JavaRTL/Float" ||
+        type == "JavaRTL/Double" ||
+        type == "JavaRTL/Unit"
+    ) {
+        return true;
+    }
+
+    return false;
+}

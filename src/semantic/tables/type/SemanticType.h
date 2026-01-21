@@ -20,6 +20,8 @@ public:
     static SemanticType* classType(const std::string& className, bool nullable = false);
     static SemanticType* arrayType(SemanticType* elementType, bool nullable = false);
 
+    static bool isTypeExist(std::string type);
+
     bool isArray() const;
     int arrayDimension() const;
     bool isReplaceable(const SemanticType& other) const;

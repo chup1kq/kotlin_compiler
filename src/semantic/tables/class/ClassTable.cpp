@@ -5,6 +5,8 @@
 #include "ClassTableElement.h"
 #include "../constant/ConstantTable.h"
 
+std::vector<std::string> ClassTable::allClassesTypes;
+
 ClassTable::ClassTable(const std::string& fileName) {
     this->items.clear();
     this->topLevelClassName = makeTopLevelClassName(fileName);
@@ -110,6 +112,7 @@ void ClassTable::addBaseClass() {
     // Cоздание класса для свободных функций
     ClassTableElement* topLevelFunctionsClass = new ClassTableElement();
     topLevelFunctionsClass->clsName = topLevelClassName;
+    allClassesTypes.push_back(topLevelClassName);
 
     // Добавляем название и связываем его с классом
     // TODO вот это дублируется с методом addClassesToClassTable
@@ -181,6 +184,8 @@ void ClassTable::addClassesToClassTable(ClassTableElement *baseClass, std::list<
         newClass->thisClass = cls;
 
         newClass->modifiers = classNode->modifiers;
+        allClassesTypes.push_back(newClass->clsName);
+        std:cout << "New class type: " << allClassesTypes.back() << std::endl;
 
         this->items.insert(std::pair<std::string, ClassTableElement*>(className, newClass));
 
