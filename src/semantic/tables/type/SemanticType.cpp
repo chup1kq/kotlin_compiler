@@ -90,7 +90,8 @@ bool SemanticType::isTypeExist(std::string type) {
         type == "JavaRTL/Boolean" ||
         type == "JavaRTL/Float" ||
         type == "JavaRTL/Double" ||
-        type == "JavaRTL/Unit"
+        type == "JavaRTL/Unit" ||
+        type == "Unit"
     ) {
         return true;
     }

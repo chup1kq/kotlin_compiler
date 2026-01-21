@@ -483,7 +483,17 @@ void ClassTable::attributeFor(MethodTableElement *method, StmtNode *stmt) {
 
     // TODO тут можно не выкидывать исключение, а проверять, что в таблице локальных переменных i имеет такой же тип, что и элементы массива
     if (method->localVarTable->contains(iter->varId)) {
-        throw SemanticError::redefinition(iter->varId);
+        LocalVariableTableElement* localIter = method->localVarTable->items.at(iter->varId);
+
+        if (!localIter->type->isReplaceable(*stmt->cond->semanticType->elementType)) {
+            throw SemanticError::notReplaceableTypesInStmtDeclaration(
+                localIter->name,
+                localIter->type->toString(),
+                stmt->cond->semanticType->elementType->toString()
+            );
+        }
+
+        localIter->isInitialized = true;
     }
 
     if (iter->varType->customName != "") {
@@ -509,6 +519,7 @@ void ClassTable::attributeFor(MethodTableElement *method, StmtNode *stmt) {
         for (auto* s : *stmt->blockStmts->stmts) {
             attributeAndFillLocalsInStatement(method, s);
         }
+
     }
 }
 
