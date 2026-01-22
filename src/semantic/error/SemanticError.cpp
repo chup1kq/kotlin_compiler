@@ -120,7 +120,7 @@ SemanticError SemanticError::uninitializedVariable(const std::string &name) {
 SemanticError SemanticError::valReassignment(const std::string &name) {
     return SemanticError(
         VAL_REASSIGNMENT,
-        "Local variable '" + name + "' was not initialized"
+        "Local variable '" + name + "' is val can not be reassigned"
     );
 }
 

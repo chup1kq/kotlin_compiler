@@ -694,6 +694,21 @@ FieldTableElement* ClassTable::hasSuperClassesField(MethodTableElement *method, 
     return relatedClass->getFieldOnCalling(fieldName, !method->relatedClass.empty());
 }
 
+MethodTableElement* ClassTable::hasSuperClassesMethod(MethodTableElement* method, std::string methodName, std::string methodDesc) {
+    if (!method) {
+        return nullptr;
+    }
+
+    // Метод не относится к классу
+    if (method->relatedClass == "") {
+        return nullptr;
+    }
+
+    // Если содержится в этом классе
+    ClassTableElement* relatedClass = items.at(method->relatedClass);
+    return relatedClass->getMethodOnCalling(methodName, methodDesc, !method->relatedClass.empty());
+}
+
 void ClassTable::attributeAssignmentExpr(LocalVariableTable *table, ExprNode* expr) {
     ExprNode* left = expr->left;
     ExprNode* right = expr->right;
@@ -836,15 +851,31 @@ void ClassTable::attributeFuncOrMethodCall(MethodTableElement* currentMethod, Ex
     std::string& methodName = expr->identifierName;
     if (expr->type == _FUNC_CALL) {
         relatedClassName = this->topLevelClassName;
-
-        // TODO посмотреть что это может быть конструктор класса
+        // TODO посмотреть что это может быть конструктор класс
         if (items.contains(methodName) && !expr->params) {
             relatedClassName = items[methodName]->clsName;
             isConstructor = true;
             methodName = "<init>";
         }
-    } else if (expr->type == _FUNC_ACCESS) {
+    }
+    else if (expr->type == _FUNC_ACCESS) {
         relatedClassName = expr->left->semanticType->className;
+
+        std::string leftClassName = expr->left->semanticType->isDeclaredClass();
+        if (leftClassName.empty()) {
+            throw SemanticError::fieldAccessFromNotDeclaredObject(expr->left->identifierName, expr->identifierName);
+        }
+
+        ClassTableElement* objectRelatedClass = items[leftClassName];
+        bool isCurrentMethodInClass = currentMethod->relatedClass == leftClassName;
+        MethodTableElement* foundMethod = objectRelatedClass->getMethodOnCalling(expr->identifierName, paramDesc, isCurrentMethodInClass);
+        if (!foundMethod) {
+            throw SemanticError::undefinedVariable(expr->identifierName);
+        }
+
+        expr->semanticType = foundMethod->retType;
+
+        return;
     }
 
 
@@ -853,6 +884,8 @@ void ClassTable::attributeFuncOrMethodCall(MethodTableElement* currentMethod, Ex
 
     // ✅ УПРОЩЕНО: ищем полный ключ "methodName_paramDesc"
     std::string fullMethodKey = methodName + "_" + paramDesc;
+
+    MethodTableElement* chosen = nullptr;
 
     auto* cls = items[relatedClassName];
     bool foundInBuiltin = false;
@@ -875,12 +908,17 @@ void ClassTable::attributeFuncOrMethodCall(MethodTableElement* currentMethod, Ex
         }
         // foundInBuiltin = isMethodBaseClassConstructorOrInputOutput(expr);
         if (!foundInBuiltin) {
-            throw SemanticError::methodNotFound(relatedClassName, methodName + paramDesc);
+            if (!chosen) {
+                throw SemanticError::methodNotFound(relatedClassName, methodName + paramDesc);
+            }
         }
     }
 
     // ✅ УПРОЩЕНО: получаем метод напрямую, без циклов по перегрузкам
-    MethodTableElement* chosen = cls->methods->getMethod(methodName, paramDesc);
+    if (!chosen) {
+        chosen = cls->methods->getMethod(methodName, paramDesc);
+    }
+
     if (!chosen && !foundInBuiltin) {
         std::cout << "Method not found: " << relatedClassName << "." << methodName << paramDesc << std::endl;
         throw SemanticError::methodCandidateNotFound(relatedClassName, methodName, paramDesc);
@@ -905,20 +943,23 @@ bool ClassTable::isMethodBaseClassConstructorOrInputOutput(ExprNode *expr) {
         }
     }
 
-    if (expr->type == _FUNC_CALL && expr->params->exprs->size() == 1) {
-        if (expr->identifierName == "Int" ||
-            expr->identifierName == "Float" ||
-            expr->identifierName == "Double" ||
-            expr->identifierName == "String" ||
-            expr->identifierName == "Char" ||
-            expr->identifierName == "Boolean" ||
-            expr->identifierName == "print" ||
-            expr->identifierName == "println" ||
-            expr->identifierName == "readln"
-        ) {
-            return true;
+    if (expr->params && expr->params->exprs) {
+        if (expr->type == _FUNC_CALL && expr->params->exprs->size() == 1) {
+            if (expr->identifierName == "Int" ||
+                expr->identifierName == "Float" ||
+                expr->identifierName == "Double" ||
+                expr->identifierName == "String" ||
+                expr->identifierName == "Char" ||
+                expr->identifierName == "Boolean" ||
+                expr->identifierName == "print" ||
+                expr->identifierName == "println" ||
+                expr->identifierName == "readln"
+            ) {
+                return true;
+            }
         }
     }
+
     return false;
 }
 

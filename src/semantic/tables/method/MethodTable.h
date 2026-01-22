@@ -20,6 +20,7 @@ public:
     bool contains(const std::string& methodName, const std::string& descriptor) const;
     bool contains(const std::string& methodName) const;
     MethodTableElement* getMethod(const std::string& methodName, const std::string& descriptor) const;
+    MethodTableElement* getMethod(const std::string& methodName) const;
 };
 
 #endif //KOTLIN_COMPILER_METHODTABLE_H

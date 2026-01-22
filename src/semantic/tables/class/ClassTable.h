@@ -60,6 +60,7 @@ public:
     bool isMethodBaseClassConstructorOrInputOutput(ExprNode* expr);
 
     FieldTableElement* hasSuperClassesField(MethodTableElement* method, std::string fieldName);
+    MethodTableElement* hasSuperClassesMethod(MethodTableElement* method, std::string methodName, std::string methodDesc);
 
     void fillConstructorMethodRefs(ClassTableElement* cls);
 

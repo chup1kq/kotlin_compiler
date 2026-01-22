@@ -73,3 +73,17 @@ MethodTableElement* MethodTable::getMethod(const std::string& methodName, const 
     return nullptr;  // Не найден
 }
 
+MethodTableElement* MethodTable::getMethod(const std::string& methodName) const {
+    auto it = methods.lower_bound(methodName);
+
+    // Проверяем, начинается ли ключ с префикса
+    while (it != methods.end()) {
+        const std::string& key = it->first;
+        if (key.size() < methodName.size() || key.compare(0, methodName.size(), methodName) != 0) {
+            break;  // Ключи больше префикса или не совпадают
+        }
+        return it->second;  // Найден подходящий метод (первый по алфавиту)
+    }
+
+    return nullptr;  // Не найден
+}

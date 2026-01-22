@@ -582,3 +582,33 @@ FieldTableElement* ClassTableElement::getFieldOnCalling(std::string fieldName, b
 
     return field;
 }
+
+MethodTableElement *ClassTableElement::getMethodOnCalling(std::string methodName, std::string methodDesc, bool isForChild) {
+    if (!this->methods->contains(methodName)) {
+        // Рекурсивный обход по предкам ранее
+        if (!this->superClsName.empty()) {
+            return ClassTable::items.at(this->superClsName)->getMethodOnCalling(methodName, methodDesc, isForChild);
+        }
+
+        return nullptr;
+    }
+
+    // Нашли поле в данном классе
+    MethodTableElement* method = this->methods->getMethod(methodName, methodDesc);
+
+    // Если запращивает наследник
+    if (isForChild) {
+        // Можем отдать любое, кроме PRIVATE
+        if (method->modifierMap->isPrivate()) {
+            return nullptr;
+        }
+    }
+    else {
+        // Можем отдать только PUBLIC
+        if (!method->modifierMap->isPublic()) {
+            return nullptr;
+        }
+    }
+
+    return method;
+}
